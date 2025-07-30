@@ -29,7 +29,7 @@ const Settings = () => {
 
   // Load players from localStorage on component mount
   useEffect(() => {
-    const savedPlayers = localStorage.getItem('players');
+    const savedPlayers = localStorage.getItem('sport-rotation-players');
     if (savedPlayers) {
       const parsedPlayers = JSON.parse(savedPlayers);
       // Migrate old players to new season format
@@ -77,7 +77,7 @@ const Settings = () => {
 
     const updatedPlayers = [...players, newPlayer];
     setPlayers(updatedPlayers);
-    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    localStorage.setItem('sport-rotation-players', JSON.stringify(updatedPlayers));
     
     setNewPlayerName('');
     setNewPlayerGuernsey(undefined);
@@ -92,7 +92,7 @@ const Settings = () => {
   const removePlayer = (playerId: string) => {
     const updatedPlayers = players.filter(p => p.id !== playerId);
     setPlayers(updatedPlayers);
-    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    localStorage.setItem('sport-rotation-players', JSON.stringify(updatedPlayers));
     toast({
       title: "Player Removed",
       description: "Player has been removed from the roster",
@@ -104,7 +104,7 @@ const Settings = () => {
       p.id === playerId ? { ...p, name: newName } : p
     );
     setPlayers(updatedPlayers);
-    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    localStorage.setItem('sport-rotation-players', JSON.stringify(updatedPlayers));
   };
 
   const updatePlayerGuernsey = (playerId: string, guernseyNumber?: number) => {
@@ -112,7 +112,7 @@ const Settings = () => {
       p.id === playerId ? { ...p, guernseyNumber } : p
     );
     setPlayers(updatedPlayers);
-    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    localStorage.setItem('sport-rotation-players', JSON.stringify(updatedPlayers));
   };
 
   const updatePlayerAttribute = (playerId: string, attribute: keyof Player['attributes'], value: any) => {
@@ -123,7 +123,7 @@ const Settings = () => {
       } : p
     );
     setPlayers(updatedPlayers);
-    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    localStorage.setItem('sport-rotation-players', JSON.stringify(updatedPlayers));
   };
 
   const updatePlayerPreferredPosition = (playerId: string, position: Position) => {
@@ -134,7 +134,7 @@ const Settings = () => {
       } : p
     );
     setPlayers(updatedPlayers);
-    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    localStorage.setItem('sport-rotation-players', JSON.stringify(updatedPlayers));
   };
 
 
@@ -155,7 +155,7 @@ const Settings = () => {
       // Keep season stats intact - only reset current game
     }));
     setPlayers(resetPlayers);
-    localStorage.setItem('players', JSON.stringify(resetPlayers));
+    localStorage.setItem('sport-rotation-players', JSON.stringify(resetPlayers));
     localStorage.removeItem('gameState');
     
     toast({
