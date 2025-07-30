@@ -42,7 +42,7 @@ const PlannedInterchanges = ({
     return colors[position];
   };
 
-  if (plannedInterchanges.length === 0) {
+  if (!plannedInterchanges || plannedInterchanges.length === 0) {
     return null;
   }
 
@@ -51,11 +51,11 @@ const PlannedInterchanges = ({
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Clock className="w-5 h-5 text-orange-600" />
-          Planned Interchanges ({plannedInterchanges.length})
+          Planned Interchanges ({plannedInterchanges?.length || 0})
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {plannedInterchanges.map((sub) => (
+        {plannedInterchanges?.map((sub) => (
           <div
             key={sub.id}
             className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100"
