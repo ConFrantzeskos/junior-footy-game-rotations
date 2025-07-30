@@ -223,28 +223,6 @@ const Settings = () => {
             )}
           </Card>
 
-          {/* Game Rules */}
-          <Card className="p-6 bg-white">
-            <h2 className="text-xl font-semibold mb-4">Game Rules</h2>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex justify-between">
-                <span>Maximum players on field:</span>
-                <span className="font-semibold">18</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Players per position:</span>
-                <span className="font-semibold">6 Forward, 6 Midfield, 6 Defense</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Total quarters:</span>
-                <span className="font-semibold">4</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Maximum roster size:</span>
-                <span className="font-semibold">25 players</span>
-              </div>
-            </div>
-          </Card>
         </div>
       </div>
     </div>
