@@ -11,343 +11,213 @@ export class AutoRotationEngine {
   }
 
   /**
-   * Generates intelligent rotation suggestions based on multiple factors
+   * Simple Smart Rotation Logic:
+   * 1. Priority: Get bench players onto the field
+   * 2. Keep kids fresh and impactful
+   * 3. Give position rotation experience
    */
   generateSuggestions(): RotationAnalysis {
     const suggestions: RotationSuggestion[] = [];
     
-    // PRIORITY 1: Critical Gap Filling - Fill empty positions first
-    const gapFillSuggestions = this.analyzeGapFilling();
-    suggestions.push(...gapFillSuggestions);
+    // PRIORITY 1: Get bench kids onto the field
+    const benchToFieldSuggestions = this.analyzeBenchToField();
+    suggestions.push(...benchToFieldSuggestions);
     
-    // PRIORITY 2: Smart-Fill for optimal team balance
-    const positions: Position[] = ['forward', 'midfield', 'defence'];
+    // PRIORITY 2: Keep kids fresh (rest tired players)
+    const freshnessSuggestions = this.analyzeFreshness();
+    suggestions.push(...freshnessSuggestions);
     
-    positions.forEach(position => {
-      const positionSuggestions = this.analyzePosition(position);
-      suggestions.push(...positionSuggestions);
-    });
+    // PRIORITY 3: Position rotation for experience
+    const positionRotationSuggestions = this.analyzePositionRotation();
+    suggestions.push(...positionRotationSuggestions);
 
-    // Remove duplicate suggestions based on player combinations
+    // Remove duplicates and sort by priority
     const uniqueSuggestions = this.deduplicateSuggestions(suggestions);
-
-    // Sort by urgency score (highest first)
     uniqueSuggestions.sort((a, b) => b.urgencyScore - a.urgencyScore);
 
-    // Limit to top 8 suggestions to include Smart-Fill
-    const topSuggestions = uniqueSuggestions.slice(0, 8);
+    // Keep top 4 suggestions for simplicity
+    const topSuggestions = uniqueSuggestions.slice(0, 4);
 
     return {
       suggestions: topSuggestions,
-      overallAssessment: this.generateOverallAssessment(topSuggestions),
-      nextReviewTime: this.calculateNextReviewTime(),
+      overallAssessment: this.generateSimpleAssessment(topSuggestions),
+      nextReviewTime: 3 * 60, // Review every 3 minutes
     };
   }
 
   /**
-   * PRIORITY 1: Critical Gap Filling - Essential positions left empty
+   * PRIORITY 1: Get bench players onto the field
    */
-  private analyzeGapFilling(): RotationSuggestion[] {
+  private analyzeBenchToField(): RotationSuggestion[] {
+    const suggestions: RotationSuggestion[] = [];
+    const benchPlayers = this.gameState.players.filter(p => !p.isActive);
+    const positions: Position[] = ['forward', 'midfield', 'defence'];
+    
+    // For each bench player, find if they can replace someone on field
+    benchPlayers.forEach(benchPlayer => {
+      const bestSwap = this.findBestSwapForBenchPlayer(benchPlayer, positions);
+      if (bestSwap) {
+        suggestions.push({
+          id: `bench-to-field-${benchPlayer.id}-${Date.now()}`,
+          type: 'swap',
+          priority: 'recommended',
+          reasoning: `Get ${benchPlayer.name} on field - ${this.getMinutesFormat(this.getRestTime(benchPlayer))} rest`,
+          playerIn: benchPlayer.id,
+          playerOut: bestSwap.playerId,
+          position: bestSwap.position,
+          urgencyScore: 80 + Math.floor(this.getRestTime(benchPlayer) / 60), // High priority
+          factors: ['Bench player needs game time', 'Fresh legs available'],
+        });
+      }
+    });
+
+    return suggestions;
+  }
+
+  /**
+   * PRIORITY 2: Keep kids fresh and impactful
+   */
+  private analyzeFreshness(): RotationSuggestion[] {
     const suggestions: RotationSuggestion[] = [];
     const positions: Position[] = ['forward', 'midfield', 'defence'];
-    const minPlayersPerPosition = { forward: 2, midfield: 2, defence: 2 }; // Minimum coverage
     
     positions.forEach(position => {
       const activePlayers = this.getActivePlayersInPosition(position);
-      const availablePlayers = this.getAvailablePlayersForPosition(position);
-      const shortage = minPlayersPerPosition[position] - activePlayers.length;
+      const benchPlayers = this.gameState.players.filter(p => !p.isActive);
       
-      if (shortage > 0 && availablePlayers.length > 0) {
-        // Fill gaps with best available players
-        for (let i = 0; i < shortage && i < availablePlayers.length; i++) {
-          const bestPlayer = this.findBestPlayerForPosition(position, availablePlayers);
-          if (bestPlayer) {
-            suggestions.push({
-              id: `gap-fill-${bestPlayer.id}-${Date.now()}-${i}`,
-              type: 'substitute_on',
-              priority: 'urgent',
-              reasoning: `Smart-Fill: Critical gap in ${position} - ${bestPlayer.name} best available`,
-              playerIn: bestPlayer.id,
-              position,
-              urgencyScore: 100 + (shortage * 10), // Highest priority
-              factors: ['Critical position gap', 'Smart-Fill recommendation'],
-            });
-            // Remove from available for next iteration
-            availablePlayers.splice(availablePlayers.indexOf(bestPlayer), 1);
-          }
+      // Find tired players (more than 6 minutes on field)
+      const tiredPlayers = activePlayers.filter(p => {
+        const timeOnField = this.currentTime - p.lastInterchangeTime;
+        return timeOnField > 6 * 60; // 6 minutes
+      });
+
+      tiredPlayers.forEach(tiredPlayer => {
+        const freshReplacement = this.findFreshReplacement(benchPlayers);
+        if (freshReplacement) {
+          const timeOnField = this.currentTime - tiredPlayer.lastInterchangeTime;
+          suggestions.push({
+            id: `freshness-${tiredPlayer.id}-${Date.now()}`,
+            type: 'swap',
+            priority: timeOnField > 8 * 60 ? 'urgent' : 'recommended',
+            reasoning: `${tiredPlayer.name} needs a break - ${this.getMinutesFormat(timeOnField)} on field`,
+            playerIn: freshReplacement.id,
+            playerOut: tiredPlayer.id,
+            position,
+            urgencyScore: 60 + Math.floor(timeOnField / 60),
+            factors: ['Player fatigue', 'Fresh replacement available'],
+          });
         }
-      }
+      });
     });
-    
+
     return suggestions;
   }
 
-  private analyzePosition(position: Position): RotationSuggestion[] {
+  /**
+   * PRIORITY 3: Position rotation for experience
+   */
+  private analyzePositionRotation(): RotationSuggestion[] {
     const suggestions: RotationSuggestion[] = [];
-    const activePlayers = this.getActivePlayersInPosition(position);
-    const availablePlayers = this.getAvailablePlayersForPosition(position);
+    const positions: Position[] = ['forward', 'midfield', 'defence'];
     
-    // Track already suggested swaps to avoid duplicates within this position
-    const suggestedSwaps = new Set<string>();
-
-    // Find players who need a spell
-    activePlayers.forEach(player => {
-      const spellSuggestion = this.analyzePlayerForSpell(player, position, availablePlayers);
-      if (spellSuggestion && this.isUniqueSuggestion(spellSuggestion, suggestedSwaps)) {
-        suggestions.push(spellSuggestion);
-        this.addToSuggestedSwaps(spellSuggestion, suggestedSwaps);
-      }
+    // Find players who could benefit from position experience
+    positions.forEach(currentPosition => {
+      const activePlayers = this.getActivePlayersInPosition(currentPosition);
+      
+      activePlayers.forEach(player => {
+        const bestRotationPosition = this.findBestRotationPosition(player, currentPosition);
+        if (bestRotationPosition) {
+          const timeInPosition = player.timeStats[currentPosition];
+          suggestions.push({
+            id: `rotation-${player.id}-${Date.now()}`,
+            type: 'swap',
+            priority: 'optional',
+            reasoning: `Try ${player.name} in ${bestRotationPosition.position} - gain experience`,
+            playerIn: bestRotationPosition.replacement.id,
+            playerOut: player.id,
+            position: bestRotationPosition.position,
+            urgencyScore: 30 + Math.floor(timeInPosition / 60),
+            factors: ['Position development', 'Experience building'],
+          });
+        }
+      });
     });
-
-    // PRIORITY 3: Fresh Legs Optimization - Enhanced analysis
-    const freshLegsSuggestion = this.analyzeEnhancedFreshLegs(position, availablePlayers, activePlayers);
-    if (freshLegsSuggestion && this.isUniqueSuggestion(freshLegsSuggestion, suggestedSwaps)) {
-      suggestions.push(freshLegsSuggestion);
-      this.addToSuggestedSwaps(freshLegsSuggestion, suggestedSwaps);
-    }
-
-    // PRIORITY 2: Equity Balancing - Enhanced for Smart-Fill
-    const equitySuggestion = this.analyzeEnhancedEquityBalancing(position, availablePlayers, activePlayers);
-    if (equitySuggestion && this.isUniqueSuggestion(equitySuggestion, suggestedSwaps)) {
-      suggestions.push(equitySuggestion);
-      this.addToSuggestedSwaps(equitySuggestion, suggestedSwaps);
-    }
 
     return suggestions;
   }
 
-  private analyzePlayerForSpell(
-    player: Player, 
-    position: Position, 
-    availablePlayers: Player[]
-  ): RotationSuggestion | null {
-    const factors: string[] = [];
-    let urgencyScore = 0;
+  // Helper Methods
 
-    // Time on ground analysis
-    const timeOnGround = this.currentTime - player.lastInterchangeTime;
-    if (timeOnGround > 8 * 60) { // 8+ minutes
-      factors.push('Long stint on ground');
-      urgencyScore += 40;
-    } else if (timeOnGround > 5 * 60) { // 5+ minutes
-      factors.push('Extended time on ground');
-      urgencyScore += 25;
-    }
+  private findBestSwapForBenchPlayer(benchPlayer: Player, positions: Position[]): { playerId: string; position: Position } | null {
+    let bestSwap: { playerId: string; position: Position; score: number } | null = null;
 
-    // Position-specific time analysis
-    const positionTime = player.timeStats[position];
-    const totalPositionTime = this.gameState.players
-      .reduce((sum, p) => sum + p.timeStats[position], 0);
-    const avgPositionTime = totalPositionTime / this.gameState.players.length;
-    
-    if (positionTime > avgPositionTime * 1.5) {
-      factors.push('Above average time in position');
-      urgencyScore += 20;
-    }
-
-    // Quarter context
-    const quarterContext = this.getQuarterContext();
-    if (quarterContext === 'final_quarter' && timeOnGround > 6 * 60) {
-      factors.push('Final quarter - fresh legs needed');
-      urgencyScore += 30;
-    }
-
-    // Find best replacement
-    const bestReplacement = this.findBestReplacement(player, position, availablePlayers);
-    
-    if (urgencyScore >= 25 && bestReplacement && factors.length > 0) {
-      const priority = urgencyScore >= 50 ? 'urgent' : urgencyScore >= 35 ? 'recommended' : 'optional';
+    positions.forEach(position => {
+      const activePlayers = this.getActivePlayersInPosition(position);
       
-      return {
-        id: `spell-${player.id}-${Date.now()}`,
-        type: 'swap',
-        priority,
-        reasoning: this.generateSpellReasoning(player, bestReplacement, factors),
-        playerIn: bestReplacement.id,
-        playerOut: player.id,
-        position,
-        urgencyScore,
-        factors,
-      };
-    }
-
-    return null;
-  }
-
-  /**
-   * PRIORITY 3: Enhanced Fresh Legs Optimization
-   */
-  private analyzeEnhancedFreshLegs(
-    position: Position,
-    availablePlayers: Player[],
-    activePlayers: Player[]
-  ): RotationSuggestion | null {
-    // Enhanced fresh player selection with multiple criteria
-    const suitableFreshPlayers = availablePlayers
-      .filter(p => this.getRestTime(p) > 2 * 60) // Minimum 2 minutes rest
-      .map(p => ({
-        player: p,
-        freshScore: this.calculateFreshScore(p, position)
-      }))
-      .sort((a, b) => b.freshScore - a.freshScore);
-
-    if (suitableFreshPlayers.length === 0) return null;
-
-    const freshPlayer = suitableFreshPlayers[0].player;
-
-    // Enhanced tired player analysis
-    const tiredPlayer = activePlayers
-      .map(p => ({
-        player: p,
-        fatigueScore: this.calculateFatigueScore(p, position)
-      }))
-      .sort((a, b) => b.fatigueScore - a.fatigueScore)[0]?.player;
-
-    if (!tiredPlayer) return null;
-
-    const freshRestTime = this.getRestTime(freshPlayer);
-    const tiredGroundTime = this.currentTime - tiredPlayer.lastInterchangeTime;
-    const freshScore = suitableFreshPlayers[0].freshScore;
-
-    // Smart-Fill logic: lower threshold for swaps if fresh player is significantly better
-    if (freshRestTime > 2 * 60 && (tiredGroundTime > 3 * 60 || freshScore > 40)) {
-      const urgencyScore = 25 + Math.floor(freshRestTime / 60) + Math.floor(freshScore / 10);
-      
-      return {
-        id: `smart-fresh-${freshPlayer.id}-${Date.now()}`,
-        type: 'swap',
-        priority: urgencyScore > 40 ? 'recommended' : 'optional',
-        reasoning: `Smart-Fill Fresh Legs: ${freshPlayer.name} (${Math.floor(freshRestTime/60)}min rest, optimal fit) for ${tiredPlayer.name}`,
-        playerIn: freshPlayer.id,
-        playerOut: tiredPlayer.id,
-        position,
-        urgencyScore,
-        factors: ['Smart fresh legs optimization', 'Position-specific fitness'],
-      };
-    }
-
-    return null;
-  }
-
-  /**
-   * PRIORITY 2: Enhanced Equity Balancing for Smart-Fill
-   */
-  private analyzeEnhancedEquityBalancing(
-    position: Position,
-    availablePlayers: Player[],
-    activePlayers: Player[]
-  ): RotationSuggestion | null {
-    // Enhanced equity analysis with season stats consideration
-    const allPlayers = [...availablePlayers, ...activePlayers];
-    const gameAvg = this.getAverageGameTime();
-    const seasonAvg = this.getAverageSeasonGameTime();
-
-    // Smart selection: consider both current game and season equity
-    const underplayedCandidates = availablePlayers
-      .map(p => ({
-        player: p,
-        equityScore: this.calculateEquityScore(p, gameAvg, seasonAvg, position),
-        currentTime: this.getTotalGameTime(p),
-        seasonTime: p.seasonStats.averageGameTime
-      }))
-      .filter(p => p.equityScore > 20) // Significant equity imbalance
-      .sort((a, b) => b.equityScore - a.equityScore);
-
-    const overplayedCandidates = activePlayers
-      .map(p => ({
-        player: p,
-        overplayScore: this.calculateOverplayScore(p, gameAvg, position),
-        currentTime: this.getTotalGameTime(p)
-      }))
-      .filter(p => p.overplayScore > 15)
-      .sort((a, b) => b.overplayScore - a.overplayScore);
-
-    if (underplayedCandidates.length > 0 && overplayedCandidates.length > 0) {
-      const underplayed = underplayedCandidates[0];
-      const overplayed = overplayedCandidates[0];
-      const timeDifference = overplayed.currentTime - underplayed.currentTime;
-      
-      if (timeDifference > 2 * 60) { // Lowered threshold for Smart-Fill
-        const urgencyScore = 15 + underplayed.equityScore + Math.floor(timeDifference / 60);
+      activePlayers.forEach(activePlayer => {
+        const timeOnField = this.currentTime - activePlayer.lastInterchangeTime;
+        const totalGameTime = this.getTotalGameTime(activePlayer);
+        const benchRestTime = this.getRestTime(benchPlayer);
         
-        return {
-          id: `smart-equity-${underplayed.player.id}-${Date.now()}`,
-          type: 'swap',
-          priority: urgencyScore > 35 ? 'recommended' : 'optional',
-          reasoning: `Smart-Fill Equity: ${underplayed.player.name} (${Math.floor(underplayed.currentTime/60)}min game, ${Math.floor(underplayed.seasonTime)}min season avg) needs more time`,
-          playerIn: underplayed.player.id,
-          playerOut: overplayed.player.id,
-          position,
-          urgencyScore,
-          factors: ['Smart equity balancing', 'Season-aware rotation'],
-        };
-      }
-    }
+        // Score based on: field time, total game time, bench rest time
+        let score = 0;
+        score += Math.min(timeOnField / 60, 15) * 2; // Up to 30 points for time on field
+        score += Math.min(totalGameTime / 60, 10) * 1; // Up to 10 points for total game time
+        score += Math.min(benchRestTime / 60, 10) * 3; // Up to 30 points for bench rest
+        
+        if (!bestSwap || score > bestSwap.score) {
+          bestSwap = { playerId: activePlayer.id, position, score };
+        }
+      });
+    });
 
-    return null;
+    // Only suggest if score is reasonable (at least 25)
+    return bestSwap && bestSwap.score > 25 ? { playerId: bestSwap.playerId, position: bestSwap.position } : null;
   }
 
-  private findBestReplacement(player: Player, position: Position, availablePlayers: Player[]): Player | null {
-    if (availablePlayers.length === 0) return null;
-
-    // Score potential replacements
-    return availablePlayers
-      .map(p => ({
-        player: p,
-        score: this.scoreReplacement(p, position)
-      }))
-      .sort((a, b) => b.score - a.score)[0]?.player || null;
+  private findFreshReplacement(benchPlayers: Player[]): Player | null {
+    // Find bench player with most rest time
+    return benchPlayers
+      .filter(p => this.getRestTime(p) > 2 * 60) // At least 2 minutes rest
+      .sort((a, b) => this.getRestTime(b) - this.getRestTime(a))[0] || null;
   }
 
-  private scoreReplacement(player: Player, position: Position): number {
-    let score = 0;
-
-    // Rest time factor (more rest = better)
-    const restTime = this.getRestTime(player);
-    score += Math.min(restTime / 60, 10) * 5; // Max 50 points for rest
-
-    // Position experience factor
-    const positionTime = player.timeStats[position];
-    score += Math.min(positionTime / 60, 5) * 3; // Max 15 points for experience
-
-    // Game time equity (less game time = better for equity)
-    const totalTime = this.getTotalGameTime(player);
-    const avgTime = this.getAverageGameTime();
-    if (totalTime < avgTime) {
-      score += (avgTime - totalTime) / 60 * 2; // Bonus for underplayed
-    }
-
-    return score;
-  }
-
-  private generateSpellReasoning(player: Player, replacement: Player, factors: string[]): string {
-    const timeOnGround = Math.floor((this.currentTime - player.lastInterchangeTime) / 60);
-    const restTime = Math.floor(this.getRestTime(replacement) / 60);
+  private findBestRotationPosition(player: Player, currentPosition: Position): { position: Position; replacement: Player } | null {
+    const positions: Position[] = ['forward', 'midfield', 'defence'];
+    const otherPositions = positions.filter(p => p !== currentPosition);
     
-    return `Give ${player.name} a spell (${timeOnGround}min on ground) - bring on ${replacement.name} (${restTime}min rest)`;
+    // Find position where player has least experience
+    const leastExperiencePosition = otherPositions.reduce((least, pos) => {
+      return player.timeStats[pos] < player.timeStats[least] ? pos : least;
+    }, otherPositions[0]);
+
+    // Find a suitable replacement from bench or other positions
+    const benchPlayers = this.gameState.players.filter(p => !p.isActive);
+    const replacement = benchPlayers[0]; // Simple - take first available bench player
+
+    return replacement ? { position: leastExperiencePosition, replacement } : null;
   }
 
-  private generateOverallAssessment(suggestions: RotationSuggestion[]): string {
+  private getMinutesFormat(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    return `${mins}min`;
+  }
+
+  private generateSimpleAssessment(suggestions: RotationSuggestion[]): string {
     if (suggestions.length === 0) {
-      return "Current rotations look good - no urgent changes needed.";
+      return "Team looks good - no immediate rotation needs.";
     }
 
     const urgentCount = suggestions.filter(s => s.priority === 'urgent').length;
     const recommendedCount = suggestions.filter(s => s.priority === 'recommended').length;
 
     if (urgentCount > 0) {
-      return `${urgentCount} urgent rotation${urgentCount > 1 ? 's' : ''} recommended - players need immediate attention.`;
+      return `${urgentCount} player${urgentCount > 1 ? 's' : ''} need${urgentCount === 1 ? 's' : ''} immediate rest.`;
     } else if (recommendedCount > 0) {
-      return `${recommendedCount} rotation${recommendedCount > 1 ? 's' : ''} suggested to optimise player freshness.`;
+      return `${recommendedCount} rotation suggestion${recommendedCount > 1 ? 's' : ''} to keep kids fresh.`;
     } else {
-      return "Some optional rotations available for game time equity.";
+      return "Optional rotations available for player development.";
     }
-  }
-
-  private calculateNextReviewTime(): number {
-    // Review more frequently if there are urgent suggestions
-    const hasUrgent = this.gameState.totalTime > 0; // Simple check for now
-    return hasUrgent ? 2 * 60 : 3 * 60; // 2-3 minutes
   }
 
   // Helper methods

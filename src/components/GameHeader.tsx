@@ -61,6 +61,16 @@ export const GameHeader = ({
 
   return (
     <div className="relative mb-xl">
+      {/* Apple-style Aussie Rules Header */}
+      <div className="text-center mb-lg">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-sherrin-red via-position-forward to-position-midfield bg-clip-text text-transparent mb-sm">
+          Junior Footy Manager
+        </h1>
+        <p className="text-sm text-muted-foreground font-medium">
+          Smart rotation management for Australian Rules Football
+        </p>
+      </div>
+
       {/* Main Dashboard Card */}
       <Card className="overflow-hidden bg-gradient-to-br from-card via-card to-accent/30 border-0">
         {/* Header Band */}
@@ -75,7 +85,7 @@ export const GameHeader = ({
                   <Trophy className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">Season {currentSeason}</h1>
+                  <h2 className="text-2xl font-bold text-foreground">Season {currentSeason}</h2>
                   <div className="flex items-center gap-md text-sm text-muted-foreground">
                     <span>Match Day {matchDay}</span>
                     <span>•</span>
@@ -213,18 +223,22 @@ export const GameHeader = ({
                 Complete Game
               </Button>
             )}
-            
-            <Button 
-              onClick={onReset} 
-              variant="outline"
-              className="border-2 border-muted-foreground/30 text-muted-foreground hover:bg-muted/50 font-semibold px-lg"
-            >
-              <RotateCcw className="w-4 h-4 mr-sm" />
-              Reset
-            </Button>
           </div>
         </div>
       </Card>
+
+      {/* Danger Zone - Reset at Bottom */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button 
+          onClick={onReset} 
+          variant="outline"
+          size="sm"
+          className="border-2 border-destructive/30 text-destructive hover:bg-destructive/5 bg-background/90 backdrop-blur-sm shadow-lg"
+        >
+          <RotateCcw className="w-4 h-4 mr-sm" />
+          Reset Game
+        </Button>
+      </div>
     </div>
   );
 };
