@@ -1,1 +1,4 @@
 project_id = "bhcnvmjqiwxnbbctkadj"
+
+[functions.ai-rotation-suggestions]
+verify_jwt = false

@@ -261,6 +261,9 @@ const Game = () => {
             onRefresh={refreshRotationSuggestions}
             isGameActive={isPlaying}
             currentGameTime={totalTime}
+            gameState={gameState}
+            currentQuarter={currentQuarter}
+            quarterTime={quarterTime}
           />
         </div>
 

@@ -1,8 +1,11 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RotationAnalysis, RotationSuggestion } from '@/types/autoRotation';
-import { Player } from '@/types/sports';
-import { RefreshCw, ArrowRight, Clock, CheckCircle2 } from 'lucide-react';
+import { Player, GameState } from '@/types/sports';
+import { RefreshCw, ArrowRight, Clock, CheckCircle2, Brain, Sparkles } from 'lucide-react';
+import { AIRotationService, AIRotationContext } from '@/services/aiRotationService';
+import { useState, useEffect } from 'react';
+import { useToast } from './ui/use-toast';
 
 interface AutoRotationSuggestionsProps {
   rotationAnalysis: RotationAnalysis | null;
@@ -11,6 +14,9 @@ interface AutoRotationSuggestionsProps {
   onRefresh: () => void;
   isGameActive: boolean;
   currentGameTime: number;
+  gameState: GameState;
+  currentQuarter: number;
+  quarterTime: number;
 }
 
 const AutoRotationSuggestions = ({
@@ -20,7 +26,60 @@ const AutoRotationSuggestions = ({
   onRefresh,
   isGameActive,
   currentGameTime,
+  gameState,
+  currentQuarter,
+  quarterTime,
 }: AutoRotationSuggestionsProps) => {
+  const { toast } = useToast();
+  const [aiEnhancedSuggestions, setAiEnhancedSuggestions] = useState<any[]>([]);
+  const [aiInsights, setAiInsights] = useState<string>('');
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(true);
+
+  // Get AI-enhanced suggestions when rotation analysis changes
+  useEffect(() => {
+    if (!rotationAnalysis || !aiEnabled || rotationAnalysis.suggestions.length === 0) {
+      setAiEnhancedSuggestions([]);
+      setAiInsights('');
+      return;
+    }
+
+    const enhanceWithAI = async () => {
+      setIsLoadingAI(true);
+      try {
+        const context: AIRotationContext = {
+          gameState,
+          players,
+          currentQuarter,
+          quarterTime,
+          totalTime: currentGameTime,
+          suggestions: rotationAnalysis.suggestions
+        };
+
+        const result = await AIRotationService.enhanceRotationSuggestions(context);
+        
+        if (result.fallbackMode) {
+          setAiInsights('AI analysis unavailable - using standard suggestions');
+        } else {
+          setAiInsights(result.aiInsights);
+          toast({
+            title: "AI Analysis Complete",
+            description: "Enhanced rotation suggestions ready",
+          });
+        }
+        
+        setAiEnhancedSuggestions(result.enhancedSuggestions);
+      } catch (error) {
+        console.error('AI enhancement failed:', error);
+        setAiEnhancedSuggestions(rotationAnalysis.suggestions);
+        setAiInsights('Using standard rotation analysis');
+      } finally {
+        setIsLoadingAI(false);
+      }
+    };
+
+    enhanceWithAI();
+  }, [rotationAnalysis, gameState, currentQuarter, quarterTime, players, currentGameTime, aiEnabled, toast]);
   const getPlayerName = (playerId: string) => {
     return players.find(p => p.id === playerId)?.name || 'Unknown';
   };
@@ -65,25 +124,65 @@ const AutoRotationSuggestions = ({
 
   return (
     <div className="space-y-6">
-      {/* Clean Header */}
+      {/* Enhanced Header with AI */}
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-bold text-foreground">Smart Rotations</h3>
-          <p className="text-sm text-muted-foreground">{rotationAnalysis.overallAssessment}</p>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {aiEnabled ? (
+              <Brain className={`w-5 h-5 ${isLoadingAI ? 'animate-pulse text-primary' : 'text-primary'}`} />
+            ) : (
+              <Sparkles className="w-5 h-5 text-muted-foreground" />
+            )}
+            <h3 className="text-lg font-bold text-foreground">
+              {aiEnabled ? 'AI-Enhanced Rotations' : 'Smart Rotations'}
+            </h3>
+          </div>
+          <Button
+            onClick={() => setAiEnabled(!aiEnabled)}
+            variant="ghost"
+            size="sm"
+            className="text-xs px-2 py-1 h-6"
+          >
+            {aiEnabled ? 'AI On' : 'AI Off'}
+          </Button>
         </div>
-        <Button
-          onClick={onRefresh}
-          variant="outline"
-          size="sm"
-          className="w-10 h-10 p-0"
-        >
-          <RefreshCw className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {isLoadingAI && (
+            <div className="text-xs text-muted-foreground">Analyzing...</div>
+          )}
+          <Button
+            onClick={onRefresh}
+            variant="outline"
+            size="sm"
+            className="w-10 h-10 p-0"
+            disabled={isLoadingAI}
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoadingAI ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
       </div>
 
-      {/* Clean Suggestion Cards */}
+      {/* AI Insights */}
+      {aiInsights && (
+        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+          <div className="flex items-start gap-2">
+            <Brain className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-foreground/90">
+              <div className="font-medium mb-1">AI Analysis</div>
+              <div className="text-muted-foreground whitespace-pre-wrap">{aiInsights}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Overall Assessment */}
+      {rotationAnalysis?.overallAssessment && (
+        <p className="text-sm text-muted-foreground">{rotationAnalysis.overallAssessment}</p>
+      )}
+
+      {/* Enhanced Suggestion Cards */}
       <div className="space-y-4">
-        {rotationAnalysis.suggestions.map((suggestion) => (
+        {(aiEnhancedSuggestions.length > 0 ? aiEnhancedSuggestions : rotationAnalysis.suggestions).map((suggestion) => (
           <Card key={suggestion.id} className="overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-center gap-6">
