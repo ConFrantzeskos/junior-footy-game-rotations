@@ -14,7 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      coach_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          preference_key: string
+          preference_value: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          preference_key: string
+          preference_value: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          preference_key?: string
+          preference_value?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rotation_feedback: {
+        Row: {
+          created_at: string
+          feedback_type: string
+          game_context: Json | null
+          id: string
+          suggestion_data: Json
+          suggestion_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_type: string
+          game_context?: Json | null
+          id?: string
+          suggestion_data: Json
+          suggestion_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback_type?: string
+          game_context?: Json | null
+          id?: string
+          suggestion_data?: Json
+          suggestion_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
