@@ -36,41 +36,30 @@ serve(async (req) => {
       suggestionsCount: gameContext.suggestions?.length || 0
     });
 
-    // Prepare context for AI analysis
+    // Enhanced tactical context for AI analysis
     const contextPrompt = `
-You are an AI assistant for a junior sports coach focused on time equity, position experience, and player inclusion. 
+You are an elite junior sports coaching assistant. Analyze the game situation and provide tactical insights for player rotations.
 
-Current Game Context:
-- Quarter: ${gameContext.currentQuarter}/4
-- Quarter Time: ${Math.floor(gameContext.quarterTime / 60)}:${(gameContext.quarterTime % 60).toString().padStart(2, '0')}
-- Total Game Time: ${Math.floor(gameContext.totalTime / 60)}:${(gameContext.totalTime % 60).toString().padStart(2, '0')}
+GAME SITUATION:
+- Quarter ${gameContext.currentQuarter}/4 | Time: ${Math.floor(gameContext.quarterTime / 60)}:${(gameContext.quarterTime % 60).toString().padStart(2, '0')}
+- Game Phase: ${gameContext.quarterTime < 450 ? 'Early' : gameContext.quarterTime < 1050 ? 'Mid' : 'Late'}
 
-Current System Suggestions:
-${gameContext.suggestions.map(s => `- ${s.reasoning} (Priority: ${s.priority})`).join('\n')}
+SUGGESTED ROTATIONS:
+${gameContext.suggestions.map(s => `• ${s.reasoning} (${s.priority})`).join('\n')}
 
-Active Players by Position:
-${gameContext.gameState?.positions ? Object.entries(gameContext.gameState.positions).map(([pos, players]: [string, any]) => 
-  `${pos}: ${(players as any[]).map(p => {
-    const player = gameContext.players.find(pl => pl.id === p.playerId);
-    return `${player?.name || 'Unknown'} (${Math.floor(p.currentStint / 60)}:${(p.currentStint % 60).toString().padStart(2, '0')} on field)`;
-  }).join(', ') || 'Empty'}`
-).join('\n') : 'No position data available'}
+TACTICAL ANALYSIS NEEDED:
+1. VALIDATE each suggestion - does it make tactical sense?
+2. EXPLAIN the impact on game flow and player development
+3. PROVIDE timing advice - when exactly to make this change
+4. SUGGEST alternatives if the suggestion seems poor
 
-Bench Players:
-${gameContext.gameState?.positions ? gameContext.players.filter(p => !Object.values(gameContext.gameState.positions).flat().some((pos: any) => pos.playerId === p.id))
-  .map(p => `${p.name} (${Math.floor((p.timeStats?.restTime || 0) / 60)}:${((p.timeStats?.restTime || 0) % 60).toString().padStart(2, '0')} rest)`)
-  .join(', ') : 'No bench data available'}
+COACHING PRINCIPLES:
+- Time equity is priority #1
+- Fresh legs maintain intensity 
+- Position experience builds versatility
+- Every player deserves meaningful minutes
 
-Coaching Philosophy: Focus on time equity, position experience, and ensuring every child feels included and gets to try different positions.
-
-Please provide:
-1. Enhanced reasoning for the top 2-3 system suggestions with junior sports context
-2. Any additional strategic insights considering player development and inclusion
-3. Timing considerations for when to make changes
-4. Brief encouraging explanations suitable for young players
-
-Keep responses concise and coaching-focused. Remember this is about development and inclusion, not winning at all costs.
-`;
+Respond with clear, actionable coaching insights that help make smart rotation decisions.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
