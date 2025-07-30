@@ -86,25 +86,31 @@ export class AutoRotationEngine {
     const suggestions: RotationSuggestion[] = [];
     const activePlayers = this.getActivePlayersInPosition(position);
     const availablePlayers = this.getAvailablePlayersForPosition(position);
+    
+    // Track already suggested swaps to avoid duplicates within this position
+    const suggestedSwaps = new Set<string>();
 
     // Find players who need a spell
     activePlayers.forEach(player => {
       const spellSuggestion = this.analyzePlayerForSpell(player, position, availablePlayers);
-      if (spellSuggestion) {
+      if (spellSuggestion && this.isUniqueSuggestion(spellSuggestion, suggestedSwaps)) {
         suggestions.push(spellSuggestion);
+        this.addToSuggestedSwaps(spellSuggestion, suggestedSwaps);
       }
     });
 
     // PRIORITY 3: Fresh Legs Optimization - Enhanced analysis
     const freshLegsSuggestion = this.analyzeEnhancedFreshLegs(position, availablePlayers, activePlayers);
-    if (freshLegsSuggestion) {
+    if (freshLegsSuggestion && this.isUniqueSuggestion(freshLegsSuggestion, suggestedSwaps)) {
       suggestions.push(freshLegsSuggestion);
+      this.addToSuggestedSwaps(freshLegsSuggestion, suggestedSwaps);
     }
 
     // PRIORITY 2: Equity Balancing - Enhanced for Smart-Fill
     const equitySuggestion = this.analyzeEnhancedEquityBalancing(position, availablePlayers, activePlayers);
-    if (equitySuggestion) {
+    if (equitySuggestion && this.isUniqueSuggestion(equitySuggestion, suggestedSwaps)) {
       suggestions.push(equitySuggestion);
+      this.addToSuggestedSwaps(equitySuggestion, suggestedSwaps);
     }
 
     return suggestions;
@@ -545,50 +551,50 @@ export class AutoRotationEngine {
    * Removes duplicate suggestions based on player combinations and positions
    */
   private deduplicateSuggestions(suggestions: RotationSuggestion[]): RotationSuggestion[] {
-    const seen = new Set<string>();
-    const uniqueSuggestions: RotationSuggestion[] = [];
+    const uniqueMap = new Map<string, RotationSuggestion>();
 
     for (const suggestion of suggestions) {
-      // Create a unique key based on the type of suggestion and players involved
-      let key: string;
+      const key = this.generateSuggestionKey(suggestion);
       
-      if (suggestion.type === 'swap' && suggestion.playerIn && suggestion.playerOut) {
-        // For swaps, key is playerIn-playerOut-position (bidirectional)
-        const players = [suggestion.playerIn, suggestion.playerOut].sort();
-        key = `swap-${players[0]}-${players[1]}-${suggestion.position}`;
-      } else if (suggestion.type === 'substitute_on' && suggestion.playerIn) {
-        // For substitutions on, key is player-position
-        key = `sub_on-${suggestion.playerIn}-${suggestion.position}`;
-      } else if (suggestion.type === 'substitute_off' && suggestion.playerOut) {
-        // For substitutions off, key is player-position
-        key = `sub_off-${suggestion.playerOut}-${suggestion.position}`;
-      } else {
-        // Fallback to suggestion id
-        key = suggestion.id;
-      }
-
-      if (!seen.has(key)) {
-        seen.add(key);
-        // Keep the highest urgency suggestion for each unique combination
-        uniqueSuggestions.push(suggestion);
-      } else {
-        // If we've seen this combination, keep the one with higher urgency
-        const existingIndex = uniqueSuggestions.findIndex(s => {
-          if (s.type === 'swap' && suggestion.type === 'swap' && s.playerIn && s.playerOut && suggestion.playerIn && suggestion.playerOut) {
-            const existingPlayers = [s.playerIn, s.playerOut].sort();
-            const newPlayers = [suggestion.playerIn, suggestion.playerOut].sort();
-            return existingPlayers[0] === newPlayers[0] && existingPlayers[1] === newPlayers[1] && s.position === suggestion.position;
-          }
-          return false;
-        });
-
-        if (existingIndex !== -1 && suggestion.urgencyScore > uniqueSuggestions[existingIndex].urgencyScore) {
-          uniqueSuggestions[existingIndex] = suggestion;
-        }
+      // If we haven't seen this key, or this suggestion has higher urgency, use it
+      if (!uniqueMap.has(key) || suggestion.urgencyScore > uniqueMap.get(key)!.urgencyScore) {
+        uniqueMap.set(key, suggestion);
       }
     }
 
-    return uniqueSuggestions;
+    return Array.from(uniqueMap.values());
+  }
+
+  /**
+   * Generates a unique key for a suggestion to identify duplicates
+   */
+  private generateSuggestionKey(suggestion: RotationSuggestion): string {
+    if (suggestion.type === 'swap' && suggestion.playerIn && suggestion.playerOut) {
+      // For swaps, create bidirectional key (A->B same as B->A in different direction)
+      const players = [suggestion.playerIn, suggestion.playerOut].sort();
+      return `swap-${players[0]}-${players[1]}-${suggestion.position}`;
+    } else if (suggestion.type === 'substitute_on' && suggestion.playerIn) {
+      return `sub_on-${suggestion.playerIn}-${suggestion.position}`;
+    } else if (suggestion.type === 'substitute_off' && suggestion.playerOut) {
+      return `sub_off-${suggestion.playerOut}-${suggestion.position}`;
+    }
+    return `other-${suggestion.id}`;
+  }
+
+  /**
+   * Checks if a suggestion is unique within the current position analysis
+   */
+  private isUniqueSuggestion(suggestion: RotationSuggestion, suggestedSwaps: Set<string>): boolean {
+    const key = this.generateSuggestionKey(suggestion);
+    return !suggestedSwaps.has(key);
+  }
+
+  /**
+   * Adds a suggestion to the set of already suggested swaps
+   */
+  private addToSuggestedSwaps(suggestion: RotationSuggestion, suggestedSwaps: Set<string>): void {
+    const key = this.generateSuggestionKey(suggestion);
+    suggestedSwaps.add(key);
   }
 }
 
