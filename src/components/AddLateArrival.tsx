@@ -21,7 +21,7 @@ const AddLateArrival = ({ onAddPlayer, isGameActive, currentGameTime, currentGam
   const { toast } = useToast();
 
   // Get players who are in the roster but not in the current game
-  const availableForLateArrival = fullRoster.filter(rosterPlayer => 
+  const availableForLateArrival = (fullRoster || []).filter(rosterPlayer => 
     !currentGamePlayers.some(gamePlayer => gamePlayer.id === rosterPlayer.id)
   );
 
