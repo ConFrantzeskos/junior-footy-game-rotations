@@ -94,20 +94,18 @@ const Game = () => {
             maxPlayers={6}
           />
           
-          <div className="lg:col-span-1 lg:scale-110 lg:mx-4">
-            <PositionSection
-              title="MIDFIELD"
-              position="midfield"
-              players={players}
-              activePlayers={activePlayersByPosition.midfield}
-              onTogglePlayer={togglePlayer}
-              onMovePlayer={movePlayer}
-              onRemovePlayer={removePlayer}
-              onDragStart={handleDragStart}
-              onPlayerSwap={swapPlayers}
-              maxPlayers={6}
-            />
-          </div>
+          <PositionSection
+            title="MIDFIELD"
+            position="midfield"
+            players={players}
+            activePlayers={activePlayersByPosition.midfield}
+            onTogglePlayer={togglePlayer}
+            onMovePlayer={movePlayer}
+            onRemovePlayer={removePlayer}
+            onDragStart={handleDragStart}
+            onPlayerSwap={swapPlayers}
+            maxPlayers={6}
+          />
           
           <PositionSection
             title="DEFENSE"
