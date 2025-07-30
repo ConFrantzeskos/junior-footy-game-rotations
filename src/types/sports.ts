@@ -135,11 +135,11 @@ export interface Player {
   };
 }
 
-export interface PlannedSubstitution {
+export interface PlannedInterchange {
   id: string;
   playerId: string;
   targetPosition: Position;
-  plannedTime?: number; // Optional game time to make the substitution
+  plannedTime?: number; // Optional game time to make the interchange
   priority: 'high' | 'medium' | 'low';
 }
 
@@ -167,5 +167,5 @@ export interface GameState {
     midfield: string[];
     defence: string[];
   };
-  plannedSubstitutions: PlannedSubstitution[];
+  plannedInterchanges: PlannedInterchange[];
 }

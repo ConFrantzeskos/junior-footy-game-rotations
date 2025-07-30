@@ -6,7 +6,7 @@ import { Plus, Clock } from 'lucide-react';
 
 interface PlayerContextMenuProps {
   player: Player;
-  onAddPlannedSubstitution: (playerId: string, targetPosition: Position, priority: 'high' | 'medium' | 'low') => void;
+  onAddPlannedInterchange: (playerId: string, targetPosition: Position, priority: 'high' | 'medium' | 'low') => void;
   isOpen: boolean;
   onClose: () => void;
   position: { x: number; y: number };
@@ -14,7 +14,7 @@ interface PlayerContextMenuProps {
 
 const PlayerContextMenu = ({
   player,
-  onAddPlannedSubstitution,
+  onAddPlannedInterchange,
   isOpen,
   onClose,
   position,
@@ -24,8 +24,8 @@ const PlayerContextMenu = ({
 
   if (!isOpen) return null;
 
-  const handleAddSubstitution = () => {
-    onAddPlannedSubstitution(player.id, selectedPosition, selectedPriority);
+  const handleAddInterchange = () => {
+    onAddPlannedInterchange(player.id, selectedPosition, selectedPriority);
     onClose();
   };
 
@@ -67,7 +67,7 @@ const PlayerContextMenu = ({
       >
         <div className="flex items-center gap-2 mb-3">
           <Clock className="w-4 h-4 text-orange-600" />
-          <span className="font-medium text-sm">Plan Substitution</span>
+          <span className="font-medium text-sm">Plan Interchange</span>
         </div>
         
         <div className="space-y-3">
@@ -125,7 +125,7 @@ const PlayerContextMenu = ({
 
           <div className="flex gap-2 pt-2">
             <Button
-              onClick={handleAddSubstitution}
+              onClick={handleAddInterchange}
               size="sm"
               className="flex-1"
             >

@@ -32,8 +32,8 @@ serve(async (req) => {
     console.log('Analyzing game context for AI suggestions:', {
       quarter: gameContext.currentQuarter,
       time: gameContext.quarterTime,
-      activePlayers: gameContext.gameState.positions,
-      suggestionsCount: gameContext.suggestions.length
+      activePlayers: gameContext.gameState?.positions ? Object.keys(gameContext.gameState.positions).length : 0,
+      suggestionsCount: gameContext.suggestions?.length || 0
     });
 
     // Prepare context for AI analysis
@@ -49,17 +49,17 @@ Current System Suggestions:
 ${gameContext.suggestions.map(s => `- ${s.reasoning} (Priority: ${s.priority})`).join('\n')}
 
 Active Players by Position:
-${Object.entries(gameContext.gameState.positions).map(([pos, players]: [string, any]) => 
+${gameContext.gameState?.positions ? Object.entries(gameContext.gameState.positions).map(([pos, players]: [string, any]) => 
   `${pos}: ${(players as any[]).map(p => {
     const player = gameContext.players.find(pl => pl.id === p.playerId);
     return `${player?.name || 'Unknown'} (${Math.floor(p.currentStint / 60)}:${(p.currentStint % 60).toString().padStart(2, '0')} on field)`;
   }).join(', ') || 'Empty'}`
-).join('\n')}
+).join('\n') : 'No position data available'}
 
 Bench Players:
-${gameContext.players.filter(p => !Object.values(gameContext.gameState.positions).flat().some((pos: any) => pos.playerId === p.id))
+${gameContext.gameState?.positions ? gameContext.players.filter(p => !Object.values(gameContext.gameState.positions).flat().some((pos: any) => pos.playerId === p.id))
   .map(p => `${p.name} (${Math.floor((p.timeStats?.restTime || 0) / 60)}:${((p.timeStats?.restTime || 0) % 60).toString().padStart(2, '0')} rest)`)
-  .join(', ')}
+  .join(', ') : 'No bench data available'}
 
 Coaching Philosophy: Focus on time equity, position experience, and ensuring every child feels included and gets to try different positions.
 

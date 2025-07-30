@@ -111,7 +111,7 @@ Respond with a JSON object:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -136,7 +136,9 @@ Respond with a JSON object:
 
     let parsedResponse;
     try {
-      parsedResponse = JSON.parse(aiResponse);
+      // Clean the response to handle markdown code blocks
+      const cleanedResponse = aiResponse.replace(/```json\s*|\s*```/g, '').trim();
+      parsedResponse = JSON.parse(cleanedResponse);
     } catch (parseError) {
       console.error('Failed to parse AI response:', aiResponse);
       throw new Error('Invalid AI response format');

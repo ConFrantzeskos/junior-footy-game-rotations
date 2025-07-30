@@ -39,18 +39,18 @@ serve(async (req) => {
     if (context.gameState) {
       contextInfo += `
 CURRENT GAME STATE:
-- Quarter: ${context.gameState.currentQuarter}
-- Time: ${Math.round(context.gameState.quarterTime / 60)} minutes
-- Active Players: ${Object.keys(context.gameState.activePositions).length}
+- Quarter: ${context.gameState.currentQuarter || 1}
+- Time: ${Math.round((context.gameState.quarterTime || 0) / 60)} minutes
+- Active Players: ${context.gameState.activePositions ? Object.keys(context.gameState.activePositions).length : 0}
 `;
     }
 
-    if (context.players) {
+    if (context.players && Array.isArray(context.players)) {
       contextInfo += `
 TEAM ROSTER (${context.players.length} players):
 ${context.players.map(player => `
-- ${player.name} (#${player.guernseyNumber}): ${player.seasonStats.gamesPlayed} games, ${Math.round(player.seasonStats.totalTimeOnField / 60)}min total
-  Positions: ${Object.keys(player.seasonStats.positionBreakdown).join(', ')}
+- ${player.name} (#${player.guernseyNumber}): ${player.seasonStats?.gamesPlayed || 0} games, ${Math.round((player.seasonStats?.totalTimeOnField || 0) / 60)}min total
+  Positions: ${player.seasonStats?.positionBreakdown ? Object.keys(player.seasonStats.positionBreakdown).join(', ') : 'Not set'}
   Current status: ${context.gameState?.playersOnField?.includes(player.id) ? 'On field' : 'On bench'}
 `).join('')}
 `;
@@ -98,7 +98,7 @@ Respond in a conversational, helpful manner as if you're an experienced assistan
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages,
         temperature: 0.7,
         max_tokens: 1500,

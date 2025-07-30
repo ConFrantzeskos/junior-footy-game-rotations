@@ -2,7 +2,7 @@ import { useGameState } from '@/hooks/useGameState';
 import { GameHeader } from '@/components/GameHeader';
 import { PositionSection } from '@/components/PositionSection';
 import { DraggablePlayer } from '@/components/DraggablePlayer';
-import PlannedSubstitutions from '@/components/PlannedSubstitutions';
+import PlannedInterchanges from '@/components/PlannedInterchanges';
 import PlayerContextMenu from '@/components/PlayerContextMenu';
 import AutoRotationSuggestions from '@/components/AutoRotationSuggestions';
 import SeasonStats from '@/components/SeasonStats';
@@ -36,15 +36,15 @@ const Game = () => {
     pauseGame,
     nextQuarter,
     resetGame,
-    addPlannedSubstitution,
-    removePlannedSubstitution,
-    executePlannedSubstitution,
+    addPlannedInterchange,
+    removePlannedInterchange,
+    executePlannedInterchange,
     completeGame,
     startNewGame,
   } = useGameState();
 
   const { players, activePlayersByPosition, isPlaying, currentQuarter, quarterTime, totalTime, 
-          plannedSubstitutions, currentSeason, matchDay, gameDate, opponent, venue, gameCompleted } = gameState;
+          plannedInterchanges, currentSeason, matchDay, gameDate, opponent, venue, gameCompleted } = gameState;
   
   // Calculate player rankings based on total game time
   const playerRankings = calculatePlayerRankings(players);
@@ -123,13 +123,13 @@ const Game = () => {
           />
         </div>
 
-        {/* Planned Substitutions Queue */}
+        {/* Planned Interchanges Queue */}
         <div className="mb-6">
-          <PlannedSubstitutions
-            plannedSubstitutions={plannedSubstitutions}
+          <PlannedInterchanges
+            plannedInterchanges={plannedInterchanges}
             players={players}
-            onExecuteSubstitution={executePlannedSubstitution}
-            onRemoveSubstitution={removePlannedSubstitution}
+            onExecuteInterchange={executePlannedInterchange}
+            onRemoveInterchange={removePlannedInterchange}
           />
         </div>
 
@@ -244,7 +244,7 @@ const Game = () => {
         {/* Context Menu */}
         <PlayerContextMenu
           player={contextMenu?.player}
-          onAddPlannedSubstitution={addPlannedSubstitution}
+          onAddPlannedInterchange={addPlannedInterchange}
           isOpen={!!contextMenu}
           onClose={handleCloseContextMenu}
           position={contextMenu?.position || { x: 0, y: 0 }}

@@ -68,7 +68,7 @@ Player: ${player.name} (#${player.guernseyNumber})
 - Total Time: ${Math.round(player.seasonStats.totalTimeOnField / 60)} minutes
 - Average per Game: ${Math.round(player.seasonStats.averageTimePerGame / 60)} minutes
 - Position Distribution: ${JSON.stringify(player.seasonStats.positionBreakdown)}
-- Preferred Positions: ${player.attributes.preferredPositions.join(', ')}
+- Preferred Positions: ${player.attributes.preferredPositions?.join(', ') || 'Not specified'}
 - Total Interchanges: ${player.seasonStats.gameRecords.reduce((sum, record) => sum + record.interchanges, 0)}
 - Longest Stint: ${Math.round(Math.max(...player.seasonStats.gameRecords.map(r => r.longestStint)) / 60)} minutes
 `).join('\n')}
@@ -113,7 +113,7 @@ Respond with a JSON object:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',

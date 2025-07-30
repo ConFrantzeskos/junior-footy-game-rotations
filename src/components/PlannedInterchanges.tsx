@@ -1,22 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PlannedSubstitution, Player, Position } from '@/types/sports';
+import { PlannedInterchange, Player, Position } from '@/types/sports';
 import { Clock, Play, X } from 'lucide-react';
 
-interface PlannedSubstitutionsProps {
-  plannedSubstitutions: PlannedSubstitution[];
+interface PlannedInterchangesProps {
+  plannedInterchanges: PlannedInterchange[];
   players: Player[];
-  onExecuteSubstitution: (subId: string) => void;
-  onRemoveSubstitution: (subId: string) => void;
+  onExecuteInterchange: (subId: string) => void;
+  onRemoveInterchange: (subId: string) => void;
 }
 
-const PlannedSubstitutions = ({
-  plannedSubstitutions,
+const PlannedInterchanges = ({
+  plannedInterchanges,
   players,
-  onExecuteSubstitution,
-  onRemoveSubstitution,
-}: PlannedSubstitutionsProps) => {
+  onExecuteInterchange,
+  onRemoveInterchange,
+}: PlannedInterchangesProps) => {
   const getPlayerName = (playerId: string) => {
     return players.find(p => p.id === playerId)?.name || 'Unknown Player';
   };
@@ -42,7 +42,7 @@ const PlannedSubstitutions = ({
     return colors[position];
   };
 
-  if (plannedSubstitutions.length === 0) {
+  if (plannedInterchanges.length === 0) {
     return null;
   }
 
@@ -51,11 +51,11 @@ const PlannedSubstitutions = ({
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Clock className="w-5 h-5 text-orange-600" />
-          Planned Substitutions ({plannedSubstitutions.length})
+          Planned Interchanges ({plannedInterchanges.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {plannedSubstitutions.map((sub) => (
+        {plannedInterchanges.map((sub) => (
           <div
             key={sub.id}
             className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100"
@@ -89,7 +89,7 @@ const PlannedSubstitutions = ({
             </div>
             <div className="flex gap-1">
               <Button
-                onClick={() => onExecuteSubstitution(sub.id)}
+                onClick={() => onExecuteInterchange(sub.id)}
                 size="sm"
                 variant="outline"
                 className="h-8 w-8 p-0 border-green-200 text-green-700 hover:bg-green-50"
@@ -97,7 +97,7 @@ const PlannedSubstitutions = ({
                 <Play className="w-3 h-3" />
               </Button>
               <Button
-                onClick={() => onRemoveSubstitution(sub.id)}
+                onClick={() => onRemoveInterchange(sub.id)}
                 size="sm"
                 variant="outline"
                 className="h-8 w-8 p-0 border-red-200 text-red-700 hover:bg-red-50"
@@ -112,4 +112,4 @@ const PlannedSubstitutions = ({
   );
 };
 
-export default PlannedSubstitutions;
+export default PlannedInterchanges;

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Player, Position, GameState, PlannedSubstitution } from '@/types/sports';
+import { Player, Position, GameState, PlannedInterchange } from '@/types/sports';
 import { toast } from '@/hooks/use-toast';
 import { migratePlayerToSeasonFormat, completeGameForPlayer } from '@/utils/seasonManager';
 
@@ -54,7 +54,7 @@ export const useGameState = () => {
         midfield: [],
         defence: [],
       },
-      plannedSubstitutions: [],
+      plannedInterchanges: [],
     };
   });
 
@@ -426,10 +426,10 @@ export const useGameState = () => {
     }
   }, [gameState.currentQuarter]);
 
-  const addPlannedSubstitution = useCallback((playerId: string, targetPosition: Position, priority: 'high' | 'medium' | 'low' = 'medium') => {
+  const addPlannedInterchange = useCallback((playerId: string, targetPosition: Position, priority: 'high' | 'medium' | 'low' = 'medium') => {
     setGameState(prev => ({
       ...prev,
-      plannedSubstitutions: [...prev.plannedSubstitutions, {
+      plannedInterchanges: [...prev.plannedInterchanges, {
         id: `sub-${Date.now()}`,
         playerId,
         targetPosition,
@@ -437,25 +437,25 @@ export const useGameState = () => {
       }],
     }));
     toast({
-      title: "Substitution Planned",
-      description: "Added to substitution queue",
+      title: "Interchange Planned",
+      description: "Added to interchange queue",
     });
   }, []);
 
-  const removePlannedSubstitution = useCallback((subId: string) => {
+  const removePlannedInterchange = useCallback((subId: string) => {
     setGameState(prev => ({
       ...prev,
-      plannedSubstitutions: prev.plannedSubstitutions.filter(sub => sub.id !== subId),
+      plannedInterchanges: prev.plannedInterchanges.filter(sub => sub.id !== subId),
     }));
   }, []);
 
-  const executePlannedSubstitution = useCallback((subId: string) => {
-    const substitution = gameState.plannedSubstitutions.find(sub => sub.id === subId);
-    if (substitution) {
-      movePlayer(substitution.playerId, substitution.targetPosition);
-      removePlannedSubstitution(subId);
+  const executePlannedInterchange = useCallback((subId: string) => {
+    const interchange = gameState.plannedInterchanges.find(sub => sub.id === subId);
+    if (interchange) {
+      movePlayer(interchange.playerId, interchange.targetPosition);
+      removePlannedInterchange(subId);
     }
-  }, [gameState.plannedSubstitutions, movePlayer]);
+  }, [gameState.plannedInterchanges, movePlayer, removePlannedInterchange]);
 
   const resetGame = useCallback(() => {
     setGameState(prev => ({
@@ -477,7 +477,7 @@ export const useGameState = () => {
         midfield: [],
         defence: [],
       },
-      plannedSubstitutions: [],
+      plannedInterchanges: [],
     }));
     toast({
       title: "Game Reset",
@@ -542,7 +542,7 @@ export const useGameState = () => {
         midfield: [],
         defence: [],
       },
-      plannedSubstitutions: [],
+      plannedInterchanges: [],
     }));
     
     toast({
@@ -561,9 +561,9 @@ export const useGameState = () => {
     pauseGame,
     nextQuarter,
     resetGame,
-    addPlannedSubstitution,
-    removePlannedSubstitution,
-    executePlannedSubstitution,
+    addPlannedInterchange,
+    removePlannedInterchange,
+    executePlannedInterchange,
     completeGame,
     startNewGame,
   };

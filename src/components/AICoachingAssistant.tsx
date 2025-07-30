@@ -24,7 +24,7 @@ export function AICoachingAssistant({ players, gameState, seasonData }: AICoachi
     "Who should I start next game?",
     "How is the team performing this season?",
     "Which players need more development time?",
-    "Should I make any substitutions right now?",
+    "Should I make any interchanges right now?",
     "Who are my most versatile players?",
     "What's the best rotation strategy for today?"
   ];

@@ -245,7 +245,7 @@ export const migratePlayerToSeasonFormat = (oldPlayer: any): Player => {
       midfield: oldPlayer.timeStats?.midfield || 0,
       defence: oldPlayer.timeStats?.defence || oldPlayer.timeStats?.defense || 0,
     },
-    guernseyNumber: oldPlayer.guernseyNumber || oldPlayer.jerseyNumber,
+    guernseyNumber: oldPlayer.guernseyNumber,
   };
 
   // Add missing attributes
