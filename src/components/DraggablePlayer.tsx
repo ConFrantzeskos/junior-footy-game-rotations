@@ -89,9 +89,9 @@ export const DraggablePlayer = ({
         player-card cursor-grab active:cursor-grabbing relative overflow-hidden
         ${
           // Interchange indicators take priority - apply to all players regardless of field status
-          ranking?.rank === 'most-1' || ranking?.rank === 'most-2' 
+          ranking?.rank === 'most-1' || ranking?.rank === 'most-2' || ranking?.rank === 'most-3'
             ? 'bg-interchange-high border-interchange-high-border text-player-text' 
-            : ranking?.rank === 'least-1' || ranking?.rank === 'least-2'
+            : ranking?.rank === 'least-1' || ranking?.rank === 'least-2' || ranking?.rank === 'least-3'
             ? 'bg-interchange-low border-interchange-low-border text-player-text'
             : // Default styling based on active state
               isActive 
