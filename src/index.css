@@ -17,8 +17,21 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Sports field inspired colors */
+    --primary: 123 38% 25%;
+    --primary-foreground: 0 0% 98%;
+    
+    --field-grass: 123 45% 35%;
+    --field-grass-light: 123 50% 45%;
+    --field-line: 0 0% 98%;
+    
+    --position-forward: 15 85% 55%;
+    --position-midfield: 213 85% 55%;
+    --position-defense: 285 85% 55%;
+    
+    --player-active: 123 60% 45%;
+    --player-inactive: 220 13% 91%;
+    --player-text: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -34,7 +47,7 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 123 38% 25%;
 
     --radius: 0.5rem;
 

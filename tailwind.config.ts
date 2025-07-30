@@ -32,6 +32,21 @@ export default {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
+				field: {
+					grass: 'hsl(var(--field-grass))',
+					light: 'hsl(var(--field-grass-light))',
+					line: 'hsl(var(--field-line))'
+				},
+				position: {
+					forward: 'hsl(var(--position-forward))',
+					midfield: 'hsl(var(--position-midfield))',
+					defense: 'hsl(var(--position-defense))'
+				},
+				player: {
+					active: 'hsl(var(--player-active))',
+					inactive: 'hsl(var(--player-inactive))',
+					text: 'hsl(var(--player-text))'
+				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
 					foreground: 'hsl(var(--destructive-foreground))'
