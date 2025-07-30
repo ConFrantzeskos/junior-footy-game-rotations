@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Player, Position, GameState } from '@/types/sports';
+import { Player, Position, GameState, PlannedSubstitution } from '@/types/sports';
 import { toast } from '@/hooks/use-toast';
 
 const QUARTER_DURATION = 15 * 60; // 15 minutes in seconds
@@ -22,6 +22,7 @@ export const useGameState = () => {
         midfield: [],
         defense: [],
       },
+      plannedSubstitutions: [],
     };
   });
 
@@ -334,6 +335,37 @@ export const useGameState = () => {
     }
   }, [gameState.currentQuarter]);
 
+  const addPlannedSubstitution = useCallback((playerId: string, targetPosition: Position, priority: 'high' | 'medium' | 'low' = 'medium') => {
+    setGameState(prev => ({
+      ...prev,
+      plannedSubstitutions: [...prev.plannedSubstitutions, {
+        id: `sub-${Date.now()}`,
+        playerId,
+        targetPosition,
+        priority,
+      }],
+    }));
+    toast({
+      title: "Substitution Planned",
+      description: "Added to substitution queue",
+    });
+  }, []);
+
+  const removePlannedSubstitution = useCallback((subId: string) => {
+    setGameState(prev => ({
+      ...prev,
+      plannedSubstitutions: prev.plannedSubstitutions.filter(sub => sub.id !== subId),
+    }));
+  }, []);
+
+  const executePlannedSubstitution = useCallback((subId: string) => {
+    const substitution = gameState.plannedSubstitutions.find(sub => sub.id === subId);
+    if (substitution) {
+      movePlayer(substitution.playerId, substitution.targetPosition);
+      removePlannedSubstitution(subId);
+    }
+  }, [gameState.plannedSubstitutions, movePlayer]);
+
   const resetGame = useCallback(() => {
     setGameState(prev => ({
       ...prev,
@@ -354,6 +386,7 @@ export const useGameState = () => {
         midfield: [],
         defense: [],
       },
+      plannedSubstitutions: [],
     }));
     toast({
       title: "Game Reset",
@@ -371,5 +404,8 @@ export const useGameState = () => {
     pauseGame,
     nextQuarter,
     resetGame,
+    addPlannedSubstitution,
+    removePlannedSubstitution,
+    executePlannedSubstitution,
   };
 };

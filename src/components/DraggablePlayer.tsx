@@ -7,6 +7,7 @@ interface DraggablePlayerProps {
   player: Player;
   onDragStart: (playerId: string, sourcePosition?: Position) => void;
   onPlayerSwap: (draggedPlayerId: string, targetPlayerId: string) => void;
+  onLongPress?: (player: Player, position: { x: number; y: number }) => void;
   className?: string;
   showTime?: boolean;
   ranking?: PlayerRank;
@@ -23,11 +24,13 @@ export const DraggablePlayer = ({
   player, 
   onDragStart, 
   onPlayerSwap,
+  onLongPress,
   className = "", 
   showTime = false,
   ranking,
   currentGameTime
 }: DraggablePlayerProps) => {
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('text/plain', player.id);
@@ -51,6 +54,29 @@ export const DraggablePlayer = ({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (onLongPress) {
+      const timer = setTimeout(() => {
+        onLongPress(player, { x: e.clientX, y: e.clientY });
+      }, 500); // 500ms long press
+      setLongPressTimer(timer);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
   };
 
 
@@ -85,8 +111,12 @@ export const DraggablePlayer = ({
       onDragEnd={handleDragEnd}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
       className={`
         player-card cursor-grab active:cursor-grabbing relative overflow-hidden
+        min-h-[64px] min-w-[120px] touch-manipulation
         ${
           // Interchange indicators take priority - apply to all players regardless of field status
           ranking?.rank === 'most-1' || ranking?.rank === 'most-2' || ranking?.rank === 'most-3'
@@ -135,7 +165,17 @@ export const DraggablePlayer = ({
       )}
       
       <div className="space-y-xs relative z-10">
-        <div className="font-semibold text-sm font-system leading-tight">{player.name}</div>
+        {/* Jersey number and player name */}
+        <div className="flex items-center gap-2">
+          {player.jerseyNumber && (
+            <div className="w-5 h-5 rounded-full bg-sherrin-red text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+              {player.jerseyNumber}
+            </div>
+          )}
+          <div className="font-semibold text-sm font-system leading-tight flex-1 min-w-0">
+            <div className="truncate">{player.name}</div>
+          </div>
+        </div>
         
         {showTime && (
           <div className="space-y-xs">

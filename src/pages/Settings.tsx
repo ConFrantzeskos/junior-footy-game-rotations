@@ -86,6 +86,12 @@ const Settings = () => {
     ));
   };
 
+  const updatePlayerJersey = (playerId: string, jerseyNumber?: number) => {
+    setPlayers(players.map(p => 
+      p.id === playerId ? { ...p, jerseyNumber } : p
+    ));
+  };
+
   const saveSettings = () => {
     localStorage.setItem('players', JSON.stringify(players));
     toast({
@@ -185,20 +191,34 @@ const Settings = () => {
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {players.map((player) => (
                   <div key={player.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                    <div className="w-20">
+                      <Label className="text-xs">Jersey #</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="99"
+                        value={player.jerseyNumber || ''}
+                        onChange={(e) => updatePlayerJersey(player.id, parseInt(e.target.value) || undefined)}
+                        placeholder="#"
+                        className="text-center text-sm h-8"
+                      />
+                    </div>
                     <div className="flex-1">
+                      <Label className="text-xs">Name</Label>
                       <Input
                         value={player.name}
                         onChange={(e) => updatePlayerName(player.id, e.target.value)}
-                        className="font-medium"
+                        className="font-medium h-8"
                       />
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Total: {Object.values(player.timeStats).reduce((a, b) => a + b, 0)}s
+                    <div className="text-sm text-muted-foreground min-w-[80px] text-right">
+                      {Math.floor(Object.values(player.timeStats).reduce((a, b) => a + b, 0) / 60)}m
                     </div>
                     <Button
                       onClick={() => removePlayer(player.id)}
                       variant="destructive"
                       size="sm"
+                      className="min-h-[32px] min-w-[32px] p-0"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

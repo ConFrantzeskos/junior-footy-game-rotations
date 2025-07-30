@@ -2,17 +2,23 @@ import { useGameState } from '@/hooks/useGameState';
 import { GameHeader } from '@/components/GameHeader';
 import { PositionSection } from '@/components/PositionSection';
 import { DraggablePlayer } from '@/components/DraggablePlayer';
+import PlannedSubstitutions from '@/components/PlannedSubstitutions';
+import PlayerContextMenu from '@/components/PlayerContextMenu';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { Position } from '@/types/sports';
+import { Position, Player } from '@/types/sports';
 import { calculatePlayerRankings } from '@/utils/playerRanking';
 
 const Game = () => {
   const navigate = useNavigate();
   const [draggedPlayer, setDraggedPlayer] = useState<{ id: string; sourcePosition?: Position } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    player: Player;
+    position: { x: number; y: number };
+  } | null>(null);
   
   const {
     gameState,
@@ -24,9 +30,12 @@ const Game = () => {
     pauseGame,
     nextQuarter,
     resetGame,
+    addPlannedSubstitution,
+    removePlannedSubstitution,
+    executePlannedSubstitution,
   } = useGameState();
 
-  const { players, activePlayersByPosition, isPlaying, currentQuarter, quarterTime, totalTime } = gameState;
+  const { players, activePlayersByPosition, isPlaying, currentQuarter, quarterTime, totalTime, plannedSubstitutions } = gameState;
   
   // Calculate player rankings based on total game time
   const playerRankings = calculatePlayerRankings(players);
@@ -37,6 +46,14 @@ const Game = () => {
 
   const handleDragEnd = () => {
     setDraggedPlayer(null);
+  };
+
+  const handleLongPress = (player: Player, position: { x: number; y: number }) => {
+    setContextMenu({ player, position });
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
   };
 
   const availablePlayers = players.filter(p => !p.isActive);
@@ -83,6 +100,16 @@ const Game = () => {
           onNextQuarter={nextQuarter}
           onReset={resetGame}
         />
+
+        {/* Planned Substitutions Queue */}
+        <div className="mb-6">
+          <PlannedSubstitutions
+            plannedSubstitutions={plannedSubstitutions}
+            players={players}
+            onExecuteSubstitution={executePlannedSubstitution}
+            onRemoveSubstitution={removePlannedSubstitution}
+          />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <PositionSection
@@ -149,6 +176,7 @@ const Game = () => {
                   player={player}
                   onDragStart={handleDragStart}
                   onPlayerSwap={swapPlayers}
+                  onLongPress={handleLongPress}
                   className="min-h-[70px]"
                   showTime={true}
                   ranking={ranking}
@@ -165,6 +193,15 @@ const Game = () => {
             </div>
           )}
         </Card>
+
+        {/* Context Menu */}
+        <PlayerContextMenu
+          player={contextMenu?.player}
+          onAddPlannedSubstitution={addPlannedSubstitution}
+          isOpen={!!contextMenu}
+          onClose={handleCloseContextMenu}
+          position={contextMenu?.position || { x: 0, y: 0 }}
+        />
       </div>
     </div>
   );
