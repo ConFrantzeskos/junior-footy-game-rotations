@@ -35,8 +35,10 @@ const AutoRotationSuggestions = ({
   const [aiInsights, setAiInsights] = useState<string>('');
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [aiEnabled, setAiEnabled] = useState(true);
+  const [lastAICall, setLastAICall] = useState<number>(0);
+  const AI_CALL_COOLDOWN = 20000; // 20 seconds between AI calls
 
-  // Get AI-enhanced suggestions when rotation analysis changes
+  // Get AI-enhanced suggestions with rate limiting
   useEffect(() => {
     if (!rotationAnalysis || !aiEnabled || rotationAnalysis.suggestions.length === 0) {
       setAiEnhancedSuggestions([]);
@@ -44,8 +46,16 @@ const AutoRotationSuggestions = ({
       return;
     }
 
+    // Rate limiting: only call AI every 20 seconds
+    const now = Date.now();
+    if (now - lastAICall < AI_CALL_COOLDOWN) {
+      return;
+    }
+
     const enhanceWithAI = async () => {
       setIsLoadingAI(true);
+      setLastAICall(now);
+      
       try {
         const context: AIRotationContext = {
           gameState,
@@ -53,33 +63,34 @@ const AutoRotationSuggestions = ({
           currentQuarter,
           quarterTime,
           totalTime: currentGameTime,
-          suggestions: rotationAnalysis.suggestions
+          suggestions: rotationAnalysis.suggestions.slice(0, 1) // Only analyze top suggestion
         };
 
         const result = await AIRotationService.enhanceRotationSuggestions(context);
         
         if (result.fallbackMode) {
-          setAiInsights('AI analysis unavailable - using standard suggestions');
+          setAiInsights('');
         } else {
-          setAiInsights(result.aiInsights);
-          toast({
-            title: "AI Analysis Complete",
-            description: "Enhanced rotation suggestions ready",
-          });
+          // Extract just the first key insight, not the full detailed reasoning
+          const insights = result.aiInsights.split('\n').find(line => 
+            line.includes('**') && (line.includes('rest') || line.includes('break') || line.includes('field'))
+          ) || '';
+          
+          setAiInsights(insights.replace(/\*\*/g, '').trim());
         }
         
-        setAiEnhancedSuggestions(result.enhancedSuggestions);
+        setAiEnhancedSuggestions(result.enhancedSuggestions.slice(0, 1)); // Only show one suggestion
       } catch (error) {
         console.error('AI enhancement failed:', error);
-        setAiEnhancedSuggestions(rotationAnalysis.suggestions);
-        setAiInsights('Using standard rotation analysis');
+        setAiEnhancedSuggestions(rotationAnalysis.suggestions.slice(0, 1));
+        setAiInsights('');
       } finally {
         setIsLoadingAI(false);
       }
     };
 
     enhanceWithAI();
-  }, [rotationAnalysis, gameState, currentQuarter, quarterTime, players, currentGameTime, aiEnabled, toast]);
+  }, [rotationAnalysis, gameState, currentQuarter, quarterTime, players, currentGameTime, aiEnabled, lastAICall]);
   const getPlayerName = (playerId: string) => {
     return players.find(p => p.id === playerId)?.name || 'Unknown';
   };
@@ -162,15 +173,12 @@ const AutoRotationSuggestions = ({
         </div>
       </div>
 
-      {/* AI Insights */}
+      {/* AI Insights - Simplified */}
       {aiInsights && (
-        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-          <div className="flex items-start gap-2">
-            <Brain className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-foreground/90">
-              <div className="font-medium mb-1">AI Analysis</div>
-              <div className="text-muted-foreground whitespace-pre-wrap">{aiInsights}</div>
-            </div>
+        <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+          <div className="flex items-center gap-2">
+            <Brain className="w-4 h-4 text-primary" />
+            <div className="text-sm text-foreground font-medium">{aiInsights}</div>
           </div>
         </div>
       )}
@@ -180,9 +188,9 @@ const AutoRotationSuggestions = ({
         <p className="text-sm text-muted-foreground">{rotationAnalysis.overallAssessment}</p>
       )}
 
-      {/* Enhanced Suggestion Cards */}
+      {/* Single Top Suggestion */}
       <div className="space-y-4">
-        {(aiEnhancedSuggestions.length > 0 ? aiEnhancedSuggestions : rotationAnalysis.suggestions).map((suggestion) => (
+        {(aiEnhancedSuggestions.length > 0 ? aiEnhancedSuggestions : rotationAnalysis.suggestions.slice(0, 1)).map((suggestion) => (
           <Card key={suggestion.id} className="overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-center gap-6">
