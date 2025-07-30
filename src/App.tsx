@@ -22,7 +22,7 @@ const App = () => {
         const players = JSON.parse(savedPlayers);
         // Check if there are any actual players (not just empty array)
         const hasConfiguredPlayers = Array.isArray(players) && players.length > 0 && 
-          players.some(p => p.name && p.name.trim() && !p.name.startsWith('Player '));
+          players.some(p => p.name && p.name.trim());
         setHasPlayers(hasConfiguredPlayers);
       } catch {
         setHasPlayers(false);
@@ -50,6 +50,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={hasPlayers ? <Game /> : <Welcome />} />
+            <Route path="/game" element={<Game />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/welcome" element={<Welcome />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -266,7 +266,7 @@ const Settings = () => {
       <div className="container mx-auto max-w-6xl p-6">
         <div className="flex items-center justify-between mb-6">
           <Button 
-            onClick={() => navigate('/')} 
+            onClick={() => navigate('/game')} 
             variant="outline"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
