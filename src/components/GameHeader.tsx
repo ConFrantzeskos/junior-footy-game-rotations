@@ -25,7 +25,6 @@ interface GameHeaderProps {
   onReset: () => void;
   onCompleteGame?: (result?: 'win' | 'loss' | 'draw') => void;
   onStartNewGame?: (matchDay?: number, opponent?: string, venue?: 'home' | 'away') => void;
-  onNavigateToSettings: () => void;
 }
 
 export const GameHeader = ({
@@ -45,7 +44,6 @@ export const GameHeader = ({
   onReset,
   onCompleteGame,
   onStartNewGame,
-  onNavigateToSettings,
 }: GameHeaderProps) => {
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -63,29 +61,6 @@ export const GameHeader = ({
 
   return (
     <div className="relative mb-xl">
-      {/* Apple-style Aussie Rules Header */}
-      <div className="flex items-center justify-between mb-lg">
-        <div className="flex-1" />
-        <div className="text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-sherrin-red via-position-forward to-position-midfield bg-clip-text text-transparent mb-sm">
-            Junior Footy Manager
-          </h1>
-          <p className="text-sm text-muted-foreground font-medium">
-            Smart rotation management for Australian Rules Football
-          </p>
-        </div>
-        <div className="flex-1 flex justify-end">
-          <Button 
-            onClick={onNavigateToSettings} 
-            variant="outline"
-            className="card-elevated"
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Settings
-          </Button>
-        </div>
-      </div>
-
       {/* Main Dashboard Card */}
       <Card className="overflow-hidden bg-gradient-to-br from-card via-card to-accent/30 border-0">
         {/* Header Band */}

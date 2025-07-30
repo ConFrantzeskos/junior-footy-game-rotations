@@ -13,6 +13,7 @@ import { Player, Position } from '@/types/sports';
 import { toast } from '@/hooks/use-toast';
 import { createNewPlayer, migratePlayerToSeasonFormat, getPlayerSeasonSummary } from '@/utils/seasonManager';
 import { generatePlayerInsights, getTeamAnalytics } from '@/utils/playerAnalytics';
+import { AppHeader } from '@/components/AppHeader';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -30,13 +31,8 @@ const Settings = () => {
       // Migrate old players to new season format
       const migratedPlayers = parsedPlayers.map(migratePlayerToSeasonFormat);
       setPlayers(migratedPlayers);
-    } else {
-      // Initialize with some default players using new format
-      const defaultPlayers: Player[] = Array.from({ length: 25 }, (_, i) => 
-        createNewPlayer(`Player ${i + 1}`, `player-${i + 1}`)
-      );
-      setPlayers(defaultPlayers);
     }
+    // Don't auto-create default players - let users add their own
   }, []);
 
   const addPlayer = () => {
@@ -254,22 +250,23 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-field-grass p-4">
-      <div className="container mx-auto max-w-6xl">
+    <div className="min-h-screen bg-background">
+      <AppHeader showSettingsButton={false} />
+      
+      <div className="container mx-auto max-w-6xl p-6">
         <div className="flex items-center justify-between mb-6">
           <Button 
             onClick={() => navigate('/')} 
             variant="outline"
-            className="bg-white hover:bg-gray-50"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Game
           </Button>
           
-          <h1 className="text-3xl font-bold text-field-line">Team Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">Team Management</h1>
           
           <div className="flex gap-2">
-            <Button onClick={saveSettings} className="bg-white text-field-grass hover:bg-gray-50">
+            <Button onClick={saveSettings} className="bg-sherrin-red hover:bg-sherrin-red/90 text-white">
               <Save className="w-4 h-4 mr-2" />
               Save All Changes
             </Button>

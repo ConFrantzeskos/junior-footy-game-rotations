@@ -6,6 +6,7 @@ import PlannedSubstitutions from '@/components/PlannedSubstitutions';
 import PlayerContextMenu from '@/components/PlayerContextMenu';
 import AutoRotationSuggestions from '@/components/AutoRotationSuggestions';
 import SeasonStats from '@/components/SeasonStats';
+import { AppHeader } from '@/components/AppHeader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
@@ -89,26 +90,11 @@ const Game = () => {
 
   const availablePlayers = players.filter(p => !p.isActive);
 
-  if (players.length === 0) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="text-center bg-card rounded-lg p-8 card-elevated">
-          <h2 className="text-2xl font-bold mb-4 font-system">No Players Configured</h2>
-          <p className="text-muted-foreground mb-6">
-            Please set up your team roster before starting a game.
-          </p>
-          <Button onClick={() => navigate('/settings')} size="lg">
-            <Settings className="w-5 h-5 mr-2" />
-            Go to Settings
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="container mx-auto max-w-7xl">
+    <div className="min-h-screen bg-background">
+      <AppHeader />
+      
+      <div className="container mx-auto max-w-7xl p-6">
         <GameHeader
           isPlaying={isPlaying}
           currentQuarter={currentQuarter}
@@ -126,7 +112,6 @@ const Game = () => {
           onReset={resetGame}
           onCompleteGame={completeGame}
           onStartNewGame={startNewGame}
-          onNavigateToSettings={() => navigate('/settings')}
         />
 
         {/* Season Statistics */}
