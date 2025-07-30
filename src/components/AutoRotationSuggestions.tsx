@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RotationAnalysis, RotationSuggestion } from '@/types/autoRotation';
 import { Player } from '@/types/sports';
-import { RefreshCw, AlertTriangle, Clock, Zap, CheckCircle2, ArrowRight, Timer, Battery } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Clock, CheckCircle2, ArrowRight, Battery, Timer, Zap } from 'lucide-react';
 
 interface AutoRotationSuggestionsProps {
   rotationAnalysis: RotationAnalysis | null;
@@ -25,51 +25,71 @@ const AutoRotationSuggestions = ({
   };
 
   const getPlayerGuernsey = (playerId: string) => {
-    return players.find(p => p.id === playerId)?.guernseyNumber;
+    return players.find(p => p.id === playerId)?.guernseyNumber || '?';
   };
 
-  const getPriorityIcon = (priority: RotationSuggestion['priority']) => {
+  const getPriorityConfig = (priority: RotationSuggestion['priority']) => {
     switch (priority) {
-      case 'urgent': return <AlertTriangle className="w-5 h-5 text-destructive" />;
-      case 'recommended': return <Clock className="w-5 h-5 text-sherrin-red" />;
-      case 'optional': return <CheckCircle2 className="w-5 h-5 text-position-midfield" />;
+      case 'urgent': 
+        return {
+          icon: <AlertTriangle className="w-4 h-4" />,
+          color: 'text-destructive',
+          bgColor: 'bg-destructive/5',
+          borderColor: 'border-destructive/20'
+        };
+      case 'recommended': 
+        return {
+          icon: <Clock className="w-4 h-4" />,
+          color: 'text-sherrin-red',
+          bgColor: 'bg-sherrin-red/5',
+          borderColor: 'border-sherrin-red/20'
+        };
+      case 'optional': 
+        return {
+          icon: <CheckCircle2 className="w-4 h-4" />,
+          color: 'text-position-midfield',
+          bgColor: 'bg-position-midfield/5',
+          borderColor: 'border-position-midfield/20'
+        };
     }
   };
 
-  const getPositionColor = (position: string) => {
-    const colors = {
-      forward: 'bg-position-forward text-white',
-      midfield: 'bg-position-midfield text-white', 
-      defence: 'bg-position-defence text-white',
+  const getPositionConfig = (position: string) => {
+    const configs = {
+      forward: { bg: 'bg-position-forward', text: 'text-white', label: 'F' },
+      midfield: { bg: 'bg-position-midfield', text: 'text-white', label: 'M' },
+      defence: { bg: 'bg-position-defence', text: 'text-white', label: 'D' },
     };
-    return colors[position as keyof typeof colors] || 'bg-muted';
+    return configs[position as keyof typeof configs] || { bg: 'bg-muted', text: 'text-foreground', label: 'P' };
   };
 
-  const getReasonIcon = (reasoning: string) => {
-    if (reasoning.includes('rest') || reasoning.includes('break')) return <Battery className="w-4 h-4" />;
-    if (reasoning.includes('field') || reasoning.includes('on field')) return <Timer className="w-4 h-4" />;
-    return <Zap className="w-4 h-4" />;
+  const getReasonConfig = (reasoning: string) => {
+    if (reasoning.includes('rest') || reasoning.includes('Rested')) {
+      return { icon: <Battery className="w-3 h-3" />, label: 'Fresh', color: 'text-status-balanced' };
+    }
+    if (reasoning.includes('break') || reasoning.includes('Tired')) {
+      return { icon: <Timer className="w-3 h-3" />, label: 'Tired', color: 'text-sherrin-red' };
+    }
+    if (reasoning.includes('field') || reasoning.includes('Bench')) {
+      return { icon: <Zap className="w-3 h-3" />, label: 'Bench', color: 'text-position-midfield' };
+    }
+    return { icon: <Zap className="w-3 h-3" />, label: 'Rotate', color: 'text-muted-foreground' };
   };
 
-  const getSimpleReason = (reasoning: string) => {
-    if (reasoning.includes('rest')) return 'Rested';
-    if (reasoning.includes('break') || reasoning.includes('tired')) return 'Tired';
-    if (reasoning.includes('field')) return 'Bench';
-    if (reasoning.includes('experience')) return 'Experience';
-    return 'Rotation';
-  };
-
-  if (!isGameActive) {
-    return null;
-  }
+  if (!isGameActive) return null;
 
   if (!rotationAnalysis || rotationAnalysis.suggestions.length === 0) {
     return (
-      <Card className="bg-status-balanced/5 border-status-balanced/20">
-        <CardContent className="py-lg">
-          <div className="flex items-center justify-center gap-md text-status-balanced">
-            <CheckCircle2 className="w-5 h-5" />
-            <span className="font-medium">All Good</span>
+      <Card className="bg-gradient-to-r from-status-balanced/10 to-status-balanced/5 border-status-balanced/20">
+        <CardContent className="py-xl">
+          <div className="flex flex-col items-center gap-md">
+            <div className="w-12 h-12 rounded-full bg-status-balanced/20 flex items-center justify-center">
+              <CheckCircle2 className="w-6 h-6 text-status-balanced" />
+            </div>
+            <div className="text-center">
+              <h3 className="font-semibold text-status-balanced">Team Looking Good</h3>
+              <p className="text-sm text-muted-foreground mt-sm">No rotation suggestions needed</p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -77,125 +97,139 @@ const AutoRotationSuggestions = ({
   }
 
   return (
-    <Card className="bg-card border-border">
-      <CardHeader className="pb-md">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-sm">
-            <Zap className="w-5 h-5 text-sherrin-red" />
-            Smart Rotations
-          </CardTitle>
-          <Button
-            onClick={onRefresh}
-            variant="outline"
-            size="sm"
-            className="h-8 w-8 p-0"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </Button>
+    <div className="space-y-lg">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-md">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sherrin-red to-position-forward flex items-center justify-center">
+            <Zap className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-foreground">Smart Rotations</h3>
+            <p className="text-sm text-muted-foreground">{rotationAnalysis.overallAssessment}</p>
+          </div>
         </div>
-      </CardHeader>
-      
-      <CardContent className="pt-0 space-y-md">
-        {rotationAnalysis.suggestions.map((suggestion) => (
-          <Card
-            key={suggestion.id}
-            className="border-l-4 border-l-sherrin-red/30 bg-gradient-to-r from-sherrin-red/5 to-transparent"
-          >
-            <CardContent className="p-lg">
-              <div className="flex items-center justify-between">
-                
-                {/* Visual Priority & Position */}
-                <div className="flex items-center gap-md">
-                  <div className="flex flex-col items-center gap-sm">
-                    {getPriorityIcon(suggestion.priority)}
-                    <Badge className={`text-xs px-sm py-0 ${getPositionColor(suggestion.position)}`}>
-                      {suggestion.position.charAt(0).toUpperCase()}
+        <Button
+          onClick={onRefresh}
+          variant="outline"
+          size="sm"
+          className="w-10 h-10 p-0"
+        >
+          <RefreshCw className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {/* Suggestions Grid */}
+      <div className="grid gap-lg">
+        {rotationAnalysis.suggestions.map((suggestion) => {
+          const priorityConfig = getPriorityConfig(suggestion.priority);
+          const positionConfig = getPositionConfig(suggestion.position);
+          const reasonConfig = getReasonConfig(suggestion.reasoning);
+
+          return (
+            <Card
+              key={suggestion.id}
+              className={`card-elevated border-l-4 ${priorityConfig.borderColor} ${priorityConfig.bgColor}`}
+            >
+              <CardContent className="p-xl">
+                <div className="grid grid-cols-[auto_1fr_auto] gap-xl items-center">
+                  
+                  {/* Priority & Position Indicator */}
+                  <div className="flex flex-col items-center gap-md">
+                    <div className={`p-md rounded-lg ${priorityConfig.bgColor} border ${priorityConfig.borderColor}`}>
+                      <div className={priorityConfig.color}>
+                        {priorityConfig.icon}
+                      </div>
+                    </div>
+                    <Badge className={`${positionConfig.bg} ${positionConfig.text} font-bold px-md py-sm`}>
+                      {positionConfig.label}
                     </Badge>
                   </div>
 
                   {/* Player Swap Visual */}
-                  {suggestion.playerIn && suggestion.playerOut && (
-                    <div className="flex items-center gap-md">
-                      {/* Player Out */}
-                      <div className="flex flex-col items-center gap-sm text-center">
+                  <div className="flex items-center justify-center">
+                    <div className="grid grid-cols-[1fr_auto_1fr] gap-xl items-center w-full max-w-md">
+                      
+                      {/* Player OUT */}
+                      <div className="flex flex-col items-center gap-md">
                         <div className="relative">
-                          <div className="w-10 h-10 rounded-full bg-muted border-2 border-muted-foreground/30 flex items-center justify-center">
-                            {getPlayerGuernsey(suggestion.playerOut) ? (
-                              <span className="text-sm font-bold text-muted-foreground">
-                                {getPlayerGuernsey(suggestion.playerOut)}
-                              </span>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">OUT</span>
-                            )}
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted to-muted-foreground/20 border-2 border-muted-foreground/30 flex items-center justify-center shadow-md">
+                            <span className="text-lg font-bold text-muted-foreground">
+                              {getPlayerGuernsey(suggestion.playerOut!)}
+                            </span>
                           </div>
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">−</span>
+                          <div className="absolute -top-1 -right-1 w-6 h-6 bg-destructive rounded-full flex items-center justify-center shadow-sm">
+                            <span className="text-white text-sm font-bold">−</span>
                           </div>
                         </div>
-                        <div className="text-xs text-muted-foreground max-w-[60px] truncate">
-                          {getPlayerName(suggestion.playerOut)}
+                        <div className="text-center">
+                          <div className="text-sm font-medium text-foreground">
+                            {getPlayerName(suggestion.playerOut!)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">OUT</div>
                         </div>
                       </div>
 
-                      {/* Arrow with reason icon */}
+                      {/* Arrow & Reason */}
                       <div className="flex flex-col items-center gap-sm">
-                        <ArrowRight className="w-6 h-6 text-sherrin-red" />
-                        <div className="flex items-center gap-xs text-xs text-muted-foreground">
-                          {getReasonIcon(suggestion.reasoning)}
-                          <span>{getSimpleReason(suggestion.reasoning)}</span>
+                        <ArrowRight className="w-8 h-8 text-sherrin-red" />
+                        <div className={`flex items-center gap-xs text-xs ${reasonConfig.color}`}>
+                          {reasonConfig.icon}
+                          <span className="font-medium">{reasonConfig.label}</span>
                         </div>
                       </div>
 
-                      {/* Player In */}
-                      <div className="flex flex-col items-center gap-sm text-center">
+                      {/* Player IN */}
+                      <div className="flex flex-col items-center gap-md">
                         <div className="relative">
-                          <div className="w-10 h-10 rounded-full bg-status-balanced border-2 border-status-balanced flex items-center justify-center">
-                            {getPlayerGuernsey(suggestion.playerIn) ? (
-                              <span className="text-sm font-bold text-white">
-                                {getPlayerGuernsey(suggestion.playerIn)}
-                              </span>
-                            ) : (
-                              <span className="text-xs text-white">IN</span>
-                            )}
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-status-balanced to-position-midfield border-2 border-status-balanced flex items-center justify-center shadow-md">
+                            <span className="text-lg font-bold text-white">
+                              {getPlayerGuernsey(suggestion.playerIn!)}
+                            </span>
                           </div>
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-sherrin-red rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">+</span>
+                          <div className="absolute -top-1 -right-1 w-6 h-6 bg-sherrin-red rounded-full flex items-center justify-center shadow-sm">
+                            <span className="text-white text-sm font-bold">+</span>
                           </div>
                         </div>
-                        <div className="text-xs font-medium max-w-[60px] truncate">
-                          {getPlayerName(suggestion.playerIn)}
+                        <div className="text-center">
+                          <div className="text-sm font-medium text-foreground">
+                            {getPlayerName(suggestion.playerIn!)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">IN</div>
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
+
+                  {/* Execute Button */}
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={() => onExecuteSwap(suggestion.playerIn!, suggestion.playerOut!)}
+                      size="lg"
+                      className={`
+                        ${suggestion.priority === 'urgent' 
+                          ? 'bg-destructive hover:bg-destructive/90 border-destructive' 
+                          : 'bg-sherrin-red hover:bg-sherrin-red/90 border-sherrin-red'
+                        } 
+                        text-white font-semibold px-xl shadow-lg
+                      `}
+                    >
+                      Execute
+                    </Button>
+                  </div>
                 </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-                {/* Execute Button */}
-                {suggestion.playerIn && suggestion.playerOut && (
-                  <Button
-                    onClick={() => onExecuteSwap(suggestion.playerIn!, suggestion.playerOut!)}
-                    size="sm"
-                    className={`${
-                      suggestion.priority === 'urgent' 
-                        ? 'bg-destructive hover:bg-destructive/90' 
-                        : 'bg-sherrin-red hover:bg-sherrin-red/90'
-                    } text-white font-semibold px-lg`}
-                  >
-                    Execute
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-
-        {/* Next Review - Visual */}
-        <div className="flex items-center justify-center gap-sm text-xs text-muted-foreground pt-sm">
-          <Clock className="w-3 h-3" />
-          <span>Next check: {Math.floor(rotationAnalysis.nextReviewTime / 60)}min</span>
-        </div>
-      </CardContent>
-    </Card>
+      {/* Footer */}
+      <div className="flex items-center justify-center gap-sm text-sm text-muted-foreground">
+        <Clock className="w-4 h-4" />
+        <span>Next review in {Math.floor(rotationAnalysis.nextReviewTime / 60)} minutes</span>
+      </div>
+    </div>
   );
 };
 
