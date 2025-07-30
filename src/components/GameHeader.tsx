@@ -67,196 +67,159 @@ export const GameHeader = ({
         <div className="h-2 bg-gradient-to-r from-sherrin-red via-position-forward to-position-midfield" />
         
         <div className="p-xl">
-          {/* Top Row - Season & Status */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-lg mb-xl">
+          {/* Season Context - Clean Header */}
+          <div className="flex items-center justify-between mb-xl">
             <div className="flex items-center gap-lg">
               <div className="flex items-center gap-md">
-                <div className="flex items-center gap-sm">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-sherrin-red to-position-forward flex items-center justify-center shadow-md">
-                    <Trophy className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-foreground">Season {currentSeason}</h1>
-                    <p className="text-sm text-muted-foreground">Australian Rules Football</p>
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-sherrin-red to-position-forward flex items-center justify-center shadow-md">
+                  <Trophy className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground">Season {currentSeason}</h1>
+                  <div className="flex items-center gap-md text-sm text-muted-foreground">
+                    <span>Match Day {matchDay}</span>
+                    <span>•</span>
+                    <span>{formatDate(gameDate)}</span>
+                    {opponent && (
+                      <>
+                        <span>•</span>
+                        <span>vs {opponent}</span>
+                        {venue && (
+                          <Badge variant="outline" className="ml-sm text-xs">
+                            {venue.toUpperCase()}
+                          </Badge>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-md">
-                <Badge variant="secondary" className="px-md py-sm bg-sherrin-red/10 text-sherrin-red border border-sherrin-red/20">
-                  <Calendar className="w-3 h-3 mr-sm" />
-                  Match Day {matchDay}
-                </Badge>
-                {gameCompleted && (
-                  <Badge className="px-md py-sm bg-status-balanced/10 text-status-balanced border border-status-balanced/20">
-                    <CheckCircle className="w-3 h-3 mr-sm" />
-                    Game Complete
-                  </Badge>
-                )}
-              </div>
             </div>
 
-            {/* Match Details */}
-            <div className="flex items-center gap-lg text-sm">
-              <div className="flex items-center gap-sm text-muted-foreground">
-                <Calendar className="w-4 h-4" />
-                <span className="font-medium">{formatDate(gameDate)}</span>
-              </div>
-              {opponent && (
+            {/* Live Status Indicator */}
+            <div className="flex items-center gap-md">
+              {gameCompleted && (
+                <Badge className="px-md py-sm bg-status-balanced/10 text-status-balanced border border-status-balanced/20">
+                  <CheckCircle className="w-3 h-3 mr-sm" />
+                  Complete
+                </Badge>
+              )}
+              
+              {!gameCompleted && (
                 <div className="flex items-center gap-sm">
-                  <Users className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">vs {opponent}</span>
-                  {venue && (
-                    <Badge variant="outline" className="ml-sm text-xs">
-                      {venue === 'home' ? 'HOME' : 'AWAY'}
-                    </Badge>
+                  {isPlaying ? (
+                    <>
+                      <div className="w-2 h-2 bg-sherrin-red rounded-full animate-pulse" />
+                      <span className="text-sm font-bold text-sherrin-red">LIVE</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full" />
+                      <span className="text-sm font-bold text-muted-foreground">PAUSED</span>
+                    </>
                   )}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Game Stats Dashboard */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-lg mb-xl">
-            {/* Quarter Display */}
-            <div className="md:col-span-1 lg:col-span-2">
-              <Card className="h-full p-lg bg-gradient-to-br from-position-forward/5 to-position-midfield/5 border border-position-forward/20">
-                <div className="flex items-center justify-between h-full">
-                  <div>
-                    <p className="text-xs font-semibold text-position-forward uppercase tracking-wider mb-sm">Current Quarter</p>
-                    <div className="flex items-baseline gap-sm">
-                      <span className="text-4xl font-bold text-foreground font-mono">{currentQuarter}</span>
-                      <span className="text-lg text-muted-foreground font-medium">of 4</span>
-                    </div>
+          {/* Game Progress - Simplified */}
+          <div className="grid grid-cols-3 gap-xl mb-xl">
+            {/* Quarter Progress */}
+            <Card className="p-lg bg-gradient-to-br from-position-forward/5 to-position-midfield/5 border border-position-forward/20">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-sm mb-md">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-position-forward to-position-midfield flex items-center justify-center shadow-sm">
+                    <span className="text-sm font-bold text-white">{currentQuarter}</span>
                   </div>
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-position-forward to-position-midfield flex items-center justify-center shadow-md">
-                    <span className="text-xl font-bold text-white">{currentQuarter}</span>
-                  </div>
+                  <div className="text-sm text-muted-foreground">of 4</div>
                 </div>
-              </Card>
-            </div>
+                <div className="text-2xl font-bold text-foreground font-mono">{formatTime(quarterTime)}</div>
+                <div className="text-xs text-muted-foreground mt-sm">Quarter Time</div>
+              </div>
+            </Card>
 
-            {/* Quarter Time */}
-            <div className="md:col-span-1">
-              <Card className="h-full p-lg bg-gradient-to-br from-position-midfield/5 to-position-defence/5 border border-position-midfield/20">
-                <div className="text-center h-full flex flex-col justify-center">
-                  <div className="flex items-center justify-center gap-sm mb-sm">
-                    <Clock className="w-4 h-4 text-position-midfield" />
-                    <p className="text-xs font-semibold text-position-midfield uppercase tracking-wider">Quarter Time</p>
-                  </div>
-                  <span className="text-2xl font-bold text-foreground font-mono">{formatTime(quarterTime)}</span>
-                </div>
-              </Card>
-            </div>
+            {/* Total Game Time */}
+            <Card className="p-lg bg-gradient-to-br from-position-midfield/5 to-position-defence/5 border border-position-midfield/20">
+              <div className="text-center">
+                <Clock className="w-6 h-6 text-position-midfield mx-auto mb-md" />
+                <div className="text-2xl font-bold text-foreground font-mono">{formatTime(totalTime)}</div>
+                <div className="text-xs text-muted-foreground mt-sm">Total Time</div>
+              </div>
+            </Card>
 
-            {/* Total Time */}
-            <div className="md:col-span-1">
-              <Card className="h-full p-lg bg-gradient-to-br from-position-defence/5 to-sherrin-red/5 border border-position-defence/20">
-                <div className="text-center h-full flex flex-col justify-center">
-                  <div className="flex items-center justify-center gap-sm mb-sm">
-                    <Clock className="w-4 h-4 text-position-defence" />
-                    <p className="text-xs font-semibold text-position-defence uppercase tracking-wider">Total Time</p>
-                  </div>
-                  <span className="text-2xl font-bold text-foreground font-mono">{formatTime(totalTime)}</span>
-                </div>
-              </Card>
-            </div>
-
-            {/* Game Status */}
-            <div className="md:col-span-1 lg:col-span-1">
-              <Card className="h-full p-lg bg-gradient-to-br from-sherrin-red/5 to-position-forward/5 border border-sherrin-red/20">
-                <div className="text-center h-full flex flex-col justify-center">
-                  <p className="text-xs font-semibold text-sherrin-red uppercase tracking-wider mb-sm">Game Status</p>
-                  <div className="flex items-center justify-center gap-sm">
-                    {isPlaying ? (
-                      <>
-                        <div className="w-2 h-2 bg-status-balanced rounded-full animate-pulse" />
-                        <span className="text-sm font-bold text-status-balanced">LIVE</span>
-                      </>
-                    ) : gameCompleted ? (
-                      <>
-                        <CheckCircle className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-bold text-muted-foreground">FINISHED</span>
-                      </>
+            {/* Quick Actions */}
+            <Card className="p-lg bg-gradient-to-br from-position-defence/5 to-sherrin-red/5 border border-position-defence/20">
+              <div className="flex flex-col gap-sm h-full justify-center">
+                {!gameCompleted ? (
+                  <>
+                    {!isPlaying ? (
+                      <Button 
+                        onClick={onStart} 
+                        size="sm" 
+                        className="bg-gradient-to-r from-status-balanced to-position-midfield hover:from-status-balanced/90 hover:to-position-midfield/90 text-white font-semibold"
+                      >
+                        <Play className="w-4 h-4 mr-sm" />
+                        Start
+                      </Button>
                     ) : (
-                      <>
-                        <div className="w-2 h-2 bg-muted-foreground rounded-full" />
-                        <span className="text-sm font-bold text-muted-foreground">PAUSED</span>
-                      </>
+                      <Button 
+                        onClick={onPause} 
+                        size="sm" 
+                        variant="outline"
+                        className="border border-sherrin-red/30 text-sherrin-red hover:bg-sherrin-red/5"
+                      >
+                        <Pause className="w-4 h-4 mr-sm" />
+                        Pause
+                      </Button>
                     )}
-                  </div>
-                </div>
-              </Card>
-            </div>
+                    
+                    <Button 
+                      onClick={onNextQuarter} 
+                      size="sm" 
+                      variant="outline"
+                      disabled={currentQuarter >= 4}
+                      className="border border-position-forward/30 text-position-forward hover:bg-position-forward/5 disabled:opacity-50"
+                    >
+                      <SkipForward className="w-4 h-4 mr-sm" />
+                      Next
+                    </Button>
+                  </>
+                ) : (
+                  onStartNewGame && (
+                    <Button 
+                      onClick={() => onStartNewGame()}
+                      size="sm"
+                      className="bg-gradient-to-r from-status-balanced to-position-midfield hover:from-status-balanced/90 hover:to-position-midfield/90 text-white font-semibold"
+                    >
+                      <Play className="w-4 h-4 mr-sm" />
+                      New Game
+                    </Button>
+                  )
+                )}
+              </div>
+            </Card>
           </div>
 
-          {/* Action Controls */}
-          <div className="flex flex-wrap gap-md justify-center lg:justify-end">
-            {!gameCompleted ? (
-              <>
-                {!isPlaying ? (
-                  <Button 
-                    onClick={onStart} 
-                    size="lg" 
-                    className="bg-gradient-to-r from-status-balanced to-position-midfield hover:from-status-balanced/90 hover:to-position-midfield/90 text-white font-semibold px-lg shadow-lg"
-                  >
-                    <Play className="w-5 h-5 mr-sm" />
-                    Start Game
-                  </Button>
-                ) : (
-                  <Button 
-                    onClick={onPause} 
-                    size="lg" 
-                    variant="outline"
-                    className="border-2 border-sherrin-red/30 text-sherrin-red hover:bg-sherrin-red/5 font-semibold px-lg"
-                  >
-                    <Pause className="w-5 h-5 mr-sm" />
-                    Pause
-                  </Button>
-                )}
-                
-                <Button 
-                  onClick={onNextQuarter} 
-                  size="lg" 
-                  variant="outline"
-                  disabled={currentQuarter >= 4}
-                  className="border-2 border-position-forward/30 text-position-forward hover:bg-position-forward/5 disabled:opacity-50 font-semibold px-lg"
-                >
-                  <SkipForward className="w-5 h-5 mr-sm" />
-                  Next Quarter
-                </Button>
-
-                {onCompleteGame && currentQuarter >= 4 && (
-                  <Button 
-                    onClick={() => onCompleteGame()}
-                    size="lg"
-                    className="bg-gradient-to-r from-position-midfield to-position-defence hover:from-position-midfield/90 hover:to-position-defence/90 text-white font-semibold px-lg shadow-lg"
-                  >
-                    <CheckCircle className="w-5 h-5 mr-sm" />
-                    Complete Game
-                  </Button>
-                )}
-              </>
-            ) : (
-              onStartNewGame && (
-                <Button 
-                  onClick={() => onStartNewGame()}
-                  size="lg"
-                  className="bg-gradient-to-r from-status-balanced to-position-midfield hover:from-status-balanced/90 hover:to-position-midfield/90 text-white font-semibold px-lg shadow-lg"
-                >
-                  <Play className="w-5 h-5 mr-sm" />
-                  New Game
-                </Button>
-              )
+          {/* Secondary Actions */}
+          <div className="flex justify-center gap-md">
+            {onCompleteGame && currentQuarter >= 4 && !gameCompleted && (
+              <Button 
+                onClick={() => onCompleteGame()}
+                variant="outline"
+                className="border-2 border-position-midfield/30 text-position-midfield hover:bg-position-midfield/5 font-semibold px-lg"
+              >
+                <CheckCircle className="w-4 h-4 mr-sm" />
+                Complete Game
+              </Button>
             )}
             
             <Button 
               onClick={onReset} 
-              size="lg" 
               variant="outline"
               className="border-2 border-muted-foreground/30 text-muted-foreground hover:bg-muted/50 font-semibold px-lg"
             >
-              <RotateCcw className="w-5 h-5 mr-sm" />
+              <RotateCcw className="w-4 h-4 mr-sm" />
               Reset
             </Button>
           </div>
