@@ -97,7 +97,7 @@ export const PositionSection = ({
   return (
     <Card 
       className={`
-        p-xl card-elevated min-h-[480px] transition-all duration-300 ease-out
+        p-xl card-elevated h-[600px] transition-all duration-300 ease-out
         ${isDragOver ? 'drop-zone-active' : ''}
         border-l-4 ${getPositionColor()}
       `}
@@ -115,7 +115,7 @@ export const PositionSection = ({
         </Badge>
       </div>
       
-      <div className="space-y-md min-h-[380px]">
+      <div className="space-y-md h-[480px] overflow-y-auto">
         {activePlayersData.map((player) => {
           const ranking = playerRankings.find(r => r.id === player.id);
           return (
@@ -148,7 +148,7 @@ export const PositionSection = ({
         })}
         
         {activeCount === 0 && (
-          <div className="flex items-center justify-center h-[380px] border-2 border-dashed border-border/40 rounded-lg bg-muted/30">
+          <div className="flex items-center justify-center h-[480px] border-2 border-dashed border-border/40 rounded-lg bg-muted/30">
             <div className="text-center text-muted-foreground">
               <div className="text-lg mb-2 font-semibold">Drop players here</div>
               <div className="text-sm opacity-70">Max {maxPlayers} players</div>

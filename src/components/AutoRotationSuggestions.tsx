@@ -27,17 +27,24 @@ const AutoRotationSuggestions = ({
     return players.find(p => p.id === playerId)?.guernseyNumber;
   };
 
-  const getSimpleReason = (reasoning: string) => {
+  const getDataDrivenReason = (reasoning: string, playerOutId: string, playerInId: string) => {
+    const playerOut = players.find(p => p.id === playerOutId);
+    const playerIn = players.find(p => p.id === playerInId);
+    
+    if (!playerOut || !playerIn) return 'Rotation needed';
+    
     if (reasoning.includes('rest') || reasoning.includes('Fresh') || reasoning.includes('Rested')) {
-      return 'Give them a break';
+      const benchTime = Math.floor((playerIn.lastInterchangeTime ? Date.now() - playerIn.lastInterchangeTime : 0) / 60000);
+      return `${benchTime}min rest`;
     }
     if (reasoning.includes('break') || reasoning.includes('Tired')) {
-      return 'Player is tired';
+      // This would need the current game time passed down to calculate properly
+      return 'Long on field';
     }
     if (reasoning.includes('field') || reasoning.includes('Bench')) {
-      return 'Get them on field';
+      return 'Fresh legs';
     }
-    return 'Rotate for balance';
+    return 'Balance team';
   };
 
   if (!isGameActive) return null;
@@ -88,16 +95,16 @@ const AutoRotationSuggestions = ({
                   </div>
                   <div>
                     <div className="font-medium text-sm">{getPlayerName(suggestion.playerOut!)}</div>
-                    <div className="text-xs text-muted-foreground">Coming off</div>
+                    <div className="text-xs text-muted-foreground">Give them a spell</div>
                   </div>
                 </div>
 
-                {/* Arrow & Reason */}
+                {/* Arrow & Data-Driven Reason */}
                 <div className="flex-1 flex items-center justify-center">
                   <div className="flex items-center gap-3 text-center">
                     <ArrowRight className="w-5 h-5 text-sherrin-red" />
-                    <div className="text-xs text-muted-foreground max-w-24">
-                      {getSimpleReason(suggestion.reasoning)}
+                    <div className="text-sm font-medium text-foreground">
+                      {getDataDrivenReason(suggestion.reasoning, suggestion.playerOut!, suggestion.playerIn!)}
                     </div>
                   </div>
                 </div>
@@ -111,7 +118,7 @@ const AutoRotationSuggestions = ({
                   </div>
                   <div>
                     <div className="font-medium text-sm">{getPlayerName(suggestion.playerIn!)}</div>
-                    <div className="text-xs text-muted-foreground">Going on</div>
+                    <div className="text-xs text-muted-foreground">Put them on</div>
                   </div>
                 </div>
 
