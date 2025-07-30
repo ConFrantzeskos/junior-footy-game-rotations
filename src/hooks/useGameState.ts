@@ -20,7 +20,7 @@ export const useGameState = () => {
       activePlayersByPosition: {
         forward: [],
         midfield: [],
-        defense: [],
+        defence: [],
       },
       plannedSubstitutions: [],
     };
@@ -74,7 +74,7 @@ export const useGameState = () => {
               
               const newQuarterStats = { ...player.quarterStats };
               if (!newQuarterStats[prev.currentQuarter]) {
-                newQuarterStats[prev.currentQuarter] = { forward: 0, midfield: 0, defense: 0 };
+                newQuarterStats[prev.currentQuarter] = { forward: 0, midfield: 0, defence: 0 };
               }
               newQuarterStats[prev.currentQuarter][player.currentPosition] += 1;
               
@@ -378,13 +378,13 @@ export const useGameState = () => {
         isActive: false,
         currentPosition: null,
         lastInterchangeTime: 0,
-        timeStats: { forward: 0, midfield: 0, defense: 0 },
+        timeStats: { forward: 0, midfield: 0, defence: 0 },
         quarterStats: {},
       })),
       activePlayersByPosition: {
         forward: [],
         midfield: [],
-        defense: [],
+        defence: [],
       },
       plannedSubstitutions: [],
     }));

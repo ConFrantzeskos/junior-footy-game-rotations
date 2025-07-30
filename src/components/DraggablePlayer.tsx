@@ -81,7 +81,7 @@ export const DraggablePlayer = ({
 
 
   const isActive = player.isActive;
-  const totalTime = player.timeStats.forward + player.timeStats.midfield + player.timeStats.defense;
+  const totalTime = player.timeStats.forward + player.timeStats.midfield + player.timeStats.defence;
   
   // Calculate game time usage percentage based on elapsed game time
   const gameTimeUsagePercentage = currentGameTime > 0 ? (totalTime / currentGameTime) * 100 : 0;
@@ -99,7 +99,7 @@ export const DraggablePlayer = ({
     const colors = {
       forward: 'border-l-position-forward',
       midfield: 'border-l-position-midfield', 
-      defense: 'border-l-position-defense',
+      defence: 'border-l-position-defence',
     };
     return colors[player.currentPosition];
   };
@@ -165,11 +165,11 @@ export const DraggablePlayer = ({
       )}
       
       <div className="space-y-xs relative z-10">
-        {/* Jersey number and player name */}
+        {/* Guernsey number and player name */}
         <div className="flex items-center gap-2">
-          {player.jerseyNumber && (
+          {player.guernseyNumber && (
             <div className="w-5 h-5 rounded-full bg-sherrin-red text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-              {player.jerseyNumber}
+              {player.guernseyNumber}
             </div>
           )}
           <div className="font-semibold text-sm font-system leading-tight flex-1 min-w-0">
@@ -208,11 +208,11 @@ export const DraggablePlayer = ({
                     title={`Midfield: ${formatTime(player.timeStats.midfield)}`}
                   />
                 )}
-                {player.timeStats.defense > 0 && (
+                {player.timeStats.defence > 0 && (
                   <div 
-                    className="h-1 bg-position-defense rounded-full opacity-60"
-                    style={{ width: `${(player.timeStats.defense / totalTime) * 100}%`, minWidth: '4px' }}
-                    title={`Defence: ${formatTime(player.timeStats.defense)}`}
+                    className="h-1 bg-position-defence rounded-full opacity-60"
+                    style={{ width: `${(player.timeStats.defence / totalTime) * 100}%`, minWidth: '4px' }}
+                    title={`Defence: ${formatTime(player.timeStats.defence)}`}
                   />
                 )}
               </div>

@@ -27,8 +27,8 @@ const Settings = () => {
         isActive: false,
         currentPosition: null,
         lastInterchangeTime: 0,
-        timeStats: { forward: 0, midfield: 0, defense: 0 },
-        quarterStats: {},
+         timeStats: { forward: 0, midfield: 0, defence: 0 },
+         quarterStats: {},
       }));
       setPlayers(defaultPlayers);
     }
@@ -59,8 +59,8 @@ const Settings = () => {
       isActive: false,
       currentPosition: null,
       lastInterchangeTime: 0,
-      timeStats: { forward: 0, midfield: 0, defense: 0 },
-      quarterStats: {},
+       timeStats: { forward: 0, midfield: 0, defence: 0 },
+       quarterStats: {},
     };
 
     setPlayers([...players, newPlayer]);
@@ -86,9 +86,9 @@ const Settings = () => {
     ));
   };
 
-  const updatePlayerJersey = (playerId: string, jerseyNumber?: number) => {
+  const updatePlayerGuernsey = (playerId: string, guernseyNumber?: number) => {
     setPlayers(players.map(p => 
-      p.id === playerId ? { ...p, jerseyNumber } : p
+      p.id === playerId ? { ...p, guernseyNumber } : p
     ));
   };
 
@@ -106,17 +106,17 @@ const Settings = () => {
       isActive: false,
       currentPosition: null,
       lastInterchangeTime: 0,
-      timeStats: { forward: 0, midfield: 0, defense: 0 },
-      quarterStats: {},
-    }));
-    setPlayers(resetPlayers);
-    localStorage.setItem('players', JSON.stringify(resetPlayers));
-    localStorage.removeItem('gameState');
-    
-    toast({
-      title: "All Stats Reset",
-      description: "All player statistics have been cleared",
-    });
+        timeStats: { forward: 0, midfield: 0, defence: 0 },
+        quarterStats: {},
+      }));
+      setPlayers(resetPlayers);
+      localStorage.setItem('players', JSON.stringify(resetPlayers));
+      localStorage.removeItem('gameState');
+      
+      toast({
+        title: "All Stats Reset",
+        description: "All player statistics have been cleared",
+      });
   };
 
   return (
@@ -192,13 +192,13 @@ const Settings = () => {
                 {players.map((player) => (
                   <div key={player.id} className="flex items-center gap-3 p-3 border rounded-lg">
                     <div className="w-20">
-                      <Label className="text-xs">Jersey #</Label>
+                      <Label className="text-xs">Guernsey #</Label>
                       <Input
                         type="number"
                         min="1"
                         max="99"
-                        value={player.jerseyNumber || ''}
-                        onChange={(e) => updatePlayerJersey(player.id, parseInt(e.target.value) || undefined)}
+                        value={player.guernseyNumber || ''}
+                        onChange={(e) => updatePlayerGuernsey(player.id, parseInt(e.target.value) || undefined)}
                         placeholder="#"
                         className="text-center text-sm h-8"
                       />

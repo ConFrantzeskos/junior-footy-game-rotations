@@ -55,7 +55,7 @@ export default {
 				position: {
 					forward: 'hsl(var(--position-forward))',
 					midfield: 'hsl(var(--position-midfield))',
-					defense: 'hsl(var(--position-defense))'
+					defence: 'hsl(var(--position-defence))'
 				},
 				status: {
 					overplayed: 'hsl(var(--status-overplayed))',

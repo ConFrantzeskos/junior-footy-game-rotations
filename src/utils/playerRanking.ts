@@ -10,7 +10,7 @@ export const calculatePlayerRankings = (players: Player[]): PlayerRank[] => {
   // Calculate total time for each player
   const playersWithTime = players.map(player => ({
     id: player.id,
-    totalTime: player.timeStats.forward + player.timeStats.midfield + player.timeStats.defense,
+    totalTime: player.timeStats.forward + player.timeStats.midfield + player.timeStats.defence,
   })).filter(p => p.totalTime > 0); // Only include players with game time
 
   if (playersWithTime.length === 0) {

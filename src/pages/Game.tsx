@@ -144,9 +144,9 @@ const Game = () => {
           
           <PositionSection
             title="DEFENDERS"
-            position="defense"
+            position="defence"
             players={players}
-            activePlayers={activePlayersByPosition.defense}
+            activePlayers={activePlayersByPosition.defence}
             onTogglePlayer={togglePlayer}
             onMovePlayer={movePlayer}
             onRemovePlayer={removePlayer}
@@ -163,7 +163,7 @@ const Game = () => {
           <div className="flex items-center justify-between mb-xl">
             <h3 className="text-2xl font-bold font-system tracking-tight">Interchange</h3>
             <div className="text-sm text-muted-foreground font-semibold">
-              On Field: {activePlayersByPosition.forward.length + activePlayersByPosition.midfield.length + activePlayersByPosition.defense.length}/18
+              On Ground: {activePlayersByPosition.forward.length + activePlayersByPosition.midfield.length + activePlayersByPosition.defence.length}/18
             </div>
           </div>
           

@@ -21,8 +21,8 @@ const PlannedSubstitutions = ({
     return players.find(p => p.id === playerId)?.name || 'Unknown Player';
   };
 
-  const getPlayerJersey = (playerId: string) => {
-    return players.find(p => p.id === playerId)?.jerseyNumber;
+  const getPlayerGuernsey = (playerId: string) => {
+    return players.find(p => p.id === playerId)?.guernseyNumber;
   };
 
   const getPriorityColor = (priority: 'high' | 'medium' | 'low') => {
@@ -37,7 +37,7 @@ const PlannedSubstitutions = ({
     const colors = {
       forward: 'bg-position-forward/10 text-position-forward border-position-forward/20',
       midfield: 'bg-position-midfield/10 text-position-midfield border-position-midfield/20',
-      defense: 'bg-position-defense/10 text-position-defense border-position-defense/20',
+      defence: 'bg-position-defence/10 text-position-defence border-position-defence/20',
     };
     return colors[position];
   };
@@ -62,9 +62,9 @@ const PlannedSubstitutions = ({
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                {getPlayerJersey(sub.playerId) && (
+                {getPlayerGuernsey(sub.playerId) && (
                   <div className="w-4 h-4 rounded-full bg-sherrin-red text-white text-xs font-bold flex items-center justify-center">
-                    {getPlayerJersey(sub.playerId)}
+                    {getPlayerGuernsey(sub.playerId)}
                   </div>
                 )}
                 <span className="font-medium text-sm truncate">

@@ -24,7 +24,7 @@ interface PositionSectionProps {
 const positionColors = {
   forward: 'position-forward',
   midfield: 'position-midfield',
-  defense: 'position-defense',
+  defence: 'position-defence',
 };
 
 const formatTime = (seconds: number): string => {
@@ -80,7 +80,7 @@ export const PositionSection = ({
     const colors = {
       forward: 'border-l-position-forward',
       midfield: 'border-l-position-midfield', 
-      defense: 'border-l-position-defense',
+      defence: 'border-l-position-defence',
     };
     return colors[position];
   };

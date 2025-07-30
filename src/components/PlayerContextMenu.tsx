@@ -29,7 +29,7 @@ const PlayerContextMenu = ({
     onClose();
   };
 
-  const positions: Position[] = ['forward', 'midfield', 'defense'];
+  const positions: Position[] = ['forward', 'midfield', 'defence'];
   const priorities: Array<'high' | 'medium' | 'low'> = ['high', 'medium', 'low'];
 
   const getPriorityColor = (priority: 'high' | 'medium' | 'low') => {
@@ -44,7 +44,7 @@ const PlayerContextMenu = ({
     const colors = {
       forward: 'bg-position-forward/10 text-position-forward border-position-forward/20',
       midfield: 'bg-position-midfield/10 text-position-midfield border-position-midfield/20',
-      defense: 'bg-position-defense/10 text-position-defense border-position-defense/20',
+      defence: 'bg-position-defence/10 text-position-defence border-position-defence/20',
     };
     return colors[position];
   };
@@ -76,9 +76,9 @@ const PlayerContextMenu = ({
               Player
             </label>
             <div className="flex items-center gap-2">
-              {player.jerseyNumber && (
+              {player.guernseyNumber && (
                 <div className="w-4 h-4 rounded-full bg-sherrin-red text-white text-xs font-bold flex items-center justify-center">
-                  {player.jerseyNumber}
+                  {player.guernseyNumber}
                 </div>
               )}
               <span className="text-sm font-medium">{player.name}</span>

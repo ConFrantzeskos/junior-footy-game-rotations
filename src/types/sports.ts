@@ -1,20 +1,20 @@
 export interface Player {
   id: string;
   name: string;
-  jerseyNumber?: number;
+  guernseyNumber?: number;
   isActive: boolean;
   currentPosition: Position | null;
-  lastInterchangeTime: number; // Total game time when player was last put on field
+  lastInterchangeTime: number; // Total game time when player was last put on ground
   timeStats: {
     forward: number;
     midfield: number;
-    defense: number;
+    defence: number;
   };
   quarterStats: {
     [quarter: number]: {
       forward: number;
       midfield: number;
-      defense: number;
+      defence: number;
     };
   };
 }
@@ -27,7 +27,7 @@ export interface PlannedSubstitution {
   priority: 'high' | 'medium' | 'low';
 }
 
-export type Position = 'forward' | 'midfield' | 'defense';
+export type Position = 'forward' | 'midfield' | 'defence';
 
 export interface GameState {
   isPlaying: boolean;
@@ -38,7 +38,7 @@ export interface GameState {
   activePlayersByPosition: {
     forward: string[];
     midfield: string[];
-    defense: string[];
+    defence: string[];
   };
   plannedSubstitutions: PlannedSubstitution[];
 }

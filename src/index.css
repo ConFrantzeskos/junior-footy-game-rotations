@@ -21,7 +21,7 @@
     /* Position System - Minimal and elegant */
     --position-forward: 15 65% 48%;
     --position-midfield: 213 65% 48%;
-    --position-defense: 285 65% 48%;
+    --position-defence: 285 65% 48%;
     
     /* Australian Rules Football Theming */
     --sherrin-red: 0 85% 55%;
@@ -205,8 +205,8 @@
   .position-midfield { 
     color: hsl(var(--position-midfield));
   }
-  .position-defense { 
-    color: hsl(var(--position-defense));
+  .position-defence { 
+    color: hsl(var(--position-defence));
   }
   
   /* Game Time Usage Indicators */
