@@ -270,11 +270,11 @@ export const useGameState = () => {
       const player1NewPosition = player2.currentPosition;
       const player2NewPosition = player1.currentPosition;
 
-      // Add players to their new positions
-      if (player1NewPosition) {
+      // Add players to their new positions (with null safety)
+      if (player1NewPosition && newActivePlayersByPosition[player1NewPosition]) {
         newActivePlayersByPosition[player1NewPosition].push(player1Id);
       }
-      if (player2NewPosition) {
+      if (player2NewPosition && newActivePlayersByPosition[player2NewPosition]) {
         newActivePlayersByPosition[player2NewPosition].push(player2Id);
       }
 

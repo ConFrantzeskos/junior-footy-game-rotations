@@ -42,7 +42,9 @@ export const DraggablePlayer = ({
 
   const handleDragEnd = (e: React.DragEvent) => {
     setIsDragging(false);
-    e.currentTarget.classList.remove('drag-lift');
+    if (e.currentTarget) {
+      e.currentTarget.classList.remove('drag-lift');
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -54,22 +56,30 @@ export const DraggablePlayer = ({
       onPlayerSwap(draggedPlayerId, player.id);
       
       // Visual feedback for successful swap
-      e.currentTarget.classList.add('bg-green-100', 'border-green-500');
-      setTimeout(() => {
-        e.currentTarget.classList.remove('bg-green-100', 'border-green-500');
-      }, 800);
+      if (e.currentTarget) {
+        e.currentTarget.classList.add('bg-green-100', 'border-green-500');
+        setTimeout(() => {
+          if (e.currentTarget) {
+            e.currentTarget.classList.remove('bg-green-100', 'border-green-500');
+          }
+        }, 800);
+      }
     }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     // Add visual feedback for valid drop zone
-    e.currentTarget.classList.add('ring-2', 'ring-blue-400', 'ring-opacity-50');
+    if (e.currentTarget) {
+      e.currentTarget.classList.add('ring-2', 'ring-blue-400', 'ring-opacity-50');
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     // Remove visual feedback when leaving drop zone
-    e.currentTarget.classList.remove('ring-2', 'ring-blue-400', 'ring-opacity-50');
+    if (e.currentTarget) {
+      e.currentTarget.classList.remove('ring-2', 'ring-blue-400', 'ring-opacity-50');
+    }
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
