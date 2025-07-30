@@ -48,7 +48,16 @@ export const PositionSection = ({
   currentGameTime,
 }: PositionSectionProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
-  const activePlayersData = players.filter(p => activePlayers.includes(p.id));
+  
+  // Sort active players by time on field since last interchange (highest first)
+  const activePlayersData = players
+    .filter(p => activePlayers.includes(p.id))
+    .sort((a, b) => {
+      const timeOnFieldA = currentGameTime - a.lastInterchangeTime;
+      const timeOnFieldB = currentGameTime - b.lastInterchangeTime;
+      return timeOnFieldB - timeOnFieldA; // Highest first
+    });
+    
   const activeCount = activePlayers.length;
 
   const handleDrop = (e: React.DragEvent) => {
