@@ -56,8 +56,8 @@ export function AwardNominations({ players }: AwardNominationsProps) {
             Play a few games to start seeing award nominations for your players based on their performance and development!
           </CardDescription>
           <div className="text-sm text-muted-foreground/80 space-y-1">
-            <p>Awards include: Iron Person, Swiss Army Knife, Rising Star, Team Player, and more!</p>
-            <p>Each award recognizes different aspects of junior footy development.</p>
+            <p>Awards include: Iron Person, Swiss Army Knife, Rising Star, Team Spirit, and more!</p>
+            <p>Each award recognizes different aspects of junior Australian Rules Football development.</p>
           </div>
         </div>
       </Card>
