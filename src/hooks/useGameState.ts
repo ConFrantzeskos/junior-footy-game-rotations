@@ -21,6 +21,8 @@ export const useGameState = () => {
       if (parsedState.players) {
         parsedState.players = parsedState.players.map((player: any) => ({
           ...player,
+          // Migrate currentPosition from "defense" to "defence"
+          currentPosition: player.currentPosition === 'defense' ? 'defence' : player.currentPosition,
           timeStats: {
             forward: player.timeStats?.forward || 0,
             midfield: player.timeStats?.midfield || 0,
@@ -258,6 +260,16 @@ export const useGameState = () => {
       
       if (!player1 || !player2) return prev;
 
+      // Migration helper: convert old "defense" to new "defence"
+      const migratePosition = (position: string | null): Position | null => {
+        if (!position) return null;
+        return position === 'defense' ? 'defence' : position as Position;
+      };
+
+      // Get migrated current positions
+      const player1CurrentPos = migratePosition(player1.currentPosition);
+      const player2CurrentPos = migratePosition(player2.currentPosition);
+
       // Create deep copy to avoid mutation issues
       const newActivePlayersByPosition = {
         forward: [...prev.activePlayersByPosition.forward],
@@ -270,9 +282,9 @@ export const useGameState = () => {
       newActivePlayersByPosition.midfield = newActivePlayersByPosition.midfield.filter(id => id !== player1Id && id !== player2Id);
       newActivePlayersByPosition.defence = newActivePlayersByPosition.defence.filter(id => id !== player1Id && id !== player2Id);
 
-      // Determine their new positions (swap)
-      const player1NewPosition = player2.currentPosition;
-      const player2NewPosition = player1.currentPosition;
+      // Determine their new positions (swap) - using migrated positions
+      const player1NewPosition = player2CurrentPos;
+      const player2NewPosition = player1CurrentPos;
 
       // Add players to their swapped positions
       if (player1NewPosition) {
