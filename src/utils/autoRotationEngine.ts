@@ -28,11 +28,14 @@ export class AutoRotationEngine {
       suggestions.push(...positionSuggestions);
     });
 
+    // Remove duplicate suggestions based on player combinations
+    const uniqueSuggestions = this.deduplicateSuggestions(suggestions);
+
     // Sort by urgency score (highest first)
-    suggestions.sort((a, b) => b.urgencyScore - a.urgencyScore);
+    uniqueSuggestions.sort((a, b) => b.urgencyScore - a.urgencyScore);
 
     // Limit to top 8 suggestions to include Smart-Fill
-    const topSuggestions = suggestions.slice(0, 8);
+    const topSuggestions = uniqueSuggestions.slice(0, 8);
 
     return {
       suggestions: topSuggestions,
@@ -536,6 +539,56 @@ export class AutoRotationEngine {
       (sum, p) => sum + p.timeStats[position], 0
     );
     return totalPositionTime / Math.max(this.gameState.players.length, 1);
+  }
+
+  /**
+   * Removes duplicate suggestions based on player combinations and positions
+   */
+  private deduplicateSuggestions(suggestions: RotationSuggestion[]): RotationSuggestion[] {
+    const seen = new Set<string>();
+    const uniqueSuggestions: RotationSuggestion[] = [];
+
+    for (const suggestion of suggestions) {
+      // Create a unique key based on the type of suggestion and players involved
+      let key: string;
+      
+      if (suggestion.type === 'swap' && suggestion.playerIn && suggestion.playerOut) {
+        // For swaps, key is playerIn-playerOut-position (bidirectional)
+        const players = [suggestion.playerIn, suggestion.playerOut].sort();
+        key = `swap-${players[0]}-${players[1]}-${suggestion.position}`;
+      } else if (suggestion.type === 'substitute_on' && suggestion.playerIn) {
+        // For substitutions on, key is player-position
+        key = `sub_on-${suggestion.playerIn}-${suggestion.position}`;
+      } else if (suggestion.type === 'substitute_off' && suggestion.playerOut) {
+        // For substitutions off, key is player-position
+        key = `sub_off-${suggestion.playerOut}-${suggestion.position}`;
+      } else {
+        // Fallback to suggestion id
+        key = suggestion.id;
+      }
+
+      if (!seen.has(key)) {
+        seen.add(key);
+        // Keep the highest urgency suggestion for each unique combination
+        uniqueSuggestions.push(suggestion);
+      } else {
+        // If we've seen this combination, keep the one with higher urgency
+        const existingIndex = uniqueSuggestions.findIndex(s => {
+          if (s.type === 'swap' && suggestion.type === 'swap' && s.playerIn && s.playerOut && suggestion.playerIn && suggestion.playerOut) {
+            const existingPlayers = [s.playerIn, s.playerOut].sort();
+            const newPlayers = [suggestion.playerIn, suggestion.playerOut].sort();
+            return existingPlayers[0] === newPlayers[0] && existingPlayers[1] === newPlayers[1] && s.position === suggestion.position;
+          }
+          return false;
+        });
+
+        if (existingIndex !== -1 && suggestion.urgencyScore > uniqueSuggestions[existingIndex].urgencyScore) {
+          uniqueSuggestions[existingIndex] = suggestion;
+        }
+      }
+    }
+
+    return uniqueSuggestions;
   }
 }
 
