@@ -87,13 +87,18 @@ export const DraggablePlayer = ({
       onDragOver={handleDragOver}
       className={`
         player-card cursor-grab active:cursor-grabbing relative overflow-hidden
-        ${isActive 
-          ? 'bg-player-active/8 text-player-text border border-player-border/40' 
-          : 'bg-card hover:bg-muted/30 border border-player-border/60'
+        ${
+          // Interchange indicators take priority - apply to all players regardless of field status
+          ranking?.rank === 'most-1' || ranking?.rank === 'most-2' 
+            ? 'bg-interchange-high border-interchange-high-border text-player-text' 
+            : ranking?.rank === 'least-1' || ranking?.rank === 'least-2'
+            ? 'bg-interchange-low border-interchange-low-border text-player-text'
+            : // Default styling based on active state
+              isActive 
+              ? 'bg-player-active/8 text-player-text border border-player-border/40' 
+              : 'bg-card hover:bg-muted/30 border border-player-border/60'
         }
         ${ranking?.rank ? `ring-1 ring-rank-${ranking.rank}/30` : ''}
-        ${ranking?.rank === 'most-1' || ranking?.rank === 'most-2' ? 'bg-interchange-high border-interchange-high-border' : ''}
-        ${ranking?.rank === 'least-1' || ranking?.rank === 'least-2' ? 'bg-interchange-low border-interchange-low-border' : ''}
         rounded-lg p-md card-elevated
         ${className}
       `}
