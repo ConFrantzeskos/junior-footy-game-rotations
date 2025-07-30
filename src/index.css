@@ -181,12 +181,19 @@
   }
   
   .position-indicator {
-    @apply w-1 h-full absolute left-0 top-0 rounded-l-lg opacity-60;
+    @apply absolute left-0 top-0 bottom-0 w-1 rounded-l-lg opacity-80;
+    background-color: currentColor;
   }
   
-  .position-forward { @apply bg-position-forward; }
-  .position-midfield { @apply bg-position-midfield; }
-  .position-defense { @apply bg-position-defense; }
+  .position-forward { 
+    color: hsl(var(--position-forward));
+  }
+  .position-midfield { 
+    color: hsl(var(--position-midfield));
+  }
+  .position-defense { 
+    color: hsl(var(--position-defense));
+  }
   
   /* Game Time Status Indicators */
   .time-status-indicator {

@@ -85,7 +85,7 @@ export const DraggablePlayer = ({
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       className={`
-        player-card cursor-grab active:cursor-grabbing relative
+        player-card cursor-grab active:cursor-grabbing relative overflow-hidden
         ${isActive 
           ? 'bg-player-active/8 text-player-text border border-player-border/40' 
           : 'bg-card hover:bg-muted/30 border border-player-border/60'
