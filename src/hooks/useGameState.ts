@@ -66,7 +66,7 @@ export const useGameState = () => {
   // Load players from localStorage and sync updates
   useEffect(() => {
     const syncPlayers = () => {
-      const savedPlayers = localStorage.getItem('players');
+      const savedPlayers = localStorage.getItem('sport-rotation-players');
       if (savedPlayers) {
         const players = JSON.parse(savedPlayers);
         const migratedPlayers = players.map(migratePlayerToSeasonFormat);
@@ -96,7 +96,7 @@ export const useGameState = () => {
 
     // Listen for storage changes (when Settings updates players)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'players') {
+      if (e.key === 'sport-rotation-players') {
         syncPlayers();
       }
     };
@@ -500,7 +500,7 @@ export const useGameState = () => {
       );
 
       // Save updated players to localStorage
-      localStorage.setItem('players', JSON.stringify(completedPlayers));
+      localStorage.setItem('sport-rotation-players', JSON.stringify(completedPlayers));
 
       toast({
         title: "Game Completed",

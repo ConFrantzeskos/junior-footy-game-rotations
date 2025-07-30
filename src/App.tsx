@@ -16,7 +16,7 @@ const App = () => {
 
   useEffect(() => {
     // Check if players are configured
-    const savedPlayers = localStorage.getItem('players');
+    const savedPlayers = localStorage.getItem('sport-rotation-players');
     if (savedPlayers) {
       try {
         const players = JSON.parse(savedPlayers);
