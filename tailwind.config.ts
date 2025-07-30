@@ -32,11 +32,6 @@ export default {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
-				field: {
-					grass: 'hsl(var(--field-grass))',
-					light: 'hsl(var(--field-grass-light))',
-					line: 'hsl(var(--field-line))'
-				},
 				position: {
 					forward: 'hsl(var(--position-forward))',
 					midfield: 'hsl(var(--position-midfield))',
@@ -79,18 +74,28 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
+			spacing: {
+				'xs': 'var(--space-xs)',
+				'sm': 'var(--space-sm)',
+				'md': 'var(--space-md)',
+				'lg': 'var(--space-lg)',
+				'xl': 'var(--space-xl)',
+				'2xl': 'var(--space-2xl)',
+			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				'sm': 'var(--radius-sm)',
+				'DEFAULT': 'var(--radius)',
+				'lg': 'var(--radius-lg)',
 			},
 			fontFamily: {
 				'system': ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
 			},
 			boxShadow: {
-				'soft': 'var(--shadow-soft)',
-				'elevated': 'var(--shadow-elevated)',
-				'floating': 'var(--shadow-floating)',
+				'sm': 'var(--shadow-sm)',
+				'DEFAULT': 'var(--shadow)',
+				'md': 'var(--shadow-md)',
+				'lg': 'var(--shadow-lg)',
+				'xl': 'var(--shadow-xl)',
 			},
 			keyframes: {
 				'accordion-down': {

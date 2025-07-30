@@ -83,24 +83,25 @@ export const PositionSection = ({
   return (
     <Card 
       className={`
-        p-6 card-elevated min-h-[450px] spring-bounce border-l-4 ${getPositionColor()}
-        ${isDragOver ? 'drop-zone-highlight' : ''}
+        p-xl card-elevated min-h-[480px] transition-all duration-300 ease-out
+        ${isDragOver ? 'drop-zone-active' : ''}
+        border-l-4 ${getPositionColor()}
       `}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold font-system">{title}</h3>
+      <div className="flex items-center justify-between mb-xl">
+        <h3 className="text-2xl font-bold font-system tracking-tight">{title}</h3>
         <Badge 
           variant={activeCount === maxPlayers ? "destructive" : "secondary"}
-          className="text-sm font-medium"
+          className="text-sm font-semibold px-3 py-1"
         >
           {activeCount}/{maxPlayers}
         </Badge>
       </div>
       
-      <div className="space-y-3 min-h-[350px]">
+      <div className="space-y-md min-h-[380px]">
         {activePlayersData.map((player) => (
           <div key={player.id} className="relative group">
             <DraggablePlayer 
@@ -113,13 +114,13 @@ export const PositionSection = ({
             <button
               onClick={() => onRemovePlayer(player.id)}
               className="
-                absolute -top-1 -right-1 w-6 h-6 
+                absolute -top-2 -right-2 w-6 h-6 
                 bg-destructive text-destructive-foreground 
-                rounded-full text-xs 
-                hover:bg-destructive/90 
+                rounded-full text-sm font-bold
+                hover:bg-destructive/90 hover:scale-110
                 transition-all duration-200
                 opacity-0 group-hover:opacity-100
-                card-elevated
+                shadow-md
               "
             >
               ×
@@ -128,10 +129,10 @@ export const PositionSection = ({
         ))}
         
         {activeCount === 0 && (
-          <div className="flex items-center justify-center h-[350px] border-2 border-dashed border-border/50 rounded-lg bg-muted/20">
+          <div className="flex items-center justify-center h-[380px] border-2 border-dashed border-border/40 rounded-lg bg-muted/30">
             <div className="text-center text-muted-foreground">
-              <div className="text-lg mb-2 font-medium">Drop players here</div>
-              <div className="text-sm">Max {maxPlayers} players</div>
+              <div className="text-lg mb-2 font-semibold">Drop players here</div>
+              <div className="text-sm opacity-70">Max {maxPlayers} players</div>
             </div>
           </div>
         )}

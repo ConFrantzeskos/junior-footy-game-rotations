@@ -77,41 +77,46 @@ export const DraggablePlayer = ({
       onDragOver={handleDragOver}
       onClick={handleClick}
       className={`
-        player-card cursor-grab active:cursor-grabbing
+        player-card cursor-grab active:cursor-grabbing relative
         ${isActive 
-          ? `bg-player-active/10 text-player-text border-l-4 ${getPositionBorderColor()} border-y border-r border-player-border` 
-          : 'bg-card hover:bg-muted/50 border border-player-border'
+          ? 'bg-player-active/8 text-player-text border border-player-border/40' 
+          : 'bg-card hover:bg-muted/30 border border-player-border/60'
         }
-        rounded-lg p-3 card-elevated
+        rounded-lg p-lg card-elevated
         ${showTime ? 'cursor-pointer' : ''}
         ${className}
       `}
     >
-      <div className="space-y-1">
-        <div className="font-medium text-base font-system">{player.name}</div>
+      {/* Minimal Position Indicator */}
+      {isActive && player.currentPosition && (
+        <div className={`position-indicator position-${player.currentPosition}`} />
+      )}
+      
+      <div className="space-y-sm relative z-10">
+        <div className="font-semibold text-lg font-system leading-tight">{player.name}</div>
         
         {isActive && player.currentPosition && (
-          <div className="text-xs text-muted-foreground capitalize font-medium">
+          <div className={`text-xs font-medium capitalize opacity-70 text-position-${player.currentPosition}`}>
             {player.currentPosition}
           </div>
         )}
         
         {showTime && totalTime > 0 && (
-          <div className="text-xs text-muted-foreground">
-            Total: {formatTime(totalTime)}
+          <div className="text-xs text-muted-foreground font-medium">
+            {formatTime(totalTime)}
           </div>
         )}
         
         {showTime && showDetails && (
-          <div className="mt-2 space-y-1 animate-accordion-down">
-            <div className="flex gap-1 flex-wrap">
-              <Badge variant="outline" className="text-xs px-2 py-0.5" title="Forward time">
+          <div className="mt-md space-y-sm animate-accordion-down">
+            <div className="flex gap-xs flex-wrap">
+              <Badge variant="outline" className="text-xs px-2 py-1 bg-white/50" title="Forward time">
                 F: {formatTime(player.timeStats.forward)}
               </Badge>
-              <Badge variant="outline" className="text-xs px-2 py-0.5" title="Midfield time">
+              <Badge variant="outline" className="text-xs px-2 py-1 bg-white/50" title="Midfield time">
                 M: {formatTime(player.timeStats.midfield)}
               </Badge>
-              <Badge variant="outline" className="text-xs px-2 py-0.5" title="Defense time">
+              <Badge variant="outline" className="text-xs px-2 py-1 bg-white/50" title="Defense time">
                 D: {formatTime(player.timeStats.defense)}
               </Badge>
             </div>

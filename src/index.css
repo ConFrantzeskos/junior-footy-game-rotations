@@ -2,59 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Clean, Apple-inspired design system. All colors MUST be HSL. */
+/* Unified Apple-inspired design system. All colors MUST be HSL. */
 
 @layer base {
   :root {
-    /* Clean foundation - whites and grays */
-    --background: 0 0% 98%;
+    /* Design System Foundation */
+    --background: 0 0% 99%;
     --foreground: 222.2 84% 4.9%;
-
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Clean design system colors */
+    /* Primary System */
     --primary: 222.2 84% 4.9%;
     --primary-foreground: 0 0% 98%;
     
-    /* Subtle position indicators */
-    --position-forward: 15 70% 50%;
-    --position-midfield: 213 70% 50%;
-    --position-defense: 285 70% 50%;
+    /* Position System - Minimal and elegant */
+    --position-forward: 15 65% 48%;
+    --position-midfield: 213 65% 48%;
+    --position-defense: 285 65% 48%;
     
-    /* Player states - subtle and clean */
-    --player-active: 142 76% 36%;
-    --player-inactive: 0 0% 96%;
+    /* Player States */
+    --player-active: 142 71% 45%;
+    --player-inactive: 0 0% 97%;
     --player-text: 222.2 84% 4.9%;
-    --player-border: 0 0% 90%;
+    --player-border: 0 0% 92%;
 
-    /* Clean UI elements */
-    --secondary: 0 0% 96%;
+    /* UI Elements */
+    --secondary: 0 0% 97%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 0 0% 96%;
+    --muted: 0 0% 97%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 0 0% 94%;
+    --accent: 0 0% 95%;
     --accent-foreground: 222.2 47.4% 11.2%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 0 0% 90%;
-    --input: 0 0% 96%;
+    --border: 0 0% 92%;
+    --input: 0 0% 97%;
     --ring: 222.2 84% 4.9%;
 
-    /* Refined radius and shadows */
-    --radius: 0.75rem;
-    --shadow-soft: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-elevated: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
-    --shadow-floating: 0 25px 50px -12px hsl(0 0% 0% / 0.25);
+    /* Unified Spacing System */
+    --space-xs: 0.25rem;    /* 4px */
+    --space-sm: 0.5rem;     /* 8px */
+    --space-md: 0.75rem;    /* 12px */
+    --space-lg: 1rem;       /* 16px */
+    --space-xl: 1.5rem;     /* 24px */
+    --space-2xl: 2rem;      /* 32px */
 
-    /* Typography system */
+    /* Unified Border Radius */
+    --radius-sm: 0.5rem;    /* 8px */
+    --radius: 0.75rem;      /* 12px - main radius */
+    --radius-lg: 1rem;      /* 16px */
+
+    /* Unified Shadow System */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+
+    /* Typography System */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
     --sidebar-background: 0 0% 98%;
@@ -124,28 +132,43 @@
 }
 
 @layer components {
-  /* Micro-interactions and animations */
+  /* Unified Component System */
   .card-elevated {
-    @apply shadow-[0_1px_3px_0_hsl(0_0%_0%_/_0.1),_0_1px_2px_-1px_hsl(0_0%_0%_/_0.1)] hover:shadow-[0_10px_15px_-3px_hsl(0_0%_0%_/_0.1),_0_4px_6px_-4px_hsl(0_0%_0%_/_0.1)] transition-all duration-300;
+    box-shadow: var(--shadow);
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .card-elevated:hover {
+    box-shadow: var(--shadow-md);
   }
   
   .player-card {
-    @apply transition-all duration-200 ease-out hover:scale-[1.02] active:scale-[0.98];
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  .player-card:hover {
+    @apply scale-[1.02];
+    box-shadow: var(--shadow-md);
+  }
+  
+  .player-card:active {
+    @apply scale-[0.98];
   }
   
   .drag-lift {
-    @apply scale-105 shadow-[0_25px_50px_-12px_hsl(0_0%_0%_/_0.25)] z-50;
+    @apply scale-105 z-50;
+    box-shadow: var(--shadow-xl);
   }
   
-  .drop-zone-highlight {
-    @apply ring-2 ring-primary/20 bg-primary/5;
+  .drop-zone-active {
+    @apply ring-2 ring-primary/30 bg-primary/5 scale-[1.01];
   }
   
-  .spring-bounce {
-    @apply transition-transform duration-300 ease-out;
+  .position-indicator {
+    @apply w-1 h-full absolute left-0 top-0 rounded-l-lg opacity-60;
   }
   
-  .subtle-border {
-    @apply border border-border/50;
-  }
+  .position-forward { @apply bg-position-forward; }
+  .position-midfield { @apply bg-position-midfield; }
+  .position-defense { @apply bg-position-defense; }
 }
