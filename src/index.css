@@ -26,6 +26,11 @@
     /* Australian Rules Football Theming */
     --sherrin-red: 0 85% 55%;
     
+    /* Game Time Usage Indicators */
+    --usage-high: 15 85% 55%;         /* >80% usage - Orange warning */
+    --usage-low: 213 85% 55%;         /* <50% usage - Blue attention */
+    --usage-balanced: 142 71% 45%;    /* 50-80% usage - Green balanced */
+    
     /* Player Time Ranking System */
     --rank-most-1: 0 85% 55%;        /* Highest time - Deep red */
     --rank-most-2: 0 75% 65%;        /* Second highest - Medium red */
@@ -210,8 +215,20 @@
     @apply shadow-sm;
   }
   
-  .time-balanced {
-    background-color: hsl(var(--status-balanced));
-    @apply shadow-sm;
+  /* Game Time Usage Indicators */
+  .usage-indicator {
+    @apply absolute top-2 right-2 w-1.5 h-1.5 rounded-full opacity-70 shadow-sm;
+  }
+  
+  .usage-high {
+    background-color: hsl(var(--usage-high));
+  }
+  
+  .usage-low {
+    background-color: hsl(var(--usage-low));
+  }
+  
+  .usage-balanced {
+    background-color: hsl(var(--usage-balanced));
   }
 }

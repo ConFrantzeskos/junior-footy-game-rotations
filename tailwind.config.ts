@@ -25,6 +25,11 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				'sherrin-red': 'hsl(var(--sherrin-red))',
+				usage: {
+					high: 'hsl(var(--usage-high))',
+					low: 'hsl(var(--usage-low))',
+					balanced: 'hsl(var(--usage-balanced))',
+				},
 				rank: {
 					'most-1': 'hsl(var(--rank-most-1))',
 					'most-2': 'hsl(var(--rank-most-2))',
