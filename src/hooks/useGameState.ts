@@ -63,14 +63,46 @@ export const useGameState = () => {
     localStorage.setItem('gameState', JSON.stringify(gameState));
   }, [gameState]);
 
-  // Load players from localStorage and migrate if needed
+  // Load players from localStorage and sync updates
   useEffect(() => {
-    const savedPlayers = localStorage.getItem('players');
-    if (savedPlayers && gameState.players.length === 0) {
-      const players = JSON.parse(savedPlayers);
-      const migratedPlayers = players.map(migratePlayerToSeasonFormat);
-      setGameState(prev => ({ ...prev, players: migratedPlayers }));
+    const syncPlayers = () => {
+      const savedPlayers = localStorage.getItem('players');
+      if (savedPlayers) {
+        const players = JSON.parse(savedPlayers);
+        const migratedPlayers = players.map(migratePlayerToSeasonFormat);
+        setGameState(prev => {
+          // Preserve current game state for existing players, but update names and other persistent data
+          const updatedPlayers = migratedPlayers.map(savedPlayer => {
+            const existingPlayer = prev.players.find(p => p.id === savedPlayer.id);
+            if (existingPlayer) {
+              return {
+                ...existingPlayer,
+                name: savedPlayer.name,
+                guernseyNumber: savedPlayer.guernseyNumber,
+                seasonStats: savedPlayer.seasonStats,
+              };
+            }
+            return savedPlayer;
+          });
+          return { ...prev, players: updatedPlayers };
+        });
+      }
+    };
+
+    // Initial load
+    if (gameState.players.length === 0) {
+      syncPlayers();
     }
+
+    // Listen for storage changes (when Settings updates players)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'players') {
+        syncPlayers();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [gameState.players.length]);
 
   // Timer effect
