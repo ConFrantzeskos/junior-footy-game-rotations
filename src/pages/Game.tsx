@@ -97,6 +97,7 @@ const Game = () => {
             onPlayerSwap={swapPlayers}
             maxPlayers={6}
             playerRankings={playerRankings}
+            currentGameTime={totalTime}
           />
           
           <PositionSection
@@ -111,6 +112,7 @@ const Game = () => {
             onPlayerSwap={swapPlayers}
             maxPlayers={6}
             playerRankings={playerRankings}
+            currentGameTime={totalTime}
           />
           
           <PositionSection
@@ -125,6 +127,7 @@ const Game = () => {
             onPlayerSwap={swapPlayers}
             maxPlayers={6}
             playerRankings={playerRankings}
+            currentGameTime={totalTime}
           />
         </div>
 
@@ -149,6 +152,7 @@ const Game = () => {
                   className="min-h-[70px]"
                   showTime={true}
                   ranking={ranking}
+                  currentGameTime={totalTime}
                 />
               );
             })}

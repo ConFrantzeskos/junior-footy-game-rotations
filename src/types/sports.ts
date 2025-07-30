@@ -3,6 +3,7 @@ export interface Player {
   name: string;
   isActive: boolean;
   currentPosition: Position | null;
+  lastInterchangeTime: number; // Total game time when player was last put on field
   timeStats: {
     forward: number;
     midfield: number;

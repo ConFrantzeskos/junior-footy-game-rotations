@@ -143,7 +143,7 @@ export const useGameState = () => {
           ...prev,
           players: prev.players.map(p =>
             p.id === playerId
-              ? { ...p, isActive: true, currentPosition: position }
+              ? { ...p, isActive: true, currentPosition: position, lastInterchangeTime: prev.totalTime }
               : p
           ),
           activePlayersByPosition: newActivePlayersByPosition,
@@ -184,10 +184,10 @@ export const useGameState = () => {
             ...prev,
             players: prev.players.map(p => {
               if (p.id === playerId) {
-                return { ...p, isActive: true, currentPosition: targetPosition };
+                return { ...p, isActive: true, currentPosition: targetPosition, lastInterchangeTime: prev.totalTime };
               }
               if (p.id === playerToSwap.id) {
-                return { ...p, isActive: true, currentPosition: sourcePosition };
+                return { ...p, isActive: true, currentPosition: sourcePosition, lastInterchangeTime: prev.totalTime };
               }
               return p;
             }),
@@ -220,7 +220,7 @@ export const useGameState = () => {
         ...prev,
         players: prev.players.map(p =>
           p.id === playerId
-            ? { ...p, isActive: true, currentPosition: targetPosition }
+            ? { ...p, isActive: true, currentPosition: targetPosition, lastInterchangeTime: prev.totalTime }
             : p
         ),
         activePlayersByPosition: newActivePlayersByPosition,
@@ -262,14 +262,16 @@ export const useGameState = () => {
             return { 
               ...p, 
               isActive: !!player1NewPosition, 
-              currentPosition: player1NewPosition 
+              currentPosition: player1NewPosition,
+              lastInterchangeTime: player1NewPosition ? prev.totalTime : p.lastInterchangeTime
             };
           }
           if (p.id === player2Id) {
             return { 
               ...p, 
               isActive: !!player2NewPosition, 
-              currentPosition: player2NewPosition 
+              currentPosition: player2NewPosition,
+              lastInterchangeTime: player2NewPosition ? prev.totalTime : p.lastInterchangeTime
             };
           }
           return p;
@@ -343,6 +345,7 @@ export const useGameState = () => {
         ...player,
         isActive: false,
         currentPosition: null,
+        lastInterchangeTime: 0,
         timeStats: { forward: 0, midfield: 0, defense: 0 },
         quarterStats: {},
       })),

@@ -10,6 +10,7 @@ interface DraggablePlayerProps {
   className?: string;
   showTime?: boolean;
   ranking?: PlayerRank;
+  currentGameTime: number;
 }
 
 const formatTime = (seconds: number): string => {
@@ -24,7 +25,8 @@ export const DraggablePlayer = ({
   onPlayerSwap,
   className = "", 
   showTime = false,
-  ranking
+  ranking,
+  currentGameTime
 }: DraggablePlayerProps) => {
   
   const handleDragStart = (e: React.DragEvent) => {
@@ -127,40 +129,21 @@ export const DraggablePlayer = ({
       )}
       
       <div className="space-y-xs relative z-10">
-        <div className="font-semibold text-sm font-system leading-tight">{player.name}</div>
-        
-        {/* Interesting Analysis */}
-        {totalTime > 0 && (
-          <div className="text-xs text-muted-foreground">
-            {(() => {
-              const { forward, midfield, defense } = player.timeStats;
-              const positions = [
-                { name: 'Forward', time: forward, short: 'F' },
-                { name: 'Midfield', time: midfield, short: 'M' },
-                { name: 'Defence', time: defense, short: 'D' }
-              ].filter(p => p.time > 0).sort((a, b) => b.time - a.time);
-              
-              if (positions.length === 0) return null;
-              
-              const topPosition = positions[0];
-              const percentage = Math.round((topPosition.time / totalTime) * 100);
-              
-              if (positions.length === 1) {
-                return `${topPosition.short}: ${percentage}%`;
-              } else {
-                const distribution = positions.map(p => 
-                  `${p.short}${Math.round((p.time / totalTime) * 100)}`
-                ).join(' ');
-                return distribution;
-              }
-            })()}
-          </div>
-        )}
+        <div className="flex items-center justify-between">
+          <div className="font-semibold text-sm font-system leading-tight">{player.name}</div>
+          
+          {/* Time since last interchange - for active players only */}
+          {isActive && player.lastInterchangeTime !== undefined && (
+            <div className="text-xs text-muted-foreground font-mono opacity-70">
+              {formatTime(currentGameTime - player.lastInterchangeTime)}
+            </div>
+          )}
+        </div>
         
         {showTime && totalTime > 0 && (
           <div className="space-y-xs">
             <div className="text-xs text-muted-foreground font-medium">
-              {formatTime(totalTime)}
+              Total: {formatTime(totalTime)}
             </div>
             
             {/* Position Time Breakdown - Mini Progress Bars */}

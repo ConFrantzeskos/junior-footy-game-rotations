@@ -18,6 +18,7 @@ interface PositionSectionProps {
   onPlayerSwap: (draggedPlayerId: string, targetPlayerId: string) => void;
   maxPlayers: number;
   playerRankings: PlayerRank[];
+  currentGameTime: number;
 }
 
 const positionColors = {
@@ -44,6 +45,7 @@ export const PositionSection = ({
   onPlayerSwap,
   maxPlayers,
   playerRankings,
+  currentGameTime,
 }: PositionSectionProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const activePlayersData = players.filter(p => activePlayers.includes(p.id));
@@ -116,6 +118,7 @@ export const PositionSection = ({
                 showTime={true}
                 className="w-full"
                 ranking={ranking}
+                currentGameTime={currentGameTime}
               />
             <button
               onClick={() => onRemovePlayer(player.id)}

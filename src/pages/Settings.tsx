@@ -26,6 +26,7 @@ const Settings = () => {
         name: `Player ${i + 1}`,
         isActive: false,
         currentPosition: null,
+        lastInterchangeTime: 0,
         timeStats: { forward: 0, midfield: 0, defense: 0 },
         quarterStats: {},
       }));
@@ -57,6 +58,7 @@ const Settings = () => {
       name: newPlayerName.trim(),
       isActive: false,
       currentPosition: null,
+      lastInterchangeTime: 0,
       timeStats: { forward: 0, midfield: 0, defense: 0 },
       quarterStats: {},
     };
@@ -97,6 +99,7 @@ const Settings = () => {
       ...player,
       isActive: false,
       currentPosition: null,
+      lastInterchangeTime: 0,
       timeStats: { forward: 0, midfield: 0, defense: 0 },
       quarterStats: {},
     }));
