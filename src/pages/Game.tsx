@@ -95,7 +95,7 @@ const Game = () => {
           />
           
           <PositionSection
-            title="MIDFIELD"
+            title="CENTRE"
             position="midfield"
             players={players}
             activePlayers={activePlayersByPosition.midfield}
@@ -108,7 +108,7 @@ const Game = () => {
           />
           
           <PositionSection
-            title="DEFENSE"
+            title="DEFENCE"
             position="defense"
             players={players}
             activePlayers={activePlayersByPosition.defense}

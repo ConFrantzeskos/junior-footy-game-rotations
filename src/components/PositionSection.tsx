@@ -86,6 +86,8 @@ export const PositionSection = ({
         p-xl card-elevated min-h-[480px] transition-all duration-300 ease-out
         ${isDragOver ? 'drop-zone-active' : ''}
         border-l-4 ${getPositionColor()}
+        ${position === 'midfield' ? 'centre-square' : ''}
+        ${position === 'forward' ? 'goal-posts' : ''}
       `}
       onDrop={handleDrop}
       onDragOver={handleDragOver}

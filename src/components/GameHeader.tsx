@@ -30,7 +30,7 @@ export const GameHeader = ({
   onReset,
 }: GameHeaderProps) => {
   return (
-    <Card className="p-2xl mb-2xl card-elevated">
+    <Card className="p-2xl mb-2xl card-elevated border-t-4 border-t-afl-sherrin">
       <div className="flex flex-col lg:flex-row justify-between items-center gap-xl">
         <div className="text-center lg:text-left">
           <h1 className="text-4xl font-bold font-system mb-lg tracking-tight">
