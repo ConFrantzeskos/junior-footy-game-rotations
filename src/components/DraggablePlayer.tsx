@@ -129,9 +129,31 @@ export const DraggablePlayer = ({
       <div className="space-y-xs relative z-10">
         <div className="font-semibold text-sm font-system leading-tight">{player.name}</div>
         
-        {isActive && player.currentPosition && (
-          <div className={`text-xs font-medium capitalize opacity-70 text-position-${player.currentPosition}`}>
-            {player.currentPosition}
+        {/* Interesting Analysis */}
+        {totalTime > 0 && (
+          <div className="text-xs text-muted-foreground">
+            {(() => {
+              const { forward, midfield, defense } = player.timeStats;
+              const positions = [
+                { name: 'Forward', time: forward, short: 'F' },
+                { name: 'Midfield', time: midfield, short: 'M' },
+                { name: 'Defence', time: defense, short: 'D' }
+              ].filter(p => p.time > 0).sort((a, b) => b.time - a.time);
+              
+              if (positions.length === 0) return null;
+              
+              const topPosition = positions[0];
+              const percentage = Math.round((topPosition.time / totalTime) * 100);
+              
+              if (positions.length === 1) {
+                return `${topPosition.short}: ${percentage}%`;
+              } else {
+                const distribution = positions.map(p => 
+                  `${p.short}${Math.round((p.time / totalTime) * 100)}`
+                ).join(' ');
+                return distribution;
+              }
+            })()}
           </div>
         )}
         
@@ -161,7 +183,7 @@ export const DraggablePlayer = ({
                 <div 
                   className="h-1 bg-position-defense rounded-full opacity-60"
                   style={{ width: `${(player.timeStats.defense / totalTime) * 100}%`, minWidth: '4px' }}
-                  title={`Defense: ${formatTime(player.timeStats.defense)}`}
+                  title={`Defence: ${formatTime(player.timeStats.defense)}`}
                 />
               )}
             </div>
