@@ -203,10 +203,13 @@ export const DraggablePlayer = ({
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
               <span>{formatTime(totalTime)}</span>
               
-              {/* Time since last interchange - for all players */}
+              {/* Time display - context depends on active status */}
               <span className="font-mono opacity-70">
                 {player.lastInterchangeTime !== undefined 
-                  ? formatTime(currentGameTime - player.lastInterchangeTime)
+                  ? (() => {
+                      const timeDiff = currentGameTime - player.lastInterchangeTime;
+                      return formatTime(timeDiff);
+                    })()
                   : formatTime(currentGameTime)
                 }
               </span>

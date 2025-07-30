@@ -142,12 +142,12 @@ export const useGameState = () => {
       const isPlayerActiveInPosition = currentPositionPlayers.includes(playerId);
 
       if (isPlayerActiveInPosition) {
-        // Remove player from field
+        // Remove player from field (goes to bench)
         return {
           ...prev,
           players: prev.players.map(p =>
             p.id === playerId
-              ? { ...p, isActive: false, currentPosition: null }
+              ? { ...p, isActive: false, currentPosition: null, lastInterchangeTime: prev.totalTime }
               : p
           ),
           activePlayersByPosition: {
@@ -311,8 +311,13 @@ export const useGameState = () => {
               ...p, 
               isActive: !!player1NewPosition, 
               currentPosition: player1NewPosition,
-              // Only update lastInterchangeTime if player was previously inactive (coming from bench)
-              lastInterchangeTime: (player1NewPosition && !player1.isActive) ? prev.totalTime : p.lastInterchangeTime
+              // Update lastInterchangeTime: 
+              // - If coming from bench to field (was inactive, now active): set to current time
+              // - If going from field to bench (was active, now inactive): set to current time
+              // - If staying on field (was active, still active): keep existing time
+              lastInterchangeTime: (player1NewPosition && !player1.isActive) || (!player1NewPosition && player1.isActive) 
+                ? prev.totalTime 
+                : p.lastInterchangeTime
             };
           }
           if (p.id === player2Id) {
@@ -320,8 +325,13 @@ export const useGameState = () => {
               ...p, 
               isActive: !!player2NewPosition, 
               currentPosition: player2NewPosition,
-              // Only update lastInterchangeTime if player was previously inactive (coming from bench)
-              lastInterchangeTime: (player2NewPosition && !player2.isActive) ? prev.totalTime : p.lastInterchangeTime
+              // Update lastInterchangeTime: 
+              // - If coming from bench to field (was inactive, now active): set to current time
+              // - If going from field to bench (was active, now inactive): set to current time
+              // - If staying on field (was active, still active): keep existing time
+              lastInterchangeTime: (player2NewPosition && !player2.isActive) || (!player2NewPosition && player2.isActive) 
+                ? prev.totalTime 
+                : p.lastInterchangeTime
             };
           }
           return p;
@@ -345,7 +355,7 @@ export const useGameState = () => {
         ...prev,
         players: prev.players.map(p =>
           p.id === playerId
-            ? { ...p, isActive: false, currentPosition: null }
+            ? { ...p, isActive: false, currentPosition: null, lastInterchangeTime: prev.totalTime }
             : p
         ),
         activePlayersByPosition: newActivePlayersByPosition,
