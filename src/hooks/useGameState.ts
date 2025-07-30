@@ -9,7 +9,29 @@ export const useGameState = () => {
   const [gameState, setGameState] = useState<GameState>(() => {
     const saved = localStorage.getItem('gameState');
     if (saved) {
-      return JSON.parse(saved);
+      const parsedState = JSON.parse(saved);
+      
+      // Data migration: handle old "defense" to new "defence" 
+      if (parsedState.activePlayersByPosition && parsedState.activePlayersByPosition.defense) {
+        parsedState.activePlayersByPosition.defence = parsedState.activePlayersByPosition.defense;
+        delete parsedState.activePlayersByPosition.defense;
+      }
+      
+      // Ensure all players have updated structure
+      if (parsedState.players) {
+        parsedState.players = parsedState.players.map((player: any) => ({
+          ...player,
+          timeStats: {
+            forward: player.timeStats?.forward || 0,
+            midfield: player.timeStats?.midfield || 0,
+            defence: player.timeStats?.defence || player.timeStats?.defense || 0,
+          },
+          quarterStats: player.quarterStats || {},
+          guernseyNumber: player.guernseyNumber || player.jerseyNumber,
+        }));
+      }
+      
+      return parsedState;
     }
     return {
       isPlaying: false,
