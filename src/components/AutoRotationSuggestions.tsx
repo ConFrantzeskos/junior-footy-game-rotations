@@ -2,8 +2,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RotationAnalysis, RotationSuggestion } from '@/types/autoRotation';
 import { Player, GameState } from '@/types/sports';
-import { RefreshCw, ArrowRight, Clock, CheckCircle2, Brain, Sparkles, Target, Loader2 } from 'lucide-react';
+import { RefreshCw, ArrowRight, Clock, CheckCircle2, Brain, Sparkles, Target, Loader2, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { AIRotationService, AIRotationContext } from '@/services/aiRotationService';
+import { FeedbackService } from '@/services/feedbackService';
+import { generateEnhancedRotationSuggestions } from '@/utils/enhancedRotationEngine';
 import { useState, useEffect } from 'react';
 import { useToast } from './ui/use-toast';
 
@@ -36,7 +38,27 @@ const AutoRotationSuggestions = ({
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [aiEnabled, setAiEnabled] = useState(true);
   const [lastAICall, setLastAICall] = useState<number>(0);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<Set<string>>(new Set());
   const AI_CALL_COOLDOWN = 20000; // 20 seconds between AI calls
+
+  const handleFeedback = async (suggestion: RotationSuggestion, feedbackType: 'thumbs_up' | 'thumbs_down') => {
+    try {
+      await FeedbackService.submitFeedback(suggestion, feedbackType, gameState);
+      setFeedbackSubmitted(prev => new Set(prev).add(suggestion.id));
+      
+      toast({
+        title: "Feedback Recorded",
+        description: `Thanks for the ${feedbackType === 'thumbs_up' ? 'positive' : 'negative'} feedback!`,
+      });
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+      toast({
+        title: "Feedback Failed",
+        description: "Couldn't record your feedback right now",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Get AI-enhanced suggestions with rate limiting
   useEffect(() => {
@@ -256,16 +278,45 @@ const AutoRotationSuggestions = ({
         </div>
       </CardContent>
 
-      {/* Bottom Row: Timing and Confidence */}
+      {/* Bottom Row: Timing, Confidence, and Feedback */}
       <div className="bg-muted/30 border-t px-6 py-3">
         <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Clock className="w-3 h-3" />
-            <span>{getTimingGuidance()}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              <span>{getTimingGuidance()}</span>
+            </div>
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Target className="w-3 h-3" />
+              <span>{getConfidence()}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Target className="w-3 h-3" />
-            <span>{getConfidence()}</span>
+          
+          {/* Feedback Buttons */}
+          <div className="flex items-center gap-1">
+            <span className="text-muted-foreground mr-2">Helpful?</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleFeedback(topSuggestion, 'thumbs_up')}
+              disabled={feedbackSubmitted.has(topSuggestion.id)}
+              className={`h-6 w-6 p-0 hover:bg-green-100 hover:text-green-600 ${
+                feedbackSubmitted.has(topSuggestion.id) ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              <ThumbsUp className="w-3 h-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleFeedback(topSuggestion, 'thumbs_down')}
+              disabled={feedbackSubmitted.has(topSuggestion.id)}
+              className={`h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600 ${
+                feedbackSubmitted.has(topSuggestion.id) ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              <ThumbsDown className="w-3 h-3" />
+            </Button>
           </div>
         </div>
       </div>

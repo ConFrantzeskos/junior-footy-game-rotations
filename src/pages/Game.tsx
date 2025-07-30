@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Position, Player } from '@/types/sports';
 import { calculatePlayerRankings } from '@/utils/playerRanking';
-import { generateRotationSuggestions } from '@/utils/autoRotationEngine';
+import { generateEnhancedRotationSuggestions } from '@/utils/enhancedRotationEngine';
 import { RotationAnalysis } from '@/types/autoRotation';
 
 const Game = () => {
@@ -52,7 +52,7 @@ const Game = () => {
   // Generate rotation suggestions when game state changes
   useEffect(() => {
     if (isPlaying && players.length > 0) {
-      const analysis = generateRotationSuggestions(gameState);
+      const analysis = generateEnhancedRotationSuggestions(gameState);
       setRotationAnalysis(analysis);
     } else {
       setRotationAnalysis(null);
@@ -61,7 +61,7 @@ const Game = () => {
 
   const refreshRotationSuggestions = () => {
     if (isPlaying && players.length > 0) {
-      const analysis = generateRotationSuggestions(gameState);
+      const analysis = generateEnhancedRotationSuggestions(gameState);
       setRotationAnalysis(analysis);
     }
   };
