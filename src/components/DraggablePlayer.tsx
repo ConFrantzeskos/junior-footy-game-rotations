@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 interface DraggablePlayerProps {
   player: Player;
   onDragStart: (playerId: string, sourcePosition?: Position) => void;
+  onPlayerSwap: (draggedPlayerId: string, targetPlayerId: string) => void;
   className?: string;
   showTime?: boolean;
 }
@@ -17,12 +18,27 @@ const formatTime = (seconds: number): string => {
 export const DraggablePlayer = ({ 
   player, 
   onDragStart, 
+  onPlayerSwap,
   className = "", 
   showTime = false 
 }: DraggablePlayerProps) => {
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('text/plain', player.id);
     onDragStart(player.id, player.currentPosition || undefined);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const draggedPlayerId = e.dataTransfer.getData('text/plain');
+    
+    if (draggedPlayerId && draggedPlayerId !== player.id) {
+      onPlayerSwap(draggedPlayerId, player.id);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
   };
 
   const isActive = player.isActive;
@@ -36,6 +52,8 @@ export const DraggablePlayer = ({
     <div
       draggable
       onDragStart={handleDragStart}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
       className={`
         cursor-grab active:cursor-grabbing p-2 rounded-lg border transition-all duration-200
         ${isActive 

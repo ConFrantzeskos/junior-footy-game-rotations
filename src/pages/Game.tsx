@@ -18,6 +18,7 @@ const Game = () => {
     togglePlayer,
     movePlayer,
     removePlayer,
+    swapPlayers,
     startGame,
     pauseGame,
     nextQuarter,
@@ -89,6 +90,7 @@ const Game = () => {
             onMovePlayer={movePlayer}
             onRemovePlayer={removePlayer}
             onDragStart={handleDragStart}
+            onPlayerSwap={swapPlayers}
             maxPlayers={6}
           />
           
@@ -101,6 +103,7 @@ const Game = () => {
             onMovePlayer={movePlayer}
             onRemovePlayer={removePlayer}
             onDragStart={handleDragStart}
+            onPlayerSwap={swapPlayers}
             maxPlayers={6}
           />
           
@@ -113,6 +116,7 @@ const Game = () => {
             onMovePlayer={movePlayer}
             onRemovePlayer={removePlayer}
             onDragStart={handleDragStart}
+            onPlayerSwap={swapPlayers}
             maxPlayers={6}
           />
         </div>
@@ -132,6 +136,7 @@ const Game = () => {
                 key={player.id}
                 player={player}
                 onDragStart={handleDragStart}
+                onPlayerSwap={swapPlayers}
                 className="min-h-[60px]"
               />
             ))}

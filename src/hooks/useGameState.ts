@@ -212,6 +212,57 @@ export const useGameState = () => {
     });
   }, []);
 
+  const swapPlayers = useCallback((player1Id: string, player2Id: string) => {
+    setGameState(prev => {
+      const player1 = prev.players.find(p => p.id === player1Id);
+      const player2 = prev.players.find(p => p.id === player2Id);
+      
+      if (!player1 || !player2) return prev;
+
+      const newActivePlayersByPosition = { ...prev.activePlayersByPosition };
+      
+      // Remove both players from all positions first
+      Object.keys(newActivePlayersByPosition).forEach(pos => {
+        newActivePlayersByPosition[pos as Position] = newActivePlayersByPosition[pos as Position]
+          .filter(id => id !== player1Id && id !== player2Id);
+      });
+
+      // Swap their positions
+      const player1NewPosition = player2.currentPosition;
+      const player2NewPosition = player1.currentPosition;
+
+      // Add players to their new positions
+      if (player1NewPosition) {
+        newActivePlayersByPosition[player1NewPosition].push(player1Id);
+      }
+      if (player2NewPosition) {
+        newActivePlayersByPosition[player2NewPosition].push(player2Id);
+      }
+
+      return {
+        ...prev,
+        players: prev.players.map(p => {
+          if (p.id === player1Id) {
+            return { 
+              ...p, 
+              isActive: !!player1NewPosition, 
+              currentPosition: player1NewPosition 
+            };
+          }
+          if (p.id === player2Id) {
+            return { 
+              ...p, 
+              isActive: !!player2NewPosition, 
+              currentPosition: player2NewPosition 
+            };
+          }
+          return p;
+        }),
+        activePlayersByPosition: newActivePlayersByPosition,
+      };
+    });
+  }, []);
+
   const removePlayer = useCallback((playerId: string) => {
     setGameState(prev => {
       const newActivePlayersByPosition = { ...prev.activePlayersByPosition };
@@ -296,6 +347,7 @@ export const useGameState = () => {
     togglePlayer,
     movePlayer,
     removePlayer,
+    swapPlayers,
     startGame,
     pauseGame,
     nextQuarter,

@@ -13,6 +13,7 @@ interface PositionSectionProps {
   onMovePlayer: (playerId: string, targetPosition: Position, sourcePosition?: Position) => void;
   onRemovePlayer: (playerId: string) => void;
   onDragStart: (playerId: string, sourcePosition?: Position) => void;
+  onPlayerSwap: (draggedPlayerId: string, targetPlayerId: string) => void;
   maxPlayers: number;
 }
 
@@ -37,6 +38,7 @@ export const PositionSection = ({
   onMovePlayer,
   onRemovePlayer,
   onDragStart,
+  onPlayerSwap,
   maxPlayers,
 }: PositionSectionProps) => {
   const activePlayersData = players.filter(p => activePlayers.includes(p.id));
@@ -82,6 +84,7 @@ export const PositionSection = ({
             <DraggablePlayer 
               player={player}
               onDragStart={handlePlayerDragStart}
+              onPlayerSwap={onPlayerSwap}
               showTime={true}
               className="w-full"
             />
