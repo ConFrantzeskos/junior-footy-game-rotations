@@ -57,6 +57,18 @@ export const DraggablePlayer = ({
 
   const isActive = player.isActive;
   const totalTime = player.timeStats.forward + player.timeStats.midfield + player.timeStats.defense;
+  
+  // Calculate game time percentage (15 mins per quarter = 900 seconds, 4 quarters = 3600 seconds)
+  const totalGameTime = 3600; // 60 minutes total
+  const playTimePercentage = (totalTime / totalGameTime) * 100;
+  
+  const getTimeStatus = () => {
+    if (playTimePercentage > 80) return 'overplayed';
+    if (playTimePercentage < 50) return 'underplayed';
+    return 'balanced';
+  };
+  
+  const timeStatus = getTimeStatus();
 
   const getPositionBorderColor = () => {
     if (!isActive || !player.currentPosition) return '';
@@ -90,6 +102,20 @@ export const DraggablePlayer = ({
       {/* Minimal Position Indicator */}
       {isActive && player.currentPosition && (
         <div className={`position-indicator position-${player.currentPosition}`} />
+      )}
+      
+      {/* Game Time Status Indicator */}
+      {totalTime > 0 && (
+        <div 
+          className={`time-status-indicator time-${timeStatus}`}
+          title={
+            timeStatus === 'overplayed' 
+              ? `High usage: ${playTimePercentage.toFixed(0)}% of game time`
+              : timeStatus === 'underplayed'
+              ? `Low usage: ${playTimePercentage.toFixed(0)}% of game time`
+              : `Balanced: ${playTimePercentage.toFixed(0)}% of game time`
+          }
+        />
       )}
       
       <div className="space-y-sm relative z-10">

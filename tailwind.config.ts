@@ -37,6 +37,11 @@ export default {
 					midfield: 'hsl(var(--position-midfield))',
 					defense: 'hsl(var(--position-defense))'
 				},
+				status: {
+					overplayed: 'hsl(var(--status-overplayed))',
+					underplayed: 'hsl(var(--status-underplayed))',
+					balanced: 'hsl(var(--status-balanced))'
+				},
 				player: {
 					active: 'hsl(var(--player-active))',
 					inactive: 'hsl(var(--player-inactive))',
