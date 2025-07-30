@@ -32,6 +32,7 @@ export const DraggablePlayer = ({
 }: DraggablePlayerProps) => {
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
@@ -50,36 +51,32 @@ export const DraggablePlayer = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsDragOver(false);
     const draggedPlayerId = e.dataTransfer.getData('text/plain');
     
     if (draggedPlayerId && draggedPlayerId !== player.id) {
       onPlayerSwap(draggedPlayerId, player.id);
       
-      // Visual feedback for successful swap
+      // Visual feedback for successful swap using semantic tokens
       if (e.currentTarget) {
-        e.currentTarget.classList.add('bg-green-100', 'border-green-500');
+        e.currentTarget.classList.add('bg-green-500/20', 'border-green-500', 'scale-105');
         setTimeout(() => {
           if (e.currentTarget) {
-            e.currentTarget.classList.remove('bg-green-100', 'border-green-500');
+            e.currentTarget.classList.remove('bg-green-500/20', 'border-green-500', 'scale-105');
           }
-        }, 800);
+        }, 600);
       }
     }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    // Add visual feedback for valid drop zone
-    if (e.currentTarget) {
-      e.currentTarget.classList.add('ring-2', 'ring-blue-400', 'ring-opacity-50');
-    }
+    setIsDragOver(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    // Remove visual feedback when leaving drop zone
-    if (e.currentTarget) {
-      e.currentTarget.classList.remove('ring-2', 'ring-blue-400', 'ring-opacity-50');
-    }
+    e.preventDefault();
+    setIsDragOver(false);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -137,7 +134,9 @@ export const DraggablePlayer = ({
       onTouchEnd={handleTouchEnd}
       className={`
         player-card cursor-grab active:cursor-grabbing relative overflow-hidden
-        min-h-[64px] min-w-[120px] touch-manipulation
+        min-h-[64px] min-w-[120px] touch-manipulation transition-all duration-200
+        ${isDragOver ? 'ring-2 ring-primary/60 bg-primary/10 scale-105' : ''}
+        ${isDragging ? 'opacity-50 rotate-2' : ''}
         ${
           // Interchange indicators take priority - apply to all players regardless of field status
           ranking?.rank === 'most-1' || ranking?.rank === 'most-2' || ranking?.rank === 'most-3'

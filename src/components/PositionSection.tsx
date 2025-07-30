@@ -97,8 +97,8 @@ export const PositionSection = ({
   return (
     <Card 
       className={`
-        p-lg card-elevated h-[600px] transition-all duration-300 ease-out
-        ${isDragOver ? 'drop-zone-active' : ''}
+        p-lg card-elevated min-h-[600px] transition-all duration-300 ease-out
+        ${isDragOver ? 'drop-zone-active ring-2 ring-primary/50 bg-primary/5' : ''}
         border-l-4 ${getPositionColor()}
       `}
       onDrop={handleDrop}
@@ -115,17 +115,17 @@ export const PositionSection = ({
         </Badge>
       </div>
       
-      <div className="space-y-sm h-[500px] overflow-y-auto">
+      <div className="space-y-sm min-h-[500px] flex flex-col">
         {activePlayersData.map((player) => {
           const ranking = playerRankings.find(r => r.id === player.id);
           return (
-            <div key={player.id} className="relative group">
+            <div key={player.id} className="relative group flex-shrink-0">
               <DraggablePlayer 
                 player={player}
                 onDragStart={handlePlayerDragStart}
                 onPlayerSwap={onPlayerSwap}
                 showTime={true}
-                className="w-full"
+                className="w-full transition-all duration-200 group-hover:scale-[1.02]"
                 ranking={ranking}
                 currentGameTime={currentGameTime}
               />
@@ -138,7 +138,7 @@ export const PositionSection = ({
                 hover:bg-destructive/90 hover:scale-110
                 transition-all duration-200
                 opacity-0 group-hover:opacity-100
-                shadow-md
+                shadow-md z-10
               "
             >
               ×
@@ -148,9 +148,16 @@ export const PositionSection = ({
         })}
         
         {activeCount === 0 && (
-          <div className="flex items-center justify-center h-[500px] border-2 border-dashed border-border/40 rounded-lg bg-muted/30">
+          <div className={`
+            flex items-center justify-center flex-1 min-h-[300px] 
+            border-2 border-dashed transition-all duration-300
+            ${isDragOver ? 'border-primary bg-primary/10' : 'border-border/40 bg-muted/30'}
+            rounded-lg
+          `}>
             <div className="text-center text-muted-foreground">
-              <div className="text-lg mb-2 font-semibold">Drop players here</div>
+              <div className={`text-lg mb-2 font-semibold transition-colors duration-300 ${isDragOver ? 'text-primary' : ''}`}>
+                {isDragOver ? 'Drop here!' : 'Drop players here'}
+              </div>
               <div className="text-sm opacity-70">Max {maxPlayers} players</div>
             </div>
           </div>

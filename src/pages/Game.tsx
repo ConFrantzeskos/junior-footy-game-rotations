@@ -207,35 +207,38 @@ const Game = () => {
         </div>
 
         {/* Interchange Section */}
-        <Card className="mt-2xl p-xl card-elevated">
-          <div className="flex items-center justify-between mb-xl">
-            <h3 className="text-2xl font-bold font-system tracking-tight">Interchange</h3>
+        <Card className="mt-2xl p-lg card-elevated">
+          <div className="flex items-center justify-between mb-lg">
+            <h3 className="text-xl font-bold font-system tracking-tight">Interchange</h3>
             <div className="text-sm text-muted-foreground font-semibold">
               On Ground: {activePlayersByPosition.forward.length + activePlayersByPosition.midfield.length + activePlayersByPosition.defence.length}/18
             </div>
           </div>
           
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-md">
-            {availablePlayers.map((player) => {
-              const ranking = playerRankings.find(r => r.id === player.id);
-              return (
-                <DraggablePlayer
-                  key={player.id}
-                  player={player}
-                  onDragStart={handleDragStart}
-                  onPlayerSwap={swapPlayers}
-                  onLongPress={handleLongPress}
-                  className="min-h-[70px]"
-                  showTime={true}
-                  ranking={ranking}
-                  currentGameTime={totalTime}
-                />
-              );
-            })}
-          </div>
+          {availablePlayers.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-md auto-rows-min">
+              {availablePlayers.map((player) => {
+                const ranking = playerRankings.find(r => r.id === player.id);
+                return (
+                  <div key={player.id} className="flex">
+                    <DraggablePlayer
+                      player={player}
+                      onDragStart={handleDragStart}
+                      onPlayerSwap={swapPlayers}
+                      onLongPress={handleLongPress}
+                      className="w-full min-h-[70px] flex-1"
+                      showTime={true}
+                      ranking={ranking}
+                      currentGameTime={totalTime}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
           
           {availablePlayers.length === 0 && (
-            <div className="text-center py-2xl text-muted-foreground">
+            <div className="text-center py-xl text-muted-foreground border-2 border-dashed border-border/40 rounded-lg bg-muted/30">
               <div className="font-semibold text-lg mb-sm">All players are on the field</div>
               <div className="text-sm opacity-70">Drag players here to substitute them</div>
             </div>
