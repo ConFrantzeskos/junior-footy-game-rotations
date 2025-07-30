@@ -185,9 +185,12 @@
     @apply ring-2 ring-primary/30 bg-primary/5 scale-[1.01];
   }
   
+  
+  /* Position Indicator - Fixed to eliminate gap */
   .position-indicator {
-    @apply absolute left-0 top-0 bottom-0 w-1 rounded-l-lg opacity-80;
+    @apply absolute inset-y-0 left-0 w-1 opacity-80;
     background-color: currentColor;
+    border-radius: var(--radius) 0 0 var(--radius);
   }
   
   .position-forward { 
@@ -200,24 +203,9 @@
     color: hsl(var(--position-defense));
   }
   
-  /* Game Time Status Indicators */
-  .time-status-indicator {
-    @apply absolute top-1 right-1 w-2 h-2 rounded-full opacity-75;
-  }
-  
-  .time-overplayed {
-    background-color: hsl(var(--status-overplayed));
-    @apply shadow-sm;
-  }
-  
-  .time-underplayed {
-    background-color: hsl(var(--status-underplayed));
-    @apply shadow-sm;
-  }
-  
   /* Game Time Usage Indicators */
   .usage-indicator {
-    @apply absolute top-2 right-2 w-1.5 h-1.5 rounded-full opacity-70 shadow-sm;
+    @apply absolute top-1 right-1 w-3 h-3 rounded-full opacity-90 shadow-md border border-white/30;
   }
   
   .usage-high {
