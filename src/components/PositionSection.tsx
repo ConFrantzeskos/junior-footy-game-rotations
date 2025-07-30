@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Player, Position } from '@/types/sports';
 import { DraggablePlayer } from './DraggablePlayer';
+import { PlayerRank } from '@/utils/playerRanking';
 
 interface PositionSectionProps {
   title: string;
@@ -16,6 +17,7 @@ interface PositionSectionProps {
   onDragStart: (playerId: string, sourcePosition?: Position) => void;
   onPlayerSwap: (draggedPlayerId: string, targetPlayerId: string) => void;
   maxPlayers: number;
+  playerRankings: PlayerRank[];
 }
 
 const positionColors = {
@@ -41,6 +43,7 @@ export const PositionSection = ({
   onDragStart,
   onPlayerSwap,
   maxPlayers,
+  playerRankings,
 }: PositionSectionProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const activePlayersData = players.filter(p => activePlayers.includes(p.id));
@@ -102,15 +105,18 @@ export const PositionSection = ({
       </div>
       
       <div className="space-y-md min-h-[380px]">
-        {activePlayersData.map((player) => (
-          <div key={player.id} className="relative group">
-            <DraggablePlayer 
-              player={player}
-              onDragStart={handlePlayerDragStart}
-              onPlayerSwap={onPlayerSwap}
-              showTime={true}
-              className="w-full"
-            />
+        {activePlayersData.map((player) => {
+          const ranking = playerRankings.find(r => r.id === player.id);
+          return (
+            <div key={player.id} className="relative group">
+              <DraggablePlayer 
+                player={player}
+                onDragStart={handlePlayerDragStart}
+                onPlayerSwap={onPlayerSwap}
+                showTime={true}
+                className="w-full"
+                ranking={ranking}
+              />
             <button
               onClick={() => onRemovePlayer(player.id)}
               className="
@@ -126,7 +132,8 @@ export const PositionSection = ({
               ×
             </button>
           </div>
-        ))}
+          );
+        })}
         
         {activeCount === 0 && (
           <div className="flex items-center justify-center h-[380px] border-2 border-dashed border-border/40 rounded-lg bg-muted/30">

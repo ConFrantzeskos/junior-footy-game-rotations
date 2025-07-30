@@ -25,6 +25,14 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				'sherrin-red': 'hsl(var(--sherrin-red))',
+				rank: {
+					'most-1': 'hsl(var(--rank-most-1))',
+					'most-2': 'hsl(var(--rank-most-2))',
+					'most-3': 'hsl(var(--rank-most-3))',
+					'least-1': 'hsl(var(--rank-least-1))',
+					'least-2': 'hsl(var(--rank-least-2))',
+					'least-3': 'hsl(var(--rank-least-3))',
+				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'

@@ -8,6 +8,7 @@ import { Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Position } from '@/types/sports';
+import { calculatePlayerRankings } from '@/utils/playerRanking';
 
 const Game = () => {
   const navigate = useNavigate();
@@ -26,6 +27,9 @@ const Game = () => {
   } = useGameState();
 
   const { players, activePlayersByPosition, isPlaying, currentQuarter, quarterTime, totalTime } = gameState;
+  
+  // Calculate player rankings based on total game time
+  const playerRankings = calculatePlayerRankings(players);
 
   const handleDragStart = (playerId: string, sourcePosition?: Position) => {
     setDraggedPlayer({ id: playerId, sourcePosition });
@@ -92,6 +96,7 @@ const Game = () => {
             onDragStart={handleDragStart}
             onPlayerSwap={swapPlayers}
             maxPlayers={6}
+            playerRankings={playerRankings}
           />
           
           <PositionSection
@@ -105,6 +110,7 @@ const Game = () => {
             onDragStart={handleDragStart}
             onPlayerSwap={swapPlayers}
             maxPlayers={6}
+            playerRankings={playerRankings}
           />
           
           <PositionSection
@@ -118,6 +124,7 @@ const Game = () => {
             onDragStart={handleDragStart}
             onPlayerSwap={swapPlayers}
             maxPlayers={6}
+            playerRankings={playerRankings}
           />
         </div>
 
@@ -131,16 +138,20 @@ const Game = () => {
           </div>
           
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-md">
-            {availablePlayers.map((player) => (
-              <DraggablePlayer
-                key={player.id}
-                player={player}
-                onDragStart={handleDragStart}
-                onPlayerSwap={swapPlayers}
-                className="min-h-[70px]"
-                showTime={true}
-              />
-            ))}
+            {availablePlayers.map((player) => {
+              const ranking = playerRankings.find(r => r.id === player.id);
+              return (
+                <DraggablePlayer
+                  key={player.id}
+                  player={player}
+                  onDragStart={handleDragStart}
+                  onPlayerSwap={swapPlayers}
+                  className="min-h-[70px]"
+                  showTime={true}
+                  ranking={ranking}
+                />
+              );
+            })}
           </div>
           
           {availablePlayers.length === 0 && (

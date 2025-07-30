@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Player, Position } from '@/types/sports';
 import { Badge } from '@/components/ui/badge';
+import { PlayerRank } from '@/utils/playerRanking';
 
 interface DraggablePlayerProps {
   player: Player;
@@ -8,6 +9,7 @@ interface DraggablePlayerProps {
   onPlayerSwap: (draggedPlayerId: string, targetPlayerId: string) => void;
   className?: string;
   showTime?: boolean;
+  ranking?: PlayerRank;
 }
 
 const formatTime = (seconds: number): string => {
@@ -21,7 +23,8 @@ export const DraggablePlayer = ({
   onDragStart, 
   onPlayerSwap,
   className = "", 
-  showTime = false 
+  showTime = false,
+  ranking
 }: DraggablePlayerProps) => {
   
   const handleDragStart = (e: React.DragEvent) => {
@@ -87,10 +90,23 @@ export const DraggablePlayer = ({
           ? 'bg-player-active/8 text-player-text border border-player-border/40' 
           : 'bg-card hover:bg-muted/30 border border-player-border/60'
         }
+        ${ranking?.rank ? `ring-1 ring-rank-${ranking.rank}/30` : ''}
         rounded-lg p-md card-elevated
         ${className}
       `}
     >
+      {/* Ranking Indicator */}
+      {ranking?.rank && (
+        <div 
+          className={`absolute top-1 left-1 w-2 h-2 rounded-full bg-rank-${ranking.rank} opacity-75 shadow-sm`}
+          title={
+            ranking.rank.startsWith('most') 
+              ? `High game time: Rank ${ranking.rank.split('-')[1]} of highest players`
+              : `Low game time: Rank ${ranking.rank.split('-')[1]} of lowest players`
+          }
+        />
+      )}
+      
       {/* Minimal Position Indicator */}
       {isActive && player.currentPosition && (
         <div className={`position-indicator position-${player.currentPosition}`} />

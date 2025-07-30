@@ -49,6 +49,22 @@ export const useGameState = () => {
           const newQuarterTime = prev.quarterTime + 1;
           const newTotalTime = prev.totalTime + 1;
           
+          // Check if quarter time has reached 15 minutes (900 seconds)
+          if (newQuarterTime >= QUARTER_DURATION) {
+            // Auto-pause at end of quarter
+            toast({
+              title: "Quarter Complete",
+              description: `Quarter ${prev.currentQuarter} finished (15 minutes)`,
+            });
+            
+            return {
+              ...prev,
+              isPlaying: false,
+              quarterTime: QUARTER_DURATION,
+              totalTime: newTotalTime,
+            };
+          }
+          
           // Update player time stats
           const updatedPlayers = prev.players.map(player => {
             if (player.isActive && player.currentPosition) {
