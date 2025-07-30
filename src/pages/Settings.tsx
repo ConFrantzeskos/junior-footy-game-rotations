@@ -230,24 +230,6 @@ const Settings = () => {
             )}
           </div>
         </div>
-
-        {/* Preferred position selector */}
-        <div className="mt-4 pt-4 border-t">
-          <Label className="text-xs font-medium">Update Preferred Position</Label>
-          <Select 
-            value={player.attributes.preferredPosition || ''} 
-            onValueChange={(value) => updatePlayerPreferredPosition(player.id, value as Position)}
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder="Select preferred position" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="forward">Forward</SelectItem>
-              <SelectItem value="midfield">Midfield</SelectItem>
-              <SelectItem value="defence">Defence</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </Card>
     );
   };
@@ -352,6 +334,22 @@ const Settings = () => {
                             onChange={(e) => updatePlayerName(player.id, e.target.value)}
                             className="font-medium h-8"
                           />
+                        </div>
+                        <div className="w-32">
+                          <Label className="text-xs">Preferred Position</Label>
+                          <Select 
+                            value={player.attributes.preferredPosition || ''} 
+                            onValueChange={(value) => updatePlayerPreferredPosition(player.id, value as Position)}
+                          >
+                            <SelectTrigger className="h-8 text-sm">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="forward">Forward</SelectItem>
+                              <SelectItem value="midfield">Midfield</SelectItem>
+                              <SelectItem value="defence">Defence</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="text-sm text-muted-foreground min-w-[120px] text-right">
                           <div>Current: {Math.floor(Object.values(player.timeStats).reduce((a, b) => a + b, 0) / 60)}m</div>
