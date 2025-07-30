@@ -29,12 +29,29 @@ export class EnhancedRotationEngine {
     const context = this.buildContext();
     const allSuggestions: RotationSuggestion[] = [];
 
+    // Debug: Log current game state
+    console.log('🔄 Rotation Engine Analysis:', {
+      currentTime: this.currentTime,
+      quarterTime: this.gameState.quarterTime,
+      totalPlayers: this.gameState.players.length,
+      activePlayers: Object.values(this.gameState.activePlayersByPosition).flat().length,
+      benchPlayers: this.gameState.players.filter(p => !this.isPlayerActive(p.id)).length
+    });
+
     // Unified intelligent scoring system
     const lateArrivalSuggestions = this.analyzeLateArrivals(context);
     const equitySuggestions = this.analyzeTimeEquity(context);
     const fatigueSuggestions = this.analyzeFatigue(context);
     const inclusionSuggestions = this.analyzeInclusion(context);
     const positionSuggestions = this.analyzePositionExperience(context);
+
+    console.log('📋 Suggestion counts:', {
+      lateArrivals: lateArrivalSuggestions.length,
+      equity: equitySuggestions.length,
+      fatigue: fatigueSuggestions.length,
+      inclusion: inclusionSuggestions.length,
+      position: positionSuggestions.length
+    });
 
     allSuggestions.push(...lateArrivalSuggestions, ...equitySuggestions, ...fatigueSuggestions, ...inclusionSuggestions, ...positionSuggestions);
 
@@ -43,6 +60,8 @@ export class EnhancedRotationEngine {
 
     // Unified scoring and ranking
     const rankedSuggestions = this.applyUnifiedScoring(filteredSuggestions, context);
+
+    console.log('✅ Final suggestions:', rankedSuggestions.length);
 
     return {
       suggestions: rankedSuggestions.slice(0, 3), // Top 3 suggestions
@@ -66,10 +85,15 @@ export class EnhancedRotationEngine {
     const suggestions: RotationSuggestion[] = [];
     const positions = ['forward', 'midfield', 'defence'] as const;
     
-    // Find players who haven't played at all (late arrivals)
-    const lateArrivals = this.gameState.players.filter(p => 
-      !this.isPlayerActive(p.id) && this.getTotalPlayTime(p) === 0
-    );
+    // Find players who haven't played at all (late arrivals or bench players)
+    const benchPlayers = this.gameState.players.filter(p => !this.isPlayerActive(p.id));
+    const lateArrivals = benchPlayers.filter(p => this.getTotalPlayTime(p) === 0);
+
+    console.log('🚁 Late arrivals analysis:', {
+      totalBench: benchPlayers.length,
+      lateArrivals: lateArrivals.length,
+      lateArrivalNames: lateArrivals.map(p => p.name)
+    });
 
     for (const lateArrival of lateArrivals) {
       // Find best position to substitute them into
@@ -82,7 +106,14 @@ export class EnhancedRotationEngine {
           .filter(Boolean)
           .sort((a, b) => this.getCurrentStint(b!) - this.getCurrentStint(a!))[0];
 
-        if (mostPlayedPlayer && this.getCurrentStint(mostPlayedPlayer) > 5 * 60) { // 5+ minutes
+        if (mostPlayedPlayer && this.getCurrentStint(mostPlayedPlayer) > 30) { // Lower threshold: 30 seconds
+          console.log('✅ Creating late arrival suggestion:', {
+            position,
+            playerIn: lateArrival.name,
+            playerOut: mostPlayedPlayer.name,
+            currentStint: this.getCurrentStint(mostPlayedPlayer)
+          });
+          
           suggestions.push({
             id: `late-arrival-${position}-${Date.now()}`,
             type: 'swap',
