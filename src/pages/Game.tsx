@@ -5,6 +5,7 @@ import { DraggablePlayer } from '@/components/DraggablePlayer';
 import PlannedSubstitutions from '@/components/PlannedSubstitutions';
 import PlayerContextMenu from '@/components/PlayerContextMenu';
 import AutoRotationSuggestions from '@/components/AutoRotationSuggestions';
+import SeasonStats from '@/components/SeasonStats';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
@@ -37,9 +38,12 @@ const Game = () => {
     addPlannedSubstitution,
     removePlannedSubstitution,
     executePlannedSubstitution,
+    completeGame,
+    startNewGame,
   } = useGameState();
 
-  const { players, activePlayersByPosition, isPlaying, currentQuarter, quarterTime, totalTime, plannedSubstitutions } = gameState;
+  const { players, activePlayersByPosition, isPlaying, currentQuarter, quarterTime, totalTime, 
+          plannedSubstitutions, currentSeason, matchDay, gameDate, opponent, venue, gameCompleted } = gameState;
   
   // Calculate player rankings based on total game time
   const playerRankings = calculatePlayerRankings(players);
@@ -122,11 +126,28 @@ const Game = () => {
           currentQuarter={currentQuarter}
           quarterTime={quarterTime}
           totalTime={totalTime}
+          gameCompleted={gameCompleted}
+          currentSeason={currentSeason}
+          matchDay={matchDay}
+          gameDate={gameDate}
+          opponent={opponent}
+          venue={venue}
           onStart={startGame}
           onPause={pauseGame}
           onNextQuarter={nextQuarter}
           onReset={resetGame}
+          onCompleteGame={completeGame}
+          onStartNewGame={startNewGame}
         />
+
+        {/* Season Statistics */}
+        <div className="mb-6">
+          <SeasonStats 
+            players={players}
+            currentMatchDay={matchDay}
+            currentSeason={currentSeason}
+          />
+        </div>
 
         {/* Planned Substitutions Queue */}
         <div className="mb-6">

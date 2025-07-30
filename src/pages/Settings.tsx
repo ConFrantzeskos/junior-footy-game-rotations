@@ -8,6 +8,7 @@ import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Player } from '@/types/sports';
 import { toast } from '@/hooks/use-toast';
+import { createNewPlayer, migratePlayerToSeasonFormat } from '@/utils/seasonManager';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -18,18 +19,15 @@ const Settings = () => {
   useEffect(() => {
     const savedPlayers = localStorage.getItem('players');
     if (savedPlayers) {
-      setPlayers(JSON.parse(savedPlayers));
+      const parsedPlayers = JSON.parse(savedPlayers);
+      // Migrate old players to new season format
+      const migratedPlayers = parsedPlayers.map(migratePlayerToSeasonFormat);
+      setPlayers(migratedPlayers);
     } else {
-      // Initialize with some default players
-      const defaultPlayers: Player[] = Array.from({ length: 25 }, (_, i) => ({
-        id: `player-${i + 1}`,
-        name: `Player ${i + 1}`,
-        isActive: false,
-        currentPosition: null,
-        lastInterchangeTime: 0,
-         timeStats: { forward: 0, midfield: 0, defence: 0 },
-         quarterStats: {},
-      }));
+      // Initialize with some default players using new format
+      const defaultPlayers: Player[] = Array.from({ length: 25 }, (_, i) => 
+        createNewPlayer(`Player ${i + 1}`, `player-${i + 1}`)
+      );
       setPlayers(defaultPlayers);
     }
   }, []);
@@ -53,15 +51,7 @@ const Settings = () => {
       return;
     }
 
-    const newPlayer: Player = {
-      id: `player-${Date.now()}`,
-      name: newPlayerName.trim(),
-      isActive: false,
-      currentPosition: null,
-      lastInterchangeTime: 0,
-       timeStats: { forward: 0, midfield: 0, defence: 0 },
-       quarterStats: {},
-    };
+    const newPlayer: Player = createNewPlayer(newPlayerName);
 
     setPlayers([...players, newPlayer]);
     setNewPlayerName('');
@@ -106,17 +96,18 @@ const Settings = () => {
       isActive: false,
       currentPosition: null,
       lastInterchangeTime: 0,
-        timeStats: { forward: 0, midfield: 0, defence: 0 },
-        quarterStats: {},
-      }));
-      setPlayers(resetPlayers);
-      localStorage.setItem('players', JSON.stringify(resetPlayers));
-      localStorage.removeItem('gameState');
-      
-      toast({
-        title: "All Stats Reset",
-        description: "All player statistics have been cleared",
-      });
+      timeStats: { forward: 0, midfield: 0, defence: 0 },
+      quarterStats: {},
+      // Keep season stats intact - only reset current game
+    }));
+    setPlayers(resetPlayers);
+    localStorage.setItem('players', JSON.stringify(resetPlayers));
+    localStorage.removeItem('gameState');
+    
+    toast({
+      title: "Current Game Stats Reset",
+      description: "Current game statistics cleared. Season stats preserved.",
+    });
   };
 
   return (
@@ -213,6 +204,10 @@ const Settings = () => {
                     </div>
                     <div className="text-sm text-muted-foreground min-w-[80px] text-right">
                       {Math.floor(Object.values(player.timeStats).reduce((a, b) => a + b, 0) / 60)}m
+                      <br />
+                      <span className="text-xs opacity-75">
+                        S: {Math.floor(player.seasonStats.totalGameTime / 60)}m
+                      </span>
                     </div>
                     <Button
                       onClick={() => removePlayer(player.id)}

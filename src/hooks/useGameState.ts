@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Player, Position, GameState, PlannedSubstitution } from '@/types/sports';
 import { toast } from '@/hooks/use-toast';
+import { migratePlayerToSeasonFormat, completeGameForPlayer } from '@/utils/seasonManager';
 
 const QUARTER_DURATION = 15 * 60; // 15 minutes in seconds
 const MAX_PLAYERS_PER_POSITION = 6;
@@ -19,27 +20,34 @@ export const useGameState = () => {
       
       // Ensure all players have updated structure
       if (parsedState.players) {
-        parsedState.players = parsedState.players.map((player: any) => ({
-          ...player,
-          // Migrate currentPosition from "defense" to "defence"
-          currentPosition: player.currentPosition === 'defense' ? 'defence' : player.currentPosition,
-          timeStats: {
-            forward: player.timeStats?.forward || 0,
-            midfield: player.timeStats?.midfield || 0,
-            defence: player.timeStats?.defence || player.timeStats?.defense || 0,
-          },
-          quarterStats: player.quarterStats || {},
-          guernseyNumber: player.guernseyNumber || player.jerseyNumber,
-        }));
+        parsedState.players = parsedState.players.map(migratePlayerToSeasonFormat);
+      }
+      
+      // Add missing season fields if they don't exist
+      if (!parsedState.currentSeason) {
+        parsedState.currentSeason = new Date().getFullYear();
+      }
+      if (!parsedState.matchDay) {
+        parsedState.matchDay = 1;
+      }
+      if (!parsedState.gameDate) {
+        parsedState.gameDate = new Date().toISOString().split('T')[0];
+      }
+      if (parsedState.gameCompleted === undefined) {
+        parsedState.gameCompleted = false;
       }
       
       return parsedState;
     }
     return {
+      currentSeason: new Date().getFullYear(),
+      matchDay: 1,
+      gameDate: new Date().toISOString().split('T')[0],
       isPlaying: false,
       currentQuarter: 1,
       quarterTime: 0,
       totalTime: 0,
+      gameCompleted: false,
       players: [],
       activePlayersByPosition: {
         forward: [],
@@ -55,12 +63,13 @@ export const useGameState = () => {
     localStorage.setItem('gameState', JSON.stringify(gameState));
   }, [gameState]);
 
-  // Load players from localStorage
+  // Load players from localStorage and migrate if needed
   useEffect(() => {
     const savedPlayers = localStorage.getItem('players');
     if (savedPlayers && gameState.players.length === 0) {
       const players = JSON.parse(savedPlayers);
-      setGameState(prev => ({ ...prev, players }));
+      const migratedPlayers = players.map(migratePlayerToSeasonFormat);
+      setGameState(prev => ({ ...prev, players: migratedPlayers }));
     }
   }, [gameState.players.length]);
 
@@ -432,6 +441,72 @@ export const useGameState = () => {
     });
   }, []);
 
+  const completeGame = useCallback((result?: 'win' | 'loss' | 'draw', opponent?: string) => {
+    setGameState(prev => {
+      // Complete the game for all players and save to season history
+      const completedPlayers = prev.players.map(player => 
+        completeGameForPlayer(
+          player, 
+          prev.matchDay, 
+          prev.gameDate,
+          opponent,
+          prev.venue,
+          result
+        )
+      );
+
+      // Save updated players to localStorage
+      localStorage.setItem('players', JSON.stringify(completedPlayers));
+
+      toast({
+        title: "Game Completed",
+        description: `Match Day ${prev.matchDay} stats saved to season history`,
+      });
+
+      return {
+        ...prev,
+        players: completedPlayers,
+        gameCompleted: true,
+        isPlaying: false,
+      };
+    });
+  }, []);
+
+  const startNewGame = useCallback((matchDay?: number, opponent?: string, venue?: 'home' | 'away') => {
+    setGameState(prev => ({
+      ...prev,
+      matchDay: matchDay || prev.matchDay + 1,
+      gameDate: new Date().toISOString().split('T')[0],
+      opponent,
+      venue,
+      isPlaying: false,
+      currentQuarter: 1,
+      quarterTime: 0,
+      totalTime: 0,
+      gameCompleted: false,
+      // Reset all current game stats but keep season data
+      players: prev.players.map(player => ({
+        ...player,
+        isActive: false,
+        currentPosition: null,
+        lastInterchangeTime: 0,
+        timeStats: { forward: 0, midfield: 0, defence: 0 },
+        quarterStats: {},
+      })),
+      activePlayersByPosition: {
+        forward: [],
+        midfield: [],
+        defence: [],
+      },
+      plannedSubstitutions: [],
+    }));
+    
+    toast({
+      title: "New Game Started",
+      description: `Match Day ${matchDay || gameState.matchDay + 1} is ready`,
+    });
+  }, [gameState.matchDay]);
+
   return {
     gameState,
     togglePlayer,
@@ -445,5 +520,7 @@ export const useGameState = () => {
     addPlannedSubstitution,
     removePlannedSubstitution,
     executePlannedSubstitution,
+    completeGame,
+    startNewGame,
   };
 };
