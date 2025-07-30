@@ -45,7 +45,8 @@ export default {
 				player: {
 					active: 'hsl(var(--player-active))',
 					inactive: 'hsl(var(--player-inactive))',
-					text: 'hsl(var(--player-text))'
+					text: 'hsl(var(--player-text))',
+					border: 'hsl(var(--player-border))'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -82,6 +83,14 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			fontFamily: {
+				'system': ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+			},
+			boxShadow: {
+				'soft': 'var(--shadow-soft)',
+				'elevated': 'var(--shadow-elevated)',
+				'floating': 'var(--shadow-floating)',
 			},
 			keyframes: {
 				'accordion-down': {

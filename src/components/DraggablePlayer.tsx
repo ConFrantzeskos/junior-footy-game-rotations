@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Player, Position } from '@/types/sports';
 import { Badge } from '@/components/ui/badge';
 
@@ -22,9 +23,16 @@ export const DraggablePlayer = ({
   className = "", 
   showTime = false 
 }: DraggablePlayerProps) => {
+  const [showDetails, setShowDetails] = useState(false);
+  
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('text/plain', player.id);
     onDragStart(player.id, player.currentPosition || undefined);
+    e.currentTarget.classList.add('drag-lift');
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove('drag-lift');
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -41,56 +49,75 @@ export const DraggablePlayer = ({
     e.preventDefault();
   };
 
+  const handleClick = () => {
+    if (showTime) {
+      setShowDetails(!showDetails);
+    }
+  };
+
   const isActive = player.isActive;
-  const positionColors = {
-    forward: 'bg-position-forward',
-    midfield: 'bg-position-midfield',
-    defense: 'bg-position-defense',
+  const totalTime = player.timeStats.forward + player.timeStats.midfield + player.timeStats.defense;
+
+  const getPositionBorderColor = () => {
+    if (!isActive || !player.currentPosition) return '';
+    const colors = {
+      forward: 'border-l-position-forward',
+      midfield: 'border-l-position-midfield', 
+      defense: 'border-l-position-defense',
+    };
+    return colors[player.currentPosition];
   };
 
   return (
     <div
       draggable
       onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
+      onClick={handleClick}
       className={`
-        cursor-grab active:cursor-grabbing p-2 rounded-lg border transition-all duration-200
+        player-card cursor-grab active:cursor-grabbing
         ${isActive 
-          ? `${positionColors[player.currentPosition!]} text-white border-transparent` 
-          : 'bg-white hover:bg-muted border-border'
+          ? `bg-player-active/10 text-player-text border-l-4 ${getPositionBorderColor()} border-y border-r border-player-border` 
+          : 'bg-card hover:bg-muted/50 border border-player-border'
         }
+        rounded-lg p-3 card-elevated
+        ${showTime ? 'cursor-pointer' : ''}
         ${className}
       `}
     >
-      <div className="flex items-center justify-between">
-        <span className="font-medium text-sm truncate">{player.name}</span>
+      <div className="space-y-1">
+        <div className="font-medium text-base font-system">{player.name}</div>
+        
+        {isActive && player.currentPosition && (
+          <div className="text-xs text-muted-foreground capitalize font-medium">
+            {player.currentPosition}
+          </div>
+        )}
+        
+        {showTime && totalTime > 0 && (
+          <div className="text-xs text-muted-foreground">
+            Total: {formatTime(totalTime)}
+          </div>
+        )}
+        
+        {showTime && showDetails && (
+          <div className="mt-2 space-y-1 animate-accordion-down">
+            <div className="flex gap-1 flex-wrap">
+              <Badge variant="outline" className="text-xs px-2 py-0.5" title="Forward time">
+                F: {formatTime(player.timeStats.forward)}
+              </Badge>
+              <Badge variant="outline" className="text-xs px-2 py-0.5" title="Midfield time">
+                M: {formatTime(player.timeStats.midfield)}
+              </Badge>
+              <Badge variant="outline" className="text-xs px-2 py-0.5" title="Defense time">
+                D: {formatTime(player.timeStats.defense)}
+              </Badge>
+            </div>
+          </div>
+        )}
       </div>
-      {isActive && player.currentPosition && (
-        <div className="text-xs opacity-80 capitalize">
-          {player.currentPosition}
-        </div>
-      )}
-      {showTime && (
-        <div className="space-y-1">
-          <div className="flex gap-1">
-            <Badge variant="outline" className="text-xs px-1 py-0" title="Forward time">
-              F: {formatTime(player.timeStats.forward)}
-            </Badge>
-            <Badge variant="outline" className="text-xs px-1 py-0" title="Midfield time">
-              M: {formatTime(player.timeStats.midfield)}
-            </Badge>
-            <Badge variant="outline" className="text-xs px-1 py-0" title="Defense time">
-              D: {formatTime(player.timeStats.defense)}
-            </Badge>
-          </div>
-          <div className="flex justify-center">
-            <Badge variant="secondary" className="text-xs px-1 py-0" title="Total time played">
-              Total: {formatTime(player.timeStats.forward + player.timeStats.midfield + player.timeStats.defense)}
-            </Badge>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

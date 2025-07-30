@@ -30,49 +30,49 @@ export const GameHeader = ({
   onReset,
 }: GameHeaderProps) => {
   return (
-    <Card className="p-4 mb-6 bg-field-grass border-field-line">
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+    <Card className="p-8 mb-8 card-elevated">
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
         <div className="text-center lg:text-left">
-          <h1 className="text-2xl font-bold text-field-line mb-2">
+          <h1 className="text-3xl font-bold font-system mb-4">
             Sports Rotation Tracker
           </h1>
-          <div className="flex gap-6 text-field-line">
-            <div>
-              <span className="text-sm opacity-80">Quarter:</span>
-              <span className="ml-2 text-xl font-bold">{currentQuarter}/4</span>
+          <div className="flex flex-col sm:flex-row gap-6 text-foreground">
+            <div className="flex flex-col items-center sm:items-start">
+              <span className="text-sm text-muted-foreground font-medium">Quarter</span>
+              <span className="text-2xl font-bold font-system">{currentQuarter}/4</span>
             </div>
-            <div>
-              <span className="text-sm opacity-80">Quarter Time:</span>
-              <span className="ml-2 text-xl font-mono">{formatTime(quarterTime)}</span>
+            <div className="flex flex-col items-center sm:items-start">
+              <span className="text-sm text-muted-foreground font-medium">Quarter Time</span>
+              <span className="text-2xl font-mono font-bold">{formatTime(quarterTime)}</span>
             </div>
-            <div>
-              <span className="text-sm opacity-80">Total Time:</span>
-              <span className="ml-2 text-xl font-mono">{formatTime(totalTime)}</span>
+            <div className="flex flex-col items-center sm:items-start">
+              <span className="text-sm text-muted-foreground font-medium">Total Time</span>
+              <span className="text-2xl font-mono font-bold">{formatTime(totalTime)}</span>
             </div>
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-3">
           {isPlaying ? (
-            <Button onClick={onPause} variant="secondary" size="lg">
+            <Button onClick={onPause} variant="secondary" size="lg" className="card-elevated">
               <Pause className="w-5 h-5 mr-2" />
               Pause
             </Button>
           ) : (
-            <Button onClick={onStart} variant="default" size="lg">
+            <Button onClick={onStart} variant="default" size="lg" className="card-elevated">
               <Play className="w-5 h-5 mr-2" />
               Start
             </Button>
           )}
           
           {currentQuarter < 4 && (
-            <Button onClick={onNextQuarter} variant="secondary" size="lg">
+            <Button onClick={onNextQuarter} variant="secondary" size="lg" className="card-elevated">
               <SkipForward className="w-5 h-5 mr-2" />
               Next Quarter
             </Button>
           )}
           
-          <Button onClick={onReset} variant="destructive" size="lg">
+          <Button onClick={onReset} variant="destructive" size="lg" className="card-elevated">
             <RotateCcw className="w-5 h-5 mr-2" />
             Reset
           </Button>

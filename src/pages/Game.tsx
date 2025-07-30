@@ -39,9 +39,9 @@ const Game = () => {
 
   if (players.length === 0) {
     return (
-      <div className="min-h-screen bg-field-grass p-4 flex items-center justify-center">
-        <div className="text-center bg-white rounded-lg p-8 shadow-lg">
-          <h2 className="text-2xl font-bold mb-4">No Players Configured</h2>
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center bg-card rounded-lg p-8 card-elevated">
+          <h2 className="text-2xl font-bold mb-4 font-system">No Players Configured</h2>
           <p className="text-muted-foreground mb-6">
             Please set up your team roster before starting a game.
           </p>
@@ -55,14 +55,14 @@ const Game = () => {
   }
 
   return (
-    <div className="min-h-screen bg-field-grass p-4">
-      <div className="container mx-auto max-w-6xl">
-        <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen bg-background p-6">
+      <div className="container mx-auto max-w-7xl">
+        <div className="flex justify-between items-center mb-8">
           <div></div>
           <Button 
             onClick={() => navigate('/settings')} 
             variant="outline"
-            className="bg-white hover:bg-gray-50"
+            className="card-elevated"
           >
             <Settings className="w-4 h-4 mr-2" />
             Settings
@@ -80,7 +80,7 @@ const Game = () => {
           onReset={resetGame}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <PositionSection
             title="FORWARD"
             position="forward"
@@ -94,18 +94,20 @@ const Game = () => {
             maxPlayers={6}
           />
           
-          <PositionSection
-            title="MIDFIELD"
-            position="midfield"
-            players={players}
-            activePlayers={activePlayersByPosition.midfield}
-            onTogglePlayer={togglePlayer}
-            onMovePlayer={movePlayer}
-            onRemovePlayer={removePlayer}
-            onDragStart={handleDragStart}
-            onPlayerSwap={swapPlayers}
-            maxPlayers={6}
-          />
+          <div className="lg:col-span-1 lg:scale-110 lg:mx-4">
+            <PositionSection
+              title="MIDFIELD"
+              position="midfield"
+              players={players}
+              activePlayers={activePlayersByPosition.midfield}
+              onTogglePlayer={togglePlayer}
+              onMovePlayer={movePlayer}
+              onRemovePlayer={removePlayer}
+              onDragStart={handleDragStart}
+              onPlayerSwap={swapPlayers}
+              maxPlayers={6}
+            />
+          </div>
           
           <PositionSection
             title="DEFENSE"
@@ -121,30 +123,30 @@ const Game = () => {
           />
         </div>
 
-        {/* Team Roster Section */}
-        <Card className="mt-6 p-6 bg-white/90 backdrop-blur-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold">Interchange</h3>
-            <div className="text-sm text-muted-foreground">
+        {/* Interchange Section */}
+        <Card className="mt-8 p-6 card-elevated">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold font-system">Interchange</h3>
+            <div className="text-sm text-muted-foreground font-medium">
               Players on Field: {activePlayersByPosition.forward.length + activePlayersByPosition.midfield.length + activePlayersByPosition.defense.length}/18
             </div>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {availablePlayers.map((player) => (
               <DraggablePlayer
                 key={player.id}
                 player={player}
                 onDragStart={handleDragStart}
                 onPlayerSwap={swapPlayers}
-                className="min-h-[60px]"
+                className="min-h-[80px]"
                 showTime={true}
               />
             ))}
           </div>
           
           {availablePlayers.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-12 text-muted-foreground">
               All players are currently on the field
             </div>
           )}
