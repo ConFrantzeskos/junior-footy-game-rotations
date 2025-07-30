@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { ArrowLeft, Plus, Trash2, Save, TrendingUp, Award, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Player, Position } from '@/types/sports';
@@ -141,138 +141,113 @@ const Settings = () => {
 
   const teamAnalytics = getTeamAnalytics(players);
 
-  const PlayerAttributesCard = ({ player }: { player: Player }) => {
-    const insights = generatePlayerInsights(player, players);
+  const PlayerCard = ({ player }: { player: Player }) => {
     const summary = getPlayerSeasonSummary(player);
+    
+    // Prepare pie chart data
+    const positionData = [
+      { name: 'Forward', value: player.seasonStats.positionTotals.forward, color: '#ef4444' },
+      { name: 'Midfield', value: player.seasonStats.positionTotals.midfield, color: '#eab308' },
+      { name: 'Defence', value: player.seasonStats.positionTotals.defence, color: '#3b82f6' },
+    ].filter(item => item.value > 0); // Only show positions with playing time
 
     return (
-      <Card className="p-4 bg-gray-50">
+      <Card className="p-4 bg-white">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="font-semibold">{player.name}</h3>
+            <h3 className="font-semibold text-lg">{player.name}</h3>
             <div className="text-sm text-muted-foreground">
-              #{player.guernseyNumber || 'N/A'} • {summary.gamesPlayed} games
+              #{player.guernseyNumber || 'N/A'} • {summary.gamesPlayed} games played
             </div>
           </div>
           <div className="text-right text-sm">
-            <div className="font-medium">{summary.totalTime}m total</div>
-            <div className="text-muted-foreground">{summary.averageTime}m avg</div>
+            <div className="font-medium text-lg">{summary.totalTime}m</div>
+            <div className="text-muted-foreground">total season</div>
           </div>
         </div>
 
-        <Tabs defaultValue="attributes" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="attributes">Attributes</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="recommendations">Tips</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="attributes" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-xs font-medium">Fitness</Label>
-                <Slider
-                  value={[player.attributes.fitness]}
-                  onValueChange={([value]) => updatePlayerAttribute(player.id, 'fitness', value)}
-                  max={10}
-                  min={1}
-                  step={1}
-                  className="mt-1"
-                />
-                <div className="text-xs text-muted-foreground text-center">{player.attributes.fitness}/10</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Position breakdown pie chart */}
+          <div>
+            <h4 className="font-medium mb-2 text-sm">Positions Played</h4>
+            {positionData.length > 0 ? (
+              <div className="h-32">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={positionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={20}
+                      outerRadius={50}
+                      dataKey="value"
+                    >
+                      {positionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: number) => [`${Math.floor(value / 60)}m`, 'Time']}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-              
-              <div>
-                <Label className="text-xs font-medium">Speed</Label>
-                <Slider
-                  value={[player.attributes.speed]}
-                  onValueChange={([value]) => updatePlayerAttribute(player.id, 'speed', value)}
-                  max={10}
-                  min={1}
-                  step={1}
-                  className="mt-1"
-                />
-                <div className="text-xs text-muted-foreground text-center">{player.attributes.speed}/10</div>
+            ) : (
+              <div className="h-32 flex items-center justify-center text-muted-foreground text-sm">
+                No game time yet
               </div>
-              
-              <div>
-                <Label className="text-xs font-medium">Endurance</Label>
-                <Slider
-                  value={[player.attributes.endurance]}
-                  onValueChange={([value]) => updatePlayerAttribute(player.id, 'endurance', value)}
-                  max={10}
-                  min={1}
-                  step={1}
-                  className="mt-1"
-                />
-                <div className="text-xs text-muted-foreground text-center">{player.attributes.endurance}/10</div>
-              </div>
-              
-              <div>
-                <Label className="text-xs font-medium">Versatility</Label>
-                <Slider
-                  value={[player.attributes.positionalVersatility]}
-                  onValueChange={([value]) => updatePlayerAttribute(player.id, 'positionalVersatility', value)}
-                  max={10}
-                  min={1}
-                  step={1}
-                  className="mt-1"
-                />
-                <div className="text-xs text-muted-foreground text-center">{player.attributes.positionalVersatility}/10</div>
-              </div>
+            )}
+          </div>
+
+          {/* Player stats */}
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Average per game:</span>
+              <span className="font-medium">{summary.averageTime}m</span>
             </div>
-            
-            <div>
-              <Label className="text-xs font-medium">Preferred Position</Label>
-              <Select 
-                value={player.attributes.preferredPosition || ''} 
-                onValueChange={(value) => updatePlayerPreferredPosition(player.id, value as Position)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select position" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="forward">Forward</SelectItem>
-                  <SelectItem value="midfield">Midfield</SelectItem>
-                  <SelectItem value="defence">Defence</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex justify-between">
+              <span>Current game:</span>
+              <span className="font-medium">
+                {Math.floor(Object.values(player.timeStats).reduce((a, b) => a + b, 0) / 60)}m
+              </span>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="analytics" className="mt-4">
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span>Consistency Score:</span>
-                <Badge variant="outline">{player.seasonStats.consistencyScore.toFixed(1)}/10</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span>Versatility Score:</span>
-                <Badge variant="outline">{player.seasonStats.versatilityScore.toFixed(1)}/10</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span>Most Played Position:</span>
-                <Badge>{summary.mostPlayedPosition}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span>Form Trend:</span>
-                <Badge variant={insights.formTrend === 'improving' ? 'default' : insights.formTrend === 'declining' ? 'destructive' : 'secondary'}>
-                  {insights.formTrend}
-                </Badge>
-              </div>
+            <div className="flex justify-between">
+              <span>Preferred position:</span>
+              <span className="font-medium capitalize">
+                {player.attributes.preferredPosition || 'Not set'}
+              </span>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="recommendations" className="mt-4">
-            <div className="space-y-2">
-              {insights.recommendations.map((rec, index) => (
-                <div key={index} className="text-sm p-2 bg-blue-50 rounded border-l-2 border-blue-200">
-                  {rec}
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+            {positionData.length > 0 && (
+              <div className="pt-2 border-t">
+                <div className="text-xs text-muted-foreground mb-1">Position breakdown:</div>
+                {positionData.map((pos) => (
+                  <div key={pos.name} className="flex justify-between text-xs">
+                    <span style={{ color: pos.color }}>● {pos.name}:</span>
+                    <span>{Math.floor(pos.value / 60)}m</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Preferred position selector */}
+        <div className="mt-4 pt-4 border-t">
+          <Label className="text-xs font-medium">Update Preferred Position</Label>
+          <Select 
+            value={player.attributes.preferredPosition || ''} 
+            onValueChange={(value) => updatePlayerPreferredPosition(player.id, value as Position)}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="Select preferred position" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="forward">Forward</SelectItem>
+              <SelectItem value="midfield">Midfield</SelectItem>
+              <SelectItem value="defence">Defence</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </Card>
     );
   };
@@ -411,7 +386,7 @@ const Settings = () => {
               
               <div className="grid gap-4 md:grid-cols-2">
                 {players.map((player) => (
-                  <PlayerAttributesCard key={player.id} player={player} />
+                  <PlayerCard key={player.id} player={player} />
                 ))}
               </div>
             </div>
