@@ -1,29 +1,62 @@
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Player } from '@/types/sports';
-import { generateAwardNominations, getCategoryColor, getIconComponent } from '@/utils/awardSystem';
-import { Trophy, Award, Sparkles } from 'lucide-react';
+import { generateAwardNominations, getCategoryColor, getIconComponent, generateAIAwardNominations } from "@/utils/awardSystem";
+import { Player } from "@/types/sports";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Trophy, Users, Target, Heart, TrendingUp, Sparkles, Loader2, RefreshCw, Award } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface AwardNominationsProps {
   players: Player[];
 }
 
-const AwardNominations = ({ players }: AwardNominationsProps) => {
-  const nominations = generateAwardNominations(players);
-  
-  if (nominations.length === 0) {
+export function AwardNominations({ players }: AwardNominationsProps) {
+  const [useAI, setUseAI] = useState(true);
+  const [aiNominations, setAiNominations] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const traditionalNominations = generateAwardNominations(players);
+
+  useEffect(() => {
+    if (useAI && players.length > 0) {
+      generateAINominations();
+    }
+  }, [useAI, players]);
+
+  const generateAINominations = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await generateAIAwardNominations(players, {
+        currentMatchDay: 10,
+        totalMatchDays: 16,
+        seasonNumber: 1
+      });
+      setAiNominations(result);
+    } catch (err) {
+      setError('Failed to generate AI nominations');
+      console.error('AI nominations error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const displayNominations = useAI && aiNominations ? aiNominations.nominations : traditionalNominations;
+
+  if (!useAI && traditionalNominations.length === 0) {
     return (
       <Card className="p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="flex flex-col items-center max-w-md mx-auto">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <Trophy className="w-8 h-8 text-primary" />
           </div>
-          <h3 className="text-xl font-bold mb-2">Season Awards</h3>
-          <p className="text-muted-foreground mb-4">
+          <CardTitle className="text-xl mb-2">Season Awards</CardTitle>
+          <CardDescription className="mb-4">
             Play a few games to start seeing award nominations for your players based on their performance and development!
-          </p>
+          </CardDescription>
           <div className="text-sm text-muted-foreground/80 space-y-1">
-            <p>Awards include: Best & Fairest, Most Versatile, Rising Star, Team Player, and more!</p>
+            <p>Awards include: Iron Person, Swiss Army Knife, Rising Star, Team Player, and more!</p>
             <p>Each award recognizes different aspects of junior footy development.</p>
           </div>
         </div>
@@ -43,108 +76,203 @@ const AwardNominations = ({ players }: AwardNominationsProps) => {
 
   return (
     <div className="space-y-6">
-      <Card className="p-6 bg-gradient-to-br from-sherrin-red/5 to-position-forward/5 border-sherrin-red/20">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-sherrin-red/10 flex items-center justify-center">
-            <Trophy className="w-5 h-5 text-sherrin-red" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold">Season Award Nominations</h2>
-            <p className="text-sm text-muted-foreground">
-              Recognizing excellence in junior Australian Rules Football
-            </p>
-          </div>
-        </div>
-        
-        <div className="bg-white/50 rounded-lg p-4">
-          <p className="text-sm text-foreground/80 leading-relaxed">
-            These awards celebrate the diverse ways players contribute to the team. From consistent performers 
-            to rising stars, every player has the opportunity to be recognized for their unique strengths and development.
-          </p>
-        </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-amber-500" />
+            Season Award Nominations
+            {useAI && <Sparkles className="h-4 w-4 text-purple-500" />}
+          </CardTitle>
+          <CardDescription className="flex items-center justify-between">
+            <span>
+              {useAI ? 'AI-powered personalized recognition' : 'Traditional award nominations'}
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={useAI ? "default" : "outline"}
+                size="sm"
+                onClick={() => setUseAI(true)}
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                AI Awards
+              </Button>
+              <Button
+                variant={!useAI ? "default" : "outline"}
+                size="sm"
+                onClick={() => setUseAI(false)}
+              >
+                Traditional
+              </Button>
+              {useAI && !isLoading && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={generateAINominations}
+                >
+                  <RefreshCw className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          </CardDescription>
+          {error && (
+            <div className="text-sm text-red-500 mt-2">
+              {error} - Showing traditional awards instead
+            </div>
+          )}
+        </CardHeader>
       </Card>
 
-      <div className="grid gap-6">
-        {nominations.map(({ player, awards }) => (
-          <Card key={player.id} className="p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-sherrin-red flex items-center justify-center text-white font-bold text-lg">
-                  {player.guernseyNumber || '?'}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold">{player.name}</h3>
-                  <div className="text-sm text-muted-foreground">
-                    {player.seasonStats.gamesCompleted} games • {Math.floor(player.seasonStats.totalGameTime / 60)}m total
+      {isLoading ? (
+        <Card className="p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-purple-500" />
+          <CardTitle className="mb-2">Generating AI Award Nominations</CardTitle>
+          <CardDescription>Analyzing player performance and creating personalized awards...</CardDescription>
+        </Card>
+      ) : displayNominations?.map((nomination: any, index: number) => {
+        // Handle both AI and traditional nomination formats
+        const player = useAI && aiNominations ? 
+          players.find(p => p.id === nomination.playerId) || { 
+            id: nomination.playerId, 
+            name: nomination.playerName, 
+            guernseyNumber: index + 1,
+            seasonStats: { gamesPlayed: 0, totalTimeOnField: 0 }
+          } : 
+          nomination.player;
+        
+        const awards = useAI && aiNominations ? nomination.awards : nomination.awards;
+
+        return (
+          <Card key={player.id || index} className="relative">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                    {player.guernseyNumber}
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">{player.name}</CardTitle>
+                    <div className="text-sm text-muted-foreground">
+                      {player.seasonStats?.gamesPlayed || player.seasonStats?.gamesCompleted || 0} games • {Math.round((player.seasonStats?.totalTimeOnField || player.seasonStats?.totalGameTime || 0) / 60)} minutes total
+                    </div>
                   </div>
                 </div>
+                <Badge variant="secondary" className="text-xs">
+                  {awards.length} {awards.length === 1 ? 'Award' : 'Awards'}
+                </Badge>
               </div>
-              <Badge variant="secondary" className="bg-primary/10 text-primary">
-                {awards.length} nomination{awards.length > 1 ? 's' : ''}
-              </Badge>
-            </div>
-
-            <div className="space-y-3">
-              {awards.map((award) => {
-                const IconComponent = getIconComponent(award.icon);
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {awards.map((award: any, awardIndex: number) => {
+                const IconComponent = useAI && aiNominations ? 
+                  getIconComponent(award.iconName) : 
+                  getIconComponent(award.icon);
                 return (
-                  <div key={award.id} className={`rounded-lg border p-4 ${getCategoryColor(award.category)}`}>
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        <IconComponent className="w-5 h-5" />
+                  <div 
+                    key={awardIndex}
+                    className="flex items-start gap-3 p-3 rounded-lg border bg-card/50"
+                  >
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-full ${getCategoryColor(award.category)}`}>
+                      <IconComponent className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium text-sm">
+                          {useAI && aiNominations ? award.title : award.name}
+                        </h4>
+                        <Badge variant="outline" className="text-xs px-1 py-0">
+                          {award.category}
+                        </Badge>
+                        {useAI && aiNominations && award.confidence && (
+                          <Badge variant="outline" className="text-xs px-1 py-0">
+                            {award.confidence}
+                          </Badge>
+                        )}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold">{award.name}</h4>
-                          <div className="flex items-center gap-1 text-xs">
-                            {getCategoryIcon(award.category)}
-                            <span className="capitalize">{award.category}</span>
-                          </div>
-                        </div>
-                        <p className="text-sm opacity-90 mb-2">{award.description}</p>
-                        <p className="text-xs opacity-80 italic">{award.reasoning(player)}</p>
-                      </div>
+                      <p className="text-xs text-muted-foreground">{award.description}</p>
+                      <p className="text-xs font-medium text-primary">
+                        {useAI && aiNominations ? award.reasoning : award.reasoning(player)}
+                      </p>
                     </div>
                   </div>
                 );
               })}
-            </div>
+            </CardContent>
           </Card>
-        ))}
-      </div>
+        );
+      })}
 
-      <Card className="p-6 bg-muted/50">
-        <h3 className="font-semibold mb-3">About Junior Footy Awards</h3>
-        <div className="grid md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-          <div>
-            <h4 className="font-medium text-foreground mb-2">Award Categories</h4>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-3 h-3 text-sherrin-red" />
-                <span><strong>Performance:</strong> Outstanding on-field achievements</span>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Heart className="h-5 w-5 text-red-500" />
+            About Our Awards
+          </CardTitle>
+          <CardDescription>
+            {useAI && aiNominations ? 'AI-powered recognition philosophy' : 'Our recognition philosophy'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {useAI && aiNominations && (
+            <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
+              <h4 className="font-medium text-sm text-purple-800 mb-2">AI Season Summary</h4>
+              <p className="text-xs text-purple-700">{aiNominations.seasonSummary}</p>
+              {aiNominations.coachingInsights && (
+                <div className="mt-2">
+                  <h5 className="font-medium text-xs text-purple-800">Coaching Insights:</h5>
+                  <p className="text-xs text-purple-700">{aiNominations.coachingInsights}</p>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                <Target className="h-4 w-4" />
               </div>
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-3 h-3 text-position-midfield" />
-                <span><strong>Character:</strong> Positive attitude and sportsmanship</span>
+              <div>
+                <h4 className="font-medium text-sm">Performance</h4>
+                <p className="text-xs text-muted-foreground">Recognizing achievement and excellence in gameplay</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Award className="w-3 h-3 text-position-forward" />
-                <span><strong>Development:</strong> Growth and learning over the season</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <Heart className="h-4 w-4" />
               </div>
-              <div className="flex items-center gap-2">
-                <Award className="w-3 h-3 text-position-defence" />
-                <span><strong>Team:</strong> Contributing to team success and unity</span>
+              <div>
+                <h4 className="font-medium text-sm">Character</h4>
+                <p className="text-xs text-muted-foreground">Celebrating sportsmanship and positive attitude</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <TrendingUp className="h-4 w-4" />
+              </div>
+              <div>
+                <h4 className="font-medium text-sm">Development</h4>
+                <p className="text-xs text-muted-foreground">Honoring growth, learning, and improvement</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-purple-600">
+                <Users className="h-4 w-4" />
+              </div>
+              <div>
+                <h4 className="font-medium text-sm">Team</h4>
+                <p className="text-xs text-muted-foreground">Appreciating collaboration and team spirit</p>
               </div>
             </div>
           </div>
-          <div>
-            <h4 className="font-medium text-foreground mb-2">Recognition Philosophy</h4>
-            <p className="leading-relaxed">
-              These awards focus on celebrating effort, improvement, and positive contribution rather than just winning. 
-              Every player has unique strengths that deserve recognition.
+          <div className="pt-4 border-t">
+            <p className="text-sm text-muted-foreground">
+              {useAI ? 
+                'Our AI analyzes each player\'s unique journey, creating personalized recognition that celebrates individual growth, contribution, and development.' :
+                'We believe every player deserves recognition. Our awards focus on effort, improvement, and positive contribution rather than just winning. Every child\'s journey is celebrated.'
+              }
             </p>
           </div>
-        </div>
+        </CardContent>
       </Card>
     </div>
   );

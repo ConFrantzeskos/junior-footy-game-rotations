@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { ArrowLeft, Plus, Trash2, TrendingUp, Award, Target } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, TrendingUp, Award, Target, Brain, MessageSquare, User, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Player, Position } from '@/types/sports';
 import { toast } from '@/hooks/use-toast';
@@ -15,6 +15,8 @@ import { createNewPlayer, migratePlayerToSeasonFormat, getPlayerSeasonSummary } 
 import { generatePlayerInsights, getTeamAnalytics } from '@/utils/playerAnalytics';
 import { AppHeader } from '@/components/AppHeader';
 import AwardNominations from '@/components/AwardNominations';
+import { AICoachingAssistant } from '@/components/AICoachingAssistant';
+import { AIPlayerInsights } from '@/components/AIPlayerInsights';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ const Settings = () => {
   const [newPlayerGuernsey, setNewPlayerGuernsey] = useState<number | undefined>(undefined);
   const [newPlayerPosition, setNewPlayerPosition] = useState<Position | undefined>(undefined);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | undefined>();
 
   // Load players from localStorage on component mount
   useEffect(() => {
@@ -278,10 +281,12 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="roster" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-white">
+          <TabsList className="grid w-full grid-cols-6 bg-white">
             <TabsTrigger value="roster">Basic Roster</TabsTrigger>
             <TabsTrigger value="attributes">Player Attributes</TabsTrigger>
-            <TabsTrigger value="analytics">Award Nominations</TabsTrigger>
+            <TabsTrigger value="analytics">Awards</TabsTrigger>
+            <TabsTrigger value="insights">AI Insights</TabsTrigger>
+            <TabsTrigger value="assistant">AI Coach</TabsTrigger>
             <TabsTrigger value="settings">Advanced Settings</TabsTrigger>
           </TabsList>
 
@@ -434,6 +439,25 @@ const Settings = () => {
 
           <TabsContent value="analytics" className="mt-6">
             <AwardNominations players={players} />
+          </TabsContent>
+
+          <TabsContent value="insights" className="mt-6">
+            <AIPlayerInsights 
+              players={players}
+              selectedPlayerId={selectedPlayerId}
+              onPlayerSelect={setSelectedPlayerId}
+            />
+          </TabsContent>
+
+          <TabsContent value="assistant" className="mt-6">
+            <AICoachingAssistant 
+              players={players}
+              seasonData={{
+                currentMatchDay: 10,
+                totalMatchDays: 16,
+                seasonNumber: 1
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="settings" className="mt-6">
