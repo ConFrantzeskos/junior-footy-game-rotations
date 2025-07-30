@@ -18,6 +18,8 @@ const Settings = () => {
   const navigate = useNavigate();
   const [players, setPlayers] = useState<Player[]>([]);
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerGuernsey, setNewPlayerGuernsey] = useState<number | undefined>(undefined);
+  const [newPlayerPosition, setNewPlayerPosition] = useState<Position | undefined>(undefined);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
   // Load players from localStorage on component mount
@@ -56,10 +58,27 @@ const Settings = () => {
       return;
     }
 
-    const newPlayer: Player = createNewPlayer(newPlayerName);
+    // Check if guernsey number is already taken
+    if (newPlayerGuernsey && players.some(p => p.guernseyNumber === newPlayerGuernsey)) {
+      toast({
+        title: "Number Already Taken",
+        description: `Guernsey number ${newPlayerGuernsey} is already assigned to another player`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newPlayer: Player = createNewPlayer(newPlayerName, undefined, newPlayerGuernsey);
+    
+    // Set preferred position if selected
+    if (newPlayerPosition) {
+      newPlayer.attributes.preferredPosition = newPlayerPosition;
+    }
 
     setPlayers([...players, newPlayer]);
     setNewPlayerName('');
+    setNewPlayerGuernsey(undefined);
+    setNewPlayerPosition(undefined);
     
     toast({
       title: "Player Added",
@@ -270,9 +289,9 @@ const Settings = () => {
               {/* Add New Player */}
               <Card className="p-6 bg-white">
                 <h2 className="text-xl font-semibold mb-4">Add New Player</h2>
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <Label htmlFor="playerName">Player Name</Label>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="playerName">Player Name *</Label>
                     <Input
                       id="playerName"
                       value={newPlayerName}
@@ -282,18 +301,44 @@ const Settings = () => {
                       className="mt-1"
                     />
                   </div>
-                  <div className="flex items-end">
-                    <Button onClick={addPlayer} disabled={players.length >= 25}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Player
-                    </Button>
+                  <div>
+                    <Label htmlFor="playerGuernsey">Guernsey Number</Label>
+                    <Input
+                      id="playerGuernsey"
+                      type="number"
+                      min="1"
+                      max="99"
+                      value={newPlayerGuernsey || ''}
+                      onChange={(e) => setNewPlayerGuernsey(parseInt(e.target.value) || undefined)}
+                      placeholder="1-99"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Preferred Position</Label>
+                    <Select value={newPlayerPosition || ''} onValueChange={(value) => setNewPlayerPosition(value as Position)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select position" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="forward">Forward</SelectItem>
+                        <SelectItem value="midfield">Midfield</SelectItem>
+                        <SelectItem value="defence">Defence</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                <div className="mt-2 flex justify-between items-center text-sm text-muted-foreground">
-                  <span>Players: {players.length}/25</span>
-                  <Badge variant={players.length >= 25 ? "destructive" : "secondary"}>
-                    {25 - players.length} remaining
-                  </Badge>
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">
+                    <span>Players: {players.length}/25</span>
+                    <Badge variant={players.length >= 25 ? "destructive" : "secondary"} className="ml-2">
+                      {25 - players.length} remaining
+                    </Badge>
+                  </div>
+                  <Button onClick={addPlayer} disabled={players.length >= 25}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Player
+                  </Button>
                 </div>
               </Card>
 
