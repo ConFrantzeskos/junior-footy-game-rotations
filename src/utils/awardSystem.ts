@@ -1,6 +1,7 @@
 import { Player } from '@/types/sports';
 import { Award, Trophy, Target, Users, TrendingUp, Star, Heart, Zap, Clock, Shield, Repeat, Activity, Timer, RotateCcw, Gauge, Flame, Crown, Sparkles } from 'lucide-react';
 import { createElement } from 'react';
+import { AIAwardService } from '@/services/aiAwardService';
 
 interface AussieRulesAward {
   id: string;
@@ -233,6 +234,17 @@ export const generateAwardNominations = (players: Player[]): { player: Player; a
 
   return nominations.sort((a, b) => b.awards.length - a.awards.length);
 };
+
+export async function generateAIAwardNominations(
+  players: Player[],
+  seasonContext: {
+    currentMatchDay: number;
+    totalMatchDays: number;
+    seasonNumber: number;
+  }
+) {
+  return await AIAwardService.generateAwardNominations(players, seasonContext);
+}
 
 export const getCategoryColor = (category: string) => {
   const colors = {

@@ -2,3 +2,15 @@ project_id = "bhcnvmjqiwxnbbctkadj"
 
 [functions.ai-rotation-suggestions]
 verify_jwt = false
+
+[functions.ai-award-nominations]
+verify_jwt = false
+
+[functions.ai-player-insights]
+verify_jwt = false
+
+[functions.ai-season-analysis]
+verify_jwt = false
+
+[functions.ai-coaching-assistant]
+verify_jwt = false

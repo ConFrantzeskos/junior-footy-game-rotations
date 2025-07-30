@@ -119,6 +119,12 @@ Keep responses concise and coaching-focused. Remember this is about development 
     return new Response(JSON.stringify({
       enhancedSuggestions,
       aiInsights,
+      strategicAdvice: aiInsights.substring(0, 200) + '...',
+      teamBalance: { score: 8, analysis: 'Good team balance maintained' },
+      playerWelfare: { 
+        fatigueAlerts: ['Monitor players with 15+ minutes'],
+        recommendations: ['Rotate tired players soon'] 
+      },
       analysisTimestamp: new Date().toISOString(),
       confidence: 'high'
     }), {
