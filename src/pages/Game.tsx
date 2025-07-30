@@ -109,18 +109,6 @@ const Game = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="container mx-auto max-w-7xl">
-        <div className="flex justify-between items-center mb-8">
-          <div></div>
-          <Button 
-            onClick={() => navigate('/settings')} 
-            variant="outline"
-            className="card-elevated"
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Settings
-          </Button>
-        </div>
-
         <GameHeader
           isPlaying={isPlaying}
           currentQuarter={currentQuarter}
@@ -138,6 +126,7 @@ const Game = () => {
           onReset={resetGame}
           onCompleteGame={completeGame}
           onStartNewGame={startNewGame}
+          onNavigateToSettings={() => navigate('/settings')}
         />
 
         {/* Season Statistics */}
