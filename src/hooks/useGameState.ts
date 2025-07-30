@@ -258,23 +258,27 @@ export const useGameState = () => {
       
       if (!player1 || !player2) return prev;
 
-      const newActivePlayersByPosition = { ...prev.activePlayersByPosition };
+      // Create deep copy to avoid mutation issues
+      const newActivePlayersByPosition = {
+        forward: [...prev.activePlayersByPosition.forward],
+        midfield: [...prev.activePlayersByPosition.midfield],
+        defence: [...prev.activePlayersByPosition.defence],
+      };
       
       // Remove both players from all positions first
-      Object.keys(newActivePlayersByPosition).forEach(pos => {
-        newActivePlayersByPosition[pos as Position] = newActivePlayersByPosition[pos as Position]
-          .filter(id => id !== player1Id && id !== player2Id);
-      });
+      newActivePlayersByPosition.forward = newActivePlayersByPosition.forward.filter(id => id !== player1Id && id !== player2Id);
+      newActivePlayersByPosition.midfield = newActivePlayersByPosition.midfield.filter(id => id !== player1Id && id !== player2Id);
+      newActivePlayersByPosition.defence = newActivePlayersByPosition.defence.filter(id => id !== player1Id && id !== player2Id);
 
-      // Swap their positions
+      // Determine their new positions (swap)
       const player1NewPosition = player2.currentPosition;
       const player2NewPosition = player1.currentPosition;
 
-      // Add players to their new positions (with null safety)
-      if (player1NewPosition && newActivePlayersByPosition[player1NewPosition]) {
+      // Add players to their swapped positions
+      if (player1NewPosition) {
         newActivePlayersByPosition[player1NewPosition].push(player1Id);
       }
-      if (player2NewPosition && newActivePlayersByPosition[player2NewPosition]) {
+      if (player2NewPosition) {
         newActivePlayersByPosition[player2NewPosition].push(player2Id);
       }
 
