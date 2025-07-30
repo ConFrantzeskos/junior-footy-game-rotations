@@ -26,6 +26,12 @@
     /* Australian Rules Football Theming */
     --sherrin-red: 0 85% 55%;
     
+    /* Interchange Indicators */
+    --interchange-high: 0 60% 95%;      /* Light red background for high time players */
+    --interchange-high-border: 0 40% 85%; /* Red border for high time players */
+    --interchange-low: 213 60% 95%;     /* Light blue background for low time players */
+    --interchange-low-border: 213 40% 85%; /* Blue border for low time players */
+    
     /* Game Time Usage Indicators */
     --usage-high: 15 85% 55%;         /* >80% usage - Orange warning */
     --usage-low: 213 85% 55%;         /* <50% usage - Blue attention */

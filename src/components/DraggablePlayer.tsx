@@ -92,6 +92,8 @@ export const DraggablePlayer = ({
           : 'bg-card hover:bg-muted/30 border border-player-border/60'
         }
         ${ranking?.rank ? `ring-1 ring-rank-${ranking.rank}/30` : ''}
+        ${ranking?.rank === 'most-1' || ranking?.rank === 'most-2' ? 'bg-interchange-high border-interchange-high-border' : ''}
+        ${ranking?.rank === 'least-1' || ranking?.rank === 'least-2' ? 'bg-interchange-low border-interchange-low-border' : ''}
         rounded-lg p-md card-elevated
         ${className}
       `}
@@ -133,7 +135,7 @@ export const DraggablePlayer = ({
         {showTime && (
           <div className="space-y-xs">
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-              <span>Total: {formatTime(totalTime)}</span>
+              <span>{formatTime(totalTime)}</span>
               
               {/* Time since last interchange - for all players */}
               <span className="font-mono opacity-70">

@@ -25,6 +25,12 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				'sherrin-red': 'hsl(var(--sherrin-red))',
+				interchange: {
+					'high': 'hsl(var(--interchange-high))',
+					'high-border': 'hsl(var(--interchange-high-border))',
+					'low': 'hsl(var(--interchange-low))',
+					'low-border': 'hsl(var(--interchange-low-border))',
+				},
 				usage: {
 					high: 'hsl(var(--usage-high))',
 					low: 'hsl(var(--usage-low))',
