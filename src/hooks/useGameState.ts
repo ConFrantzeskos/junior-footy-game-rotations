@@ -121,44 +121,87 @@ export const useGameState = () => {
   // Load players from localStorage and sync updates
   useEffect(() => {
     const syncPlayers = () => {
+      console.log('🔄 Syncing players from storage...');
       const savedPlayers = localStorage.getItem('sport-rotation-players');
+      
       if (savedPlayers) {
-        const players = JSON.parse(savedPlayers);
-        const migratedPlayers = players.map(migratePlayerToSeasonFormat);
+        const rosterPlayers = JSON.parse(savedPlayers);
+        const migratedRosterPlayers = rosterPlayers.map(migratePlayerToSeasonFormat);
+        console.log('📋 Roster players loaded:', migratedRosterPlayers.length);
+        
         setGameState(prev => {
-          // Preserve current game state for existing players, but update names and other persistent data
-          const updatedPlayers = migratedPlayers.map(savedPlayer => {
-            const existingPlayer = prev.players.find(p => p.id === savedPlayer.id);
-            if (existingPlayer) {
-              return {
-                ...existingPlayer,
-                name: savedPlayer.name,
-                guernseyNumber: savedPlayer.guernseyNumber,
-                seasonStats: savedPlayer.seasonStats,
-              };
+          console.log('🎮 Current game players:', prev.players.length);
+          
+          // Create a Map for faster lookups
+          const rosterPlayerMap = new Map(migratedRosterPlayers.map(p => [p.id, p]));
+          const gamePlayerMap = new Map(prev.players.map(p => [p.id, p]));
+          
+          // Start with players that exist in both roster and game state
+          const syncedPlayers: Player[] = [];
+          
+          // Handle players in both roster and game state (merge properly)
+          migratedRosterPlayers.forEach(rosterPlayer => {
+            const gamePlayer = gamePlayerMap.get(rosterPlayer.id);
+            if (gamePlayer) {
+              // Merge: keep game state, update persistent data from roster
+              syncedPlayers.push({
+                ...gamePlayer,
+                name: rosterPlayer.name,
+                guernseyNumber: rosterPlayer.guernseyNumber,
+                seasonStats: rosterPlayer.seasonStats,
+                attributes: rosterPlayer.attributes,
+              });
+              console.log(`✅ Merged player: ${rosterPlayer.name}`);
+            } else {
+              // Player exists in roster but not in game - add them
+              syncedPlayers.push(rosterPlayer);
+              console.log(`➕ Added new player: ${rosterPlayer.name}`);
             }
-            return savedPlayer;
           });
-          return { ...prev, players: updatedPlayers };
+          
+          // Remove players from active positions if they're no longer in roster
+          const newActivePlayersByPosition = { ...prev.activePlayersByPosition };
+          let removedActivePlayer = false;
+          
+          Object.keys(newActivePlayersByPosition).forEach(position => {
+            const pos = position as Position;
+            newActivePlayersByPosition[pos] = newActivePlayersByPosition[pos].filter(playerId => {
+              const playerExists = rosterPlayerMap.has(playerId);
+              if (!playerExists) {
+                console.log(`🚫 Removed player ${playerId} from ${position} (not in roster)`);
+                removedActivePlayer = true;
+              }
+              return playerExists;
+            });
+          });
+          
+          console.log(`🎯 Final synced players: ${syncedPlayers.length}`);
+          
+          return { 
+            ...prev, 
+            players: syncedPlayers,
+            activePlayersByPosition: newActivePlayersByPosition
+          };
         });
+      } else {
+        console.log('⚠️ No roster found in storage');
       }
     };
 
-    // Initial load
-    if (gameState.players.length === 0) {
-      syncPlayers();
-    }
+    // Always sync on mount and when roster changes
+    syncPlayers();
 
     // Listen for storage changes (when Settings updates players)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'sport-rotation-players') {
+        console.log('🔔 Storage change detected, re-syncing players');
         syncPlayers();
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [gameState.players.length]);
+  }, []); // Remove dependency on gameState.players.length to always sync
 
   // Timer effect
   useEffect(() => {
