@@ -217,7 +217,14 @@ const Game = () => {
           
           {availablePlayers.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-md auto-rows-min">
-              {availablePlayers.map((player) => {
+              {availablePlayers
+                .sort((a, b) => {
+                  // Sort by time on bench: longest first (left), shortest last (right)
+                  const timeOnBenchA = totalTime - a.lastInterchangeTime;
+                  const timeOnBenchB = totalTime - b.lastInterchangeTime;
+                  return timeOnBenchB - timeOnBenchA;
+                })
+                .map((player) => {
                 const ranking = playerRankings.find(r => r.id === player.id);
                 return (
                   <div key={player.id} className="flex">
