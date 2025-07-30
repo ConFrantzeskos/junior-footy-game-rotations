@@ -378,9 +378,9 @@ const Settings = () => {
           <TabsContent value="attributes" className="mt-6">
             <div className="grid gap-4">
               <Card className="p-6 bg-white">
-                <h2 className="text-xl font-semibold mb-4">Player Attributes & Performance</h2>
+                <h2 className="text-xl font-semibold mb-4">Player Management</h2>
                 <p className="text-muted-foreground mb-6">
-                  Manage individual player attributes, track performance metrics, and get personalized recommendations.
+                  View and manage individual player data with position analytics.
                 </p>
               </Card>
               
