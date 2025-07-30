@@ -457,33 +457,6 @@ export const useGameState = () => {
     }
   }, [gameState.plannedInterchanges, movePlayer, removePlannedInterchange]);
 
-  const resetGame = useCallback(() => {
-    setGameState(prev => ({
-      ...prev,
-      isPlaying: false,
-      currentQuarter: 1,
-      quarterTime: 0,
-      totalTime: 0,
-      players: prev.players.map(player => ({
-        ...player,
-        isActive: false,
-        currentPosition: null,
-        lastInterchangeTime: 0,
-        timeStats: { forward: 0, midfield: 0, defence: 0 },
-        quarterStats: {},
-      })),
-      activePlayersByPosition: {
-        forward: [],
-        midfield: [],
-        defence: [],
-      },
-      plannedInterchanges: [],
-    }));
-    toast({
-      title: "Game Reset",
-      description: "All stats cleared and ready for new game",
-    });
-  }, []);
 
   const completeGame = useCallback((result?: 'win' | 'loss' | 'draw', opponent?: string) => {
     setGameState(prev => {
@@ -560,7 +533,7 @@ export const useGameState = () => {
     startGame,
     pauseGame,
     nextQuarter,
-    resetGame,
+    
     addPlannedInterchange,
     removePlannedInterchange,
     executePlannedInterchange,

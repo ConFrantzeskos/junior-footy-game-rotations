@@ -35,7 +35,7 @@ const Game = () => {
     startGame,
     pauseGame,
     nextQuarter,
-    resetGame,
+    
     addPlannedInterchange,
     removePlannedInterchange,
     executePlannedInterchange,
@@ -109,7 +109,7 @@ const Game = () => {
           onStart={startGame}
           onPause={pauseGame}
           onNextQuarter={nextQuarter}
-          onReset={resetGame}
+          
           onCompleteGame={completeGame}
           onStartNewGame={startNewGame}
         />

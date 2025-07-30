@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, Pause, SkipForward, RotateCcw, Trophy, CheckCircle, Calendar, Clock, Users, Settings } from "lucide-react";
+import { Play, Pause, SkipForward, Trophy, CheckCircle, Calendar, Clock, Users, Settings } from "lucide-react";
 
 interface GameHeaderProps {
   // Game state
@@ -22,7 +22,7 @@ interface GameHeaderProps {
   onStart: () => void;
   onPause: () => void;
   onNextQuarter: () => void;
-  onReset: () => void;
+  
   onCompleteGame?: (result?: 'win' | 'loss' | 'draw') => void;
   onStartNewGame?: (matchDay?: number, opponent?: string, venue?: 'home' | 'away') => void;
 }
@@ -41,7 +41,7 @@ export const GameHeader = ({
   onStart,
   onPause,
   onNextQuarter,
-  onReset,
+  
   onCompleteGame,
   onStartNewGame,
 }: GameHeaderProps) => {
@@ -219,15 +219,6 @@ export const GameHeader = ({
 
       {/* Danger Zone - Reset at Bottom */}
       <div className="fixed bottom-6 right-6 z-50">
-        <Button 
-          onClick={onReset} 
-          variant="outline"
-          size="sm"
-          className="border-2 border-destructive/30 text-destructive hover:bg-destructive/5 bg-background/90 backdrop-blur-sm shadow-lg"
-        >
-          <RotateCcw className="w-4 h-4 mr-sm" />
-          Reset Game
-        </Button>
       </div>
     </div>
   );
