@@ -72,16 +72,23 @@ export const DraggablePlayer = ({
         </div>
       )}
       {showTime && (
-        <div className="flex gap-1 mt-1">
-          <Badge variant="outline" className="text-xs px-1 py-0" title="Forward time">
-            F: {formatTime(player.timeStats.forward)}
-          </Badge>
-          <Badge variant="outline" className="text-xs px-1 py-0" title="Midfield time">
-            M: {formatTime(player.timeStats.midfield)}
-          </Badge>
-          <Badge variant="outline" className="text-xs px-1 py-0" title="Defense time">
-            D: {formatTime(player.timeStats.defense)}
-          </Badge>
+        <div className="space-y-1">
+          <div className="flex gap-1">
+            <Badge variant="outline" className="text-xs px-1 py-0" title="Forward time">
+              F: {formatTime(player.timeStats.forward)}
+            </Badge>
+            <Badge variant="outline" className="text-xs px-1 py-0" title="Midfield time">
+              M: {formatTime(player.timeStats.midfield)}
+            </Badge>
+            <Badge variant="outline" className="text-xs px-1 py-0" title="Defense time">
+              D: {formatTime(player.timeStats.defense)}
+            </Badge>
+          </div>
+          <div className="flex justify-center">
+            <Badge variant="secondary" className="text-xs px-1 py-0" title="Total time played">
+              Total: {formatTime(player.timeStats.forward + player.timeStats.midfield + player.timeStats.defense)}
+            </Badge>
+          </div>
         </div>
       )}
     </div>
