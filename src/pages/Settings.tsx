@@ -14,6 +14,7 @@ import { toast } from '@/hooks/use-toast';
 import { createNewPlayer, migratePlayerToSeasonFormat, getPlayerSeasonSummary } from '@/utils/seasonManager';
 import { generatePlayerInsights, getTeamAnalytics } from '@/utils/playerAnalytics';
 import { AppHeader } from '@/components/AppHeader';
+import AwardNominations from '@/components/AwardNominations';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -277,7 +278,7 @@ const Settings = () => {
           <TabsList className="grid w-full grid-cols-4 bg-white">
             <TabsTrigger value="roster">Basic Roster</TabsTrigger>
             <TabsTrigger value="attributes">Player Attributes</TabsTrigger>
-            <TabsTrigger value="analytics">Team Analytics</TabsTrigger>
+            <TabsTrigger value="analytics">Award Nominations</TabsTrigger>
             <TabsTrigger value="settings">Advanced Settings</TabsTrigger>
           </TabsList>
 
@@ -343,10 +344,6 @@ const Settings = () => {
               <Card className="p-6 bg-white">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Player Roster</h2>
-                  <Button onClick={resetAllStats} variant="destructive" size="sm">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Reset Current Game Stats
-                  </Button>
                 </div>
                 
                 {players.length === 0 ? (
@@ -433,109 +430,13 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-6">
-            <div className="grid gap-6">
-              {/* Team Overview */}
-              <Card className="p-6 bg-white">
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="w-5 h-5" />
-                  <h2 className="text-xl font-semibold">Team Analytics</h2>
-                </div>
-                
-                <div className="grid md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {teamAnalytics.averageGameTime}m
-                    </div>
-                    <div className="text-sm text-muted-foreground">Average Game Time</div>
-                  </div>
-                  
-                  <div className="text-center p-4 bg-green-50 rounded">
-                    <div className="text-lg font-bold text-green-600">
-                      {teamAnalytics.mostVersatilePlayer?.name || 'N/A'}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Most Versatile</div>
-                  </div>
-                  
-                  <div className="text-center p-4 bg-purple-50 rounded">
-                    <div className="text-lg font-bold text-purple-600">
-                      {teamAnalytics.mostConsistentPlayer?.name || 'N/A'}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Most Consistent</div>
-                  </div>
-                  
-                  <div className="text-center p-4 bg-orange-50 rounded">
-                    <div className="text-lg font-bold text-orange-600">
-                      {teamAnalytics.topPerformer?.name || 'N/A'}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Top Performer</div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Position Balance */}
-              <Card className="p-6 bg-white">
-                <h3 className="text-lg font-semibold mb-4">Team Position Balance</h3>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Forward</span>
-                      <span>{teamAnalytics.teamBalance.forward.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-red-500 h-2 rounded-full" 
-                        style={{ width: `${teamAnalytics.teamBalance.forward}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Midfield</span>
-                      <span>{teamAnalytics.teamBalance.midfield.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-yellow-500 h-2 rounded-full" 
-                        style={{ width: `${teamAnalytics.teamBalance.midfield}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Defence</span>
-                      <span>{teamAnalytics.teamBalance.defence.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-500 h-2 rounded-full" 
-                        style={{ width: `${teamAnalytics.teamBalance.defence}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <AwardNominations players={players} />
           </TabsContent>
 
           <TabsContent value="settings" className="mt-6">
             <Card className="p-6 bg-white">
               <h2 className="text-xl font-semibold mb-4">Advanced Settings</h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded">
-                  <div>
-                    <h3 className="font-medium">Reset All Player Statistics</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Clear all current game data while preserving season history
-                    </p>
-                  </div>
-                  <Button onClick={resetAllStats} variant="destructive">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Reset Stats
-                  </Button>
-                </div>
-                
                 <div className="flex items-center justify-between p-4 border rounded">
                   <div>
                     <h3 className="font-medium">Save All Changes</h3>

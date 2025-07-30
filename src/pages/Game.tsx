@@ -207,7 +207,7 @@ const Game = () => {
                       onDragStart={handleDragStart}
                       onPlayerSwap={swapPlayers}
                       onLongPress={handleLongPress}
-                      className="w-full min-h-[70px] flex-1"
+                      className="w-full min-h-[80px] flex-1"
                       showTime={true}
                       ranking={ranking}
                       currentGameTime={totalTime}
