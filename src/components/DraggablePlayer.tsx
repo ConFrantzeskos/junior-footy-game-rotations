@@ -23,7 +23,6 @@ export const DraggablePlayer = ({
   className = "", 
   showTime = false 
 }: DraggablePlayerProps) => {
-  const [showDetails, setShowDetails] = useState(false);
   
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('text/plain', player.id);
@@ -49,11 +48,6 @@ export const DraggablePlayer = ({
     e.preventDefault();
   };
 
-  const handleClick = () => {
-    if (showTime) {
-      setShowDetails(!showDetails);
-    }
-  };
 
   const isActive = player.isActive;
   const totalTime = player.timeStats.forward + player.timeStats.midfield + player.timeStats.defense;
@@ -87,15 +81,13 @@ export const DraggablePlayer = ({
       onDragEnd={handleDragEnd}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
-      onClick={handleClick}
       className={`
         player-card cursor-grab active:cursor-grabbing relative
         ${isActive 
           ? 'bg-player-active/8 text-player-text border border-player-border/40' 
           : 'bg-card hover:bg-muted/30 border border-player-border/60'
         }
-        rounded-lg p-lg card-elevated
-        ${showTime ? 'cursor-pointer' : ''}
+        rounded-lg p-md card-elevated
         ${className}
       `}
     >
@@ -118,8 +110,8 @@ export const DraggablePlayer = ({
         />
       )}
       
-      <div className="space-y-sm relative z-10">
-        <div className="font-semibold text-lg font-system leading-tight">{player.name}</div>
+      <div className="space-y-xs relative z-10">
+        <div className="font-semibold text-sm font-system leading-tight">{player.name}</div>
         
         {isActive && player.currentPosition && (
           <div className={`text-xs font-medium capitalize opacity-70 text-position-${player.currentPosition}`}>
@@ -128,23 +120,34 @@ export const DraggablePlayer = ({
         )}
         
         {showTime && totalTime > 0 && (
-          <div className="text-xs text-muted-foreground font-medium">
-            {formatTime(totalTime)}
-          </div>
-        )}
-        
-        {showTime && showDetails && (
-          <div className="mt-md space-y-sm animate-accordion-down">
-            <div className="flex gap-xs flex-wrap">
-              <Badge variant="outline" className="text-xs px-2 py-1 bg-white/50" title="Forward time">
-                F: {formatTime(player.timeStats.forward)}
-              </Badge>
-              <Badge variant="outline" className="text-xs px-2 py-1 bg-white/50" title="Midfield time">
-                M: {formatTime(player.timeStats.midfield)}
-              </Badge>
-              <Badge variant="outline" className="text-xs px-2 py-1 bg-white/50" title="Defense time">
-                D: {formatTime(player.timeStats.defense)}
-              </Badge>
+          <div className="space-y-xs">
+            <div className="text-xs text-muted-foreground font-medium">
+              {formatTime(totalTime)}
+            </div>
+            
+            {/* Position Time Breakdown - Mini Progress Bars */}
+            <div className="flex gap-xs">
+              {player.timeStats.forward > 0 && (
+                <div 
+                  className="h-1 bg-position-forward rounded-full opacity-60"
+                  style={{ width: `${(player.timeStats.forward / totalTime) * 100}%`, minWidth: '4px' }}
+                  title={`Forward: ${formatTime(player.timeStats.forward)}`}
+                />
+              )}
+              {player.timeStats.midfield > 0 && (
+                <div 
+                  className="h-1 bg-position-midfield rounded-full opacity-60"
+                  style={{ width: `${(player.timeStats.midfield / totalTime) * 100}%`, minWidth: '4px' }}
+                  title={`Midfield: ${formatTime(player.timeStats.midfield)}`}
+                />
+              )}
+              {player.timeStats.defense > 0 && (
+                <div 
+                  className="h-1 bg-position-defense rounded-full opacity-60"
+                  style={{ width: `${(player.timeStats.defense / totalTime) * 100}%`, minWidth: '4px' }}
+                  title={`Defense: ${formatTime(player.timeStats.defense)}`}
+                />
+              )}
             </div>
           </div>
         )}
