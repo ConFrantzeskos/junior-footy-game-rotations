@@ -23,6 +23,9 @@
     --position-midfield: 213 65% 48%;
     --position-defense: 285 65% 48%;
     
+    /* Australian Rules Football Theming */
+    --sherrin-red: 0 85% 55%;
+    
     /* Player States */
     --player-active: 142 71% 45%;
     --player-inactive: 0 0% 97%;

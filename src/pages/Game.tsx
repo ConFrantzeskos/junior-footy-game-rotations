@@ -82,7 +82,7 @@ const Game = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <PositionSection
-            title="FORWARD"
+            title="FORWARDS"
             position="forward"
             players={players}
             activePlayers={activePlayersByPosition.forward}
@@ -95,7 +95,7 @@ const Game = () => {
           />
           
           <PositionSection
-            title="MIDFIELD"
+            title="MIDFIELDERS"
             position="midfield"
             players={players}
             activePlayers={activePlayersByPosition.midfield}
@@ -108,7 +108,7 @@ const Game = () => {
           />
           
           <PositionSection
-            title="DEFENSE"
+            title="DEFENDERS"
             position="defense"
             players={players}
             activePlayers={activePlayersByPosition.defense}

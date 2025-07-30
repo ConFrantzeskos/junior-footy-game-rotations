@@ -33,8 +33,8 @@ export const GameHeader = ({
     <Card className="p-2xl mb-2xl card-elevated">
       <div className="flex flex-col lg:flex-row justify-between items-center gap-xl">
         <div className="text-center lg:text-left">
-          <h1 className="text-4xl font-bold font-system mb-lg tracking-tight">
-            Sports Rotation Tracker
+          <h1 className="text-4xl font-bold font-system mb-lg tracking-tight text-sherrin-red">
+            Junior Footy Rotation Tracker
           </h1>
           <div className="flex flex-col sm:flex-row gap-2xl text-foreground">
             <div className="flex flex-col items-center sm:items-start">
