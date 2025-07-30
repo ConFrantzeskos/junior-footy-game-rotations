@@ -64,10 +64,9 @@ export const useGameState = () => {
   }, [gameState]);
 
   const addLateArrival = useCallback((playerId: string) => {
-    // For now, we'll get the player from localStorage roster
-    // In a real app, this would come from a proper roster management system
-    const storedRoster = localStorage.getItem('teamRoster');
-    if (!storedRoster) {
+    // Get the player from the main roster
+    const storedPlayers = localStorage.getItem('sport-rotation-players');
+    if (!storedPlayers) {
       toast({
         title: "No Roster Found",
         description: "Please set up your team roster first",
@@ -76,7 +75,7 @@ export const useGameState = () => {
       return;
     }
 
-    const fullRoster: Player[] = JSON.parse(storedRoster);
+    const fullRoster: Player[] = JSON.parse(storedPlayers);
     const playerToAdd = fullRoster.find(p => p.id === playerId);
     
     if (!playerToAdd) {

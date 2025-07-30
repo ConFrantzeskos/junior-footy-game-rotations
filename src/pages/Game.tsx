@@ -31,13 +31,9 @@ const Game = () => {
   // Load full roster for late arrivals
   useEffect(() => {
     const loadFullRoster = () => {
-      const storedRoster = localStorage.getItem('teamRoster');
       const storedPlayers = localStorage.getItem('sport-rotation-players');
       
-      if (storedRoster) {
-        setFullRoster(JSON.parse(storedRoster));
-      } else if (storedPlayers) {
-        // Fallback to using stored players as roster
+      if (storedPlayers) {
         setFullRoster(JSON.parse(storedPlayers));
       } else {
         setFullRoster([]);
@@ -48,7 +44,7 @@ const Game = () => {
     
     // Listen for roster updates
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'teamRoster' || e.key === 'sport-rotation-players') {
+      if (e.key === 'sport-rotation-players') {
         loadFullRoster();
       }
     };
