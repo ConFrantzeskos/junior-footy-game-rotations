@@ -31,14 +31,17 @@ export const DraggablePlayer = ({
   currentGameTime
 }: DraggablePlayerProps) => {
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   
   const handleDragStart = (e: React.DragEvent) => {
+    setIsDragging(true);
     e.dataTransfer.setData('text/plain', player.id);
     onDragStart(player.id, player.currentPosition || undefined);
     e.currentTarget.classList.add('drag-lift');
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
+    setIsDragging(false);
     e.currentTarget.classList.remove('drag-lift');
   };
 
@@ -49,30 +52,38 @@ export const DraggablePlayer = ({
     
     if (draggedPlayerId && draggedPlayerId !== player.id) {
       onPlayerSwap(draggedPlayerId, player.id);
+      
+      // Visual feedback for successful swap
+      e.currentTarget.classList.add('bg-green-100', 'border-green-500');
+      setTimeout(() => {
+        e.currentTarget.classList.remove('bg-green-100', 'border-green-500');
+      }, 800);
     }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    // Add visual feedback for valid drop zone
+    e.currentTarget.classList.add('ring-2', 'ring-blue-400', 'ring-opacity-50');
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (onLongPress) {
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Remove visual feedback when leaving drop zone
+    e.currentTarget.classList.remove('ring-2', 'ring-blue-400', 'ring-opacity-50');
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Only trigger long press if not dragging and onLongPress is available
+    if (!isDragging && onLongPress) {
       const timer = setTimeout(() => {
-        onLongPress(player, { x: e.clientX, y: e.clientY });
-      }, 500); // 500ms long press
+        const touch = e.touches[0];
+        onLongPress(player, { x: touch.clientX, y: touch.clientY });
+      }, 800); // Longer delay to avoid conflict with drag
       setLongPressTimer(timer);
     }
   };
 
-  const handleMouseUp = () => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-  };
-
-  const handleMouseLeave = () => {
+  const handleTouchEnd = () => {
     if (longPressTimer) {
       clearTimeout(longPressTimer);
       setLongPressTimer(null);
@@ -111,9 +122,9 @@ export const DraggablePlayer = ({
       onDragEnd={handleDragEnd}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
+      onDragLeave={handleDragLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       className={`
         player-card cursor-grab active:cursor-grabbing relative overflow-hidden
         min-h-[64px] min-w-[120px] touch-manipulation

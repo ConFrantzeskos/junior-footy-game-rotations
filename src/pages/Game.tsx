@@ -128,17 +128,6 @@ const Game = () => {
           onReset={resetGame}
         />
 
-        {/* Auto-Rotation Suggestions */}
-        <div className="mb-6">
-          <AutoRotationSuggestions
-            rotationAnalysis={rotationAnalysis}
-            players={players}
-            onExecuteSwap={handleExecuteRotationSwap}
-            onRefresh={refreshRotationSuggestions}
-            isGameActive={isPlaying}
-          />
-        </div>
-
         {/* Planned Substitutions Queue */}
         <div className="mb-6">
           <PlannedSubstitutions
@@ -231,6 +220,17 @@ const Game = () => {
             </div>
           )}
         </Card>
+
+        {/* Auto-Rotation Suggestions at Bottom */}
+        <div className="mt-6">
+          <AutoRotationSuggestions
+            rotationAnalysis={rotationAnalysis}
+            players={players}
+            onExecuteSwap={handleExecuteRotationSwap}
+            onRefresh={refreshRotationSuggestions}
+            isGameActive={isPlaying}
+          />
+        </div>
 
         {/* Context Menu */}
         <PlayerContextMenu
