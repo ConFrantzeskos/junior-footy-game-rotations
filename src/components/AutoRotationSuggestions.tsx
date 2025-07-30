@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RotationAnalysis, RotationSuggestion } from '@/types/autoRotation';
 import { Player, GameState } from '@/types/sports';
-import { RefreshCw, ArrowRight, Clock, CheckCircle2, Brain, Sparkles } from 'lucide-react';
+import { RefreshCw, ArrowRight, Clock, CheckCircle2, Brain, Sparkles, Target, Loader2 } from 'lucide-react';
 import { AIRotationService, AIRotationContext } from '@/services/aiRotationService';
 import { useState, useEffect } from 'react';
 import { useToast } from './ui/use-toast';
@@ -133,123 +133,143 @@ const AutoRotationSuggestions = ({
     );
   }
 
+  const topSuggestion = (aiEnhancedSuggestions.length > 0 ? aiEnhancedSuggestions : rotationAnalysis.suggestions)[0];
+  
+  if (!topSuggestion) return null;
+
+  // Generate contextual AI insight for this specific swap
+  const getContextualInsight = () => {
+    if (!aiInsights) {
+      if (topSuggestion.playerOut && topSuggestion.playerIn) {
+        return `Fresh legs for ${topSuggestion.position} - swap recommended`;
+      }
+      return 'Keep the rotation active';
+    }
+    return aiInsights;
+  };
+
+  // Generate timing guidance
+  const getTimingGuidance = () => {
+    const reviewMinutes = Math.round(rotationAnalysis.nextReviewTime / 60);
+    return `Best timing: Next ${reviewMinutes} minutes`;
+  };
+
+  // Generate confidence level
+  const getConfidence = () => {
+    if (topSuggestion.priority === 'urgent') return 'High confidence';
+    if (topSuggestion.priority === 'recommended') return 'Medium confidence';
+    return 'Low confidence';
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Enhanced Header with AI */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            {aiEnabled ? (
-              <Brain className={`w-5 h-5 ${isLoadingAI ? 'animate-pulse text-primary' : 'text-primary'}`} />
-            ) : (
-              <Sparkles className="w-5 h-5 text-muted-foreground" />
-            )}
-            <h3 className="text-lg font-bold text-foreground">
-              {aiEnabled ? 'AI-Enhanced Rotations' : 'Smart Rotations'}
-            </h3>
-          </div>
-          <Button
-            onClick={() => setAiEnabled(!aiEnabled)}
-            variant="ghost"
-            size="sm"
-            className="text-xs px-2 py-1 h-6"
-          >
-            {aiEnabled ? 'AI On' : 'AI Off'}
-          </Button>
-        </div>
+    <Card className="mb-6 overflow-hidden">
+      {/* Top Row: AI Tactical Insight */}
+      <div className="bg-primary/5 border-b border-primary/10 px-6 py-3">
         <div className="flex items-center gap-2">
-          {isLoadingAI && (
-            <div className="text-xs text-muted-foreground">Analyzing...</div>
-          )}
-          <Button
-            onClick={onRefresh}
-            variant="outline"
-            size="sm"
-            className="w-10 h-10 p-0"
-            disabled={isLoadingAI}
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoadingAI ? 'animate-spin' : ''}`} />
-          </Button>
-        </div>
-      </div>
-
-      {/* AI Insights - Simplified */}
-      {aiInsights && (
-        <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
-          <div className="flex items-center gap-2">
-            <Brain className="w-4 h-4 text-primary" />
-            <div className="text-sm text-foreground font-medium">{aiInsights}</div>
+          <Brain className={`w-4 h-4 ${aiEnabled ? 'text-primary' : 'text-muted-foreground'}`} />
+          <span className="text-sm font-medium text-foreground">
+            {isLoadingAI ? 'Analyzing...' : getContextualInsight()}
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAiEnabled(!aiEnabled)}
+              className={`h-7 text-xs ${aiEnabled ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              AI {aiEnabled ? 'On' : 'Off'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRefresh}
+              disabled={isLoadingAI}
+              className="h-7"
+            >
+              <RefreshCw className="w-3 h-3" />
+            </Button>
           </div>
         </div>
-      )}
-
-      {/* Overall Assessment */}
-      {rotationAnalysis?.overallAssessment && (
-        <p className="text-sm text-muted-foreground">{rotationAnalysis.overallAssessment}</p>
-      )}
-
-      {/* Single Top Suggestion */}
-      <div className="space-y-4">
-        {(aiEnhancedSuggestions.length > 0 ? aiEnhancedSuggestions : rotationAnalysis.suggestions.slice(0, 1)).map((suggestion) => (
-          <Card key={suggestion.id} className="overflow-hidden">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-6">
-                
-                {/* Player OUT */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border-2 border-muted-foreground/20">
-                    <span className="text-sm font-bold text-muted-foreground">
-                      {getPlayerGuernsey(suggestion.playerOut!) || '?'}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-sm">{getPlayerName(suggestion.playerOut!)}</div>
-                    <div className="text-xs text-muted-foreground">Give them a spell</div>
-                  </div>
-                </div>
-
-                {/* Arrow & Data-Driven Reason */}
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="flex items-center gap-3 text-center">
-                    <ArrowRight className="w-5 h-5 text-sherrin-red" />
-                    <div className="text-sm font-medium text-foreground">
-                      {getDataDrivenReason(suggestion.reasoning, suggestion.playerOut!, suggestion.playerIn!)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Player IN */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-sherrin-red flex items-center justify-center border-2 border-sherrin-red shadow-sm">
-                    <span className="text-sm font-bold text-white">
-                      {getPlayerGuernsey(suggestion.playerIn!) || '?'}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-sm">{getPlayerName(suggestion.playerIn!)}</div>
-                    <div className="text-xs text-muted-foreground">Put them on</div>
-                  </div>
-                </div>
-
-                {/* Execute */}
-                <Button
-                  onClick={() => onExecuteSwap(suggestion.playerIn!, suggestion.playerOut!)}
-                  className="bg-sherrin-red hover:bg-sherrin-red/90 text-white font-medium px-6"
-                >
-                  Swap
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
-      {/* Simple Footer */}
-      <div className="text-center text-xs text-muted-foreground">
-        <Clock className="w-3 h-3 inline mr-1" />
-        Next check in {Math.floor(rotationAnalysis.nextReviewTime / 60)} minutes
+      {/* Main Row: Player Swap Interface */}
+      <CardContent className="p-6">
+        <div className="flex items-center gap-4">
+          {/* Player OUT */}
+          <div className="text-center min-w-0 flex-shrink-0">
+            <div className="text-xs text-muted-foreground mb-1 font-medium">OUT</div>
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border-2 border-muted-foreground/20 mx-auto mb-1">
+              <span className="text-sm font-bold text-muted-foreground">
+                {topSuggestion.playerOut ? getPlayerGuernsey(topSuggestion.playerOut) : '?'}
+              </span>
+            </div>
+            <div className="font-semibold text-sm">
+              {topSuggestion.playerOut ? getPlayerName(topSuggestion.playerOut) : 'TBD'}
+            </div>
+          </div>
+          
+          <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          
+          {/* AI Reason */}
+          <div className="text-center flex-1 min-w-0 px-4">
+            <div className="text-xs text-muted-foreground mb-1 font-medium">REASON</div>
+            <div className="text-sm font-medium text-foreground leading-tight">
+              {getDataDrivenReason(topSuggestion.reasoning, topSuggestion.playerOut, topSuggestion.playerIn)}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {topSuggestion.position}
+            </div>
+          </div>
+          
+          <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          
+          {/* Player IN */}
+          <div className="text-center min-w-0 flex-shrink-0">
+            <div className="text-xs text-muted-foreground mb-1 font-medium">IN</div>
+            <div className="w-12 h-12 rounded-full bg-sherrin-red flex items-center justify-center border-2 border-sherrin-red shadow-sm mx-auto mb-1">
+              <span className="text-sm font-bold text-white">
+                {topSuggestion.playerIn ? getPlayerGuernsey(topSuggestion.playerIn) : '?'}
+              </span>
+            </div>
+            <div className="font-semibold text-sm">
+              {topSuggestion.playerIn ? getPlayerName(topSuggestion.playerIn) : 'TBD'}
+            </div>
+          </div>
+          
+          {/* Swap Button */}
+          <Button
+            onClick={() => {
+              if (topSuggestion.playerOut && topSuggestion.playerIn) {
+                onExecuteSwap(topSuggestion.playerIn, topSuggestion.playerOut);
+                toast({
+                  title: "Swap Executed",
+                  description: `${getPlayerName(topSuggestion.playerOut)} → ${getPlayerName(topSuggestion.playerIn)}`,
+                });
+              }
+            }}
+            disabled={!topSuggestion.playerOut || !topSuggestion.playerIn || isLoadingAI}
+            className="bg-sherrin-red hover:bg-sherrin-red/90 text-white font-medium px-6 flex-shrink-0"
+            size="lg"
+          >
+            Swap
+          </Button>
+        </div>
+      </CardContent>
+
+      {/* Bottom Row: Timing and Confidence */}
+      <div className="bg-muted/30 border-t px-6 py-3">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Clock className="w-3 h-3" />
+            <span>{getTimingGuidance()}</span>
+          </div>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Target className="w-3 h-3" />
+            <span>{getConfidence()}</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
