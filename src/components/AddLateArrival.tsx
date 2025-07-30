@@ -1,128 +1,66 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { UserPlus, Clock } from 'lucide-react';
 import { Player } from '@/types/sports';
 import { useToast } from '@/hooks/use-toast';
 
 interface AddLateArrivalProps {
-  onAddPlayer: (player: Omit<Player, 'id'>) => void;
+  onAddPlayer: (playerId: string) => void;
   isGameActive: boolean;
   currentGameTime: number;
-  existingPlayers: Player[];
+  currentGamePlayers: Player[];
+  fullRoster: Player[]; // All team players
 }
 
-const AddLateArrival = ({ onAddPlayer, isGameActive, currentGameTime, existingPlayers }: AddLateArrivalProps) => {
+const AddLateArrival = ({ onAddPlayer, isGameActive, currentGameTime, currentGamePlayers, fullRoster }: AddLateArrivalProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [playerName, setPlayerName] = useState('');
-  const [guernseyNumber, setGuernseyNumber] = useState('');
+  const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const { toast } = useToast();
+
+  // Get players who are in the roster but not in the current game
+  const availableForLateArrival = fullRoster.filter(rosterPlayer => 
+    !currentGamePlayers.some(gamePlayer => gamePlayer.id === rosterPlayer.id)
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!playerName.trim()) {
+    if (!selectedPlayerId) {
       toast({
-        title: "Name Required",
-        description: "Please enter the player's name",
+        title: "Player Required",
+        description: "Please select a player",
         variant: "destructive"
       });
       return;
     }
 
-    // Check for duplicate names
-    if (existingPlayers.some(p => p.name.toLowerCase() === playerName.trim().toLowerCase())) {
+    const selectedPlayer = fullRoster.find(p => p.id === selectedPlayerId);
+    if (!selectedPlayer) {
       toast({
-        title: "Duplicate Name",
-        description: "A player with this name already exists",
+        title: "Player Not Found",
+        description: "Selected player not found in roster",
         variant: "destructive"
       });
       return;
     }
 
-    // Check for duplicate guernsey numbers
-    const guernseyNum = guernseyNumber ? parseInt(guernseyNumber) : undefined;
-    if (guernseyNum && existingPlayers.some(p => p.guernseyNumber === guernseyNum)) {
-      toast({
-        title: "Duplicate Number",
-        description: "This guernsey number is already taken",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const newPlayer: Omit<Player, 'id'> = {
-      name: playerName.trim(),
-      guernseyNumber: guernseyNum,
-      isActive: false,
-      currentPosition: null,
-      lastInterchangeTime: currentGameTime, // Start from current game time
-      timeStats: {
-        forward: 0,
-        midfield: 0,
-        defence: 0
-      },
-      quarterStats: {},
-      attributes: {
-        fitness: 5,
-        speed: 5,
-        endurance: 5,
-        positionalVersatility: 5,
-        gameReadiness: 8, // High readiness since they just arrived
-        dateJoined: new Date().toISOString(),
-        isAvailable: true,
-        injuryHistory: []
-      },
-      seasonStats: {
-        totalGameTime: 0,
-        gamesPlayed: 1, // This game counts
-        gamesCompleted: 0,
-        gamesStarted: 0,
-        positionTotals: {
-          forward: 0,
-          midfield: 0,
-          defence: 0
-        },
-        positionPerformance: {
-          forward: { games: 0, averageTime: 0, effectiveness: 5 },
-          midfield: { games: 0, averageTime: 0, effectiveness: 5 },
-          defence: { games: 0, averageTime: 0, effectiveness: 5 }
-        },
-        averageGameTime: 0,
-        longestGameTime: 0,
-        shortestGameTime: 0,
-        consistencyScore: 5,
-        monthlyStats: {},
-        rotationFrequency: 0,
-        versatilityScore: 5,
-        reliabilityScore: 8, // High since they showed up!
-        gameHistory: []
-      },
-      currentGamePerformance: {
-        interchanges: 0,
-        positionSwitches: 0,
-        longestStint: 0,
-        lastPositionChangeTime: currentGameTime
-      }
-    };
-
-    onAddPlayer(newPlayer);
+    onAddPlayer(selectedPlayerId);
     
     toast({
-      title: "Player Added!",
-      description: `${playerName} is now available for rotation`,
+      title: "Late Arrival Added!",
+      description: `${selectedPlayer.name} is now available for rotation`,
     });
 
     // Reset form and close dialog
-    setPlayerName('');
-    setGuernseyNumber('');
+    setSelectedPlayerId('');
     setIsOpen(false);
   };
 
-  if (!isGameActive) {
-    return null; // Only show during active games
+  if (!isGameActive || availableForLateArrival.length === 0) {
+    return null; // Only show during active games when players are available
   }
 
   return (
@@ -143,38 +81,30 @@ const AddLateArrival = ({ onAddPlayer, isGameActive, currentGameTime, existingPl
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="playerName">Player Name *</Label>
-            <Input
-              id="playerName"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Enter player's name"
-              autoFocus
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="guernseyNumber">Guernsey Number (optional)</Label>
-            <Input
-              id="guernseyNumber"
-              type="number"
-              value={guernseyNumber}
-              onChange={(e) => setGuernseyNumber(e.target.value)}
-              placeholder="Enter number"
-              min="1"
-              max="999"
-            />
+            <Label htmlFor="playerSelect">Select Player</Label>
+            <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a player who just arrived..." />
+              </SelectTrigger>
+              <SelectContent>
+                {availableForLateArrival.map(player => (
+                  <SelectItem key={player.id} value={player.id}>
+                    {player.name} {player.guernseyNumber ? `(#${player.guernseyNumber})` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-sm text-blue-800">
-              <strong>Late arrival priority:</strong> This player will be prioritized for rotation since they haven't played yet.
+              <strong>Late arrival priority:</strong> This player will be prioritized for rotation since they haven't played yet this game.
             </p>
           </div>
 
           <div className="flex gap-2 pt-2">
-            <Button type="submit" className="flex-1">
-              Add Player
+            <Button type="submit" className="flex-1" disabled={!selectedPlayerId}>
+              Add to Game
             </Button>
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Cancel

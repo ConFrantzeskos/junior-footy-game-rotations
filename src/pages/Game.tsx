@@ -25,8 +25,38 @@ const Game = () => {
     player: Player;
     position: { x: number; y: number };
   } | null>(null);
+  const [fullRoster, setFullRoster] = useState<Player[]>([]);
   const [rotationAnalysis, setRotationAnalysis] = useState<RotationAnalysis | null>(null);
-  
+
+  // Load full roster for late arrivals
+  useEffect(() => {
+    const loadFullRoster = () => {
+      const storedRoster = localStorage.getItem('teamRoster');
+      const storedPlayers = localStorage.getItem('sport-rotation-players');
+      
+      if (storedRoster) {
+        setFullRoster(JSON.parse(storedRoster));
+      } else if (storedPlayers) {
+        // Fallback to using stored players as roster
+        setFullRoster(JSON.parse(storedPlayers));
+      } else {
+        setFullRoster([]);
+      }
+    };
+
+    loadFullRoster();
+    
+    // Listen for roster updates
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'teamRoster' || e.key === 'sport-rotation-players') {
+        loadFullRoster();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const {
     gameState,
     togglePlayer,
@@ -190,7 +220,8 @@ const Game = () => {
                 onAddPlayer={addLateArrival}
                 isGameActive={isPlaying}
                 currentGameTime={totalTime}
-                existingPlayers={players}
+                currentGamePlayers={players}
+                fullRoster={fullRoster}
               />
               <div className="text-sm text-muted-foreground font-semibold">
                 On Ground: {activePlayersByPosition.forward.length + activePlayersByPosition.midfield.length + activePlayersByPosition.defence.length}/18

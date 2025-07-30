@@ -63,22 +63,61 @@ export const useGameState = () => {
     localStorage.setItem('gameState', JSON.stringify(gameState));
   }, [gameState]);
 
-  const addLateArrival = useCallback((playerData: Omit<Player, 'id'>) => {
-    const newPlayer: Player = {
-      ...playerData,
-      id: `late-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  const addLateArrival = useCallback((playerId: string) => {
+    // For now, we'll get the player from localStorage roster
+    // In a real app, this would come from a proper roster management system
+    const storedRoster = localStorage.getItem('teamRoster');
+    if (!storedRoster) {
+      toast({
+        title: "No Roster Found",
+        description: "Please set up your team roster first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const fullRoster: Player[] = JSON.parse(storedRoster);
+    const playerToAdd = fullRoster.find(p => p.id === playerId);
+    
+    if (!playerToAdd) {
+      toast({
+        title: "Player Not Found",
+        description: "Selected player not found in roster",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Reset player's game stats for this game
+    const gameReadyPlayer: Player = {
+      ...playerToAdd,
+      isActive: false,
+      currentPosition: null,
+      lastInterchangeTime: gameState.totalTime, // Start from current game time
+      timeStats: {
+        forward: 0,
+        midfield: 0,
+        defence: 0
+      },
+      quarterStats: {},
+      currentGamePerformance: {
+        interchanges: 0,
+        positionSwitches: 0,
+        longestStint: 0,
+        lastPositionChangeTime: gameState.totalTime
+      }
     };
 
     setGameState(prev => ({
       ...prev,
-      players: [...prev.players, newPlayer]
+      players: [...prev.players, gameReadyPlayer]
     }));
 
     toast({
       title: "Late Arrival Added",
-      description: `${newPlayer.name} is now available for rotation`,
+      description: `${gameReadyPlayer.name} is now available for rotation`,
     });
-  }, [toast]);
+  }, [gameState.totalTime, toast]);
 
   // Load players from localStorage and sync updates
   useEffect(() => {
