@@ -36,30 +36,24 @@ serve(async (req) => {
       suggestionsCount: gameContext.suggestions?.length || 0
     });
 
-    // Enhanced tactical context for AI analysis
+    // Simple, kid-focused context for AI analysis
     const contextPrompt = `
-You are an elite junior sports coaching assistant. Analyze the game situation and provide tactical insights for player rotations.
+You are helping a junior sports coach keep kids happy and engaged. The key principles are simple:
 
-GAME SITUATION:
-- Quarter ${gameContext.currentQuarter}/4 | Time: ${Math.floor(gameContext.quarterTime / 60)}:${(gameContext.quarterTime % 60).toString().padStart(2, '0')}
-- Game Phase: ${gameContext.quarterTime < 450 ? 'Early' : gameContext.quarterTime < 1050 ? 'Mid' : 'Late'}
+🔥 TIRED KIDS NEED A BREAK
+🪑 BENCHED KIDS GET BORED & FRUSTRATED
 
-SUGGESTED ROTATIONS:
-${gameContext.suggestions.map(s => `• ${s.reasoning} (${s.priority})`).join('\n')}
+Current Rotation Suggestions:
+${gameContext.suggestions.map(s => `• ${s.reasoning}`).join('\n')}
 
-TACTICAL ANALYSIS NEEDED:
-1. VALIDATE each suggestion - does it make tactical sense?
-2. EXPLAIN the impact on game flow and player development
-3. PROVIDE timing advice - when exactly to make this change
-4. SUGGEST alternatives if the suggestion seems poor
+Your job: Explain WHY each suggestion makes sense for keeping kids happy and engaged.
 
-COACHING PRINCIPLES:
-- Time equity is priority #1
-- Fresh legs maintain intensity 
-- Position experience builds versatility
-- Every player deserves meaningful minutes
+Focus on:
+- "Get [bench player] on field - they've been waiting patiently for X minutes"
+- "Give [field player] a rest - they've been working hard for X minutes" 
+- "Keep everyone involved and having fun"
 
-Respond with clear, actionable coaching insights that help make smart rotation decisions.`;
+Avoid tactical jargon. Keep it simple, positive, and focused on the kids' experience.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
