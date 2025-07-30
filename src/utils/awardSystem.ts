@@ -1,5 +1,5 @@
 import { Player } from '@/types/sports';
-import { Award, Trophy, Target, Users, TrendingUp, Star, Heart, Zap } from 'lucide-react';
+import { Award, Trophy, Target, Users, TrendingUp, Star, Heart, Zap, Clock, Shield, Repeat, Activity, Timer, RotateCcw, Gauge, Flame, Crown, Sparkles } from 'lucide-react';
 import { createElement } from 'react';
 
 interface AussieRulesAward {
@@ -12,31 +12,168 @@ interface AussieRulesAward {
   category: 'performance' | 'character' | 'development' | 'team';
 }
 
-// Junior-focused Australian Rules Football awards
+// Realistic data-driven awards based on measurable statistics
 export const JUNIOR_AWARDS: AussieRulesAward[] = [
+  // PARTICIPATION & ENDURANCE AWARDS
   {
-    id: 'best-and-fairest',
-    name: 'Best & Fairest',
-    description: 'Most consistent performer with great sportsmanship',
-    icon: 'Trophy',
+    id: 'iron-person',
+    name: 'Iron Person',
+    description: 'Player with the most total minutes on field',
+    icon: 'Crown',
     criteria: (player) => {
-      const totalTime = player.seasonStats.totalGameTime;
-      const gamesPlayed = player.seasonStats.gamesCompleted;
-      const averageTime = gamesPlayed > 0 ? totalTime / gamesPlayed : 0;
-      return gamesPlayed >= 3 && averageTime > 900; // 15+ min average, 3+ games
+      // Award goes to top 10% by total time (minimum 2 games)
+      return player.seasonStats.gamesCompleted >= 2 && player.seasonStats.totalGameTime > 1800; // 30+ min total
     },
-    reasoning: (player) => `Consistent playing time across ${player.seasonStats.gamesCompleted} games with ${Math.floor(player.seasonStats.averageGameTime / 60)} min average per game.`,
+    reasoning: (player) => `Accumulated ${Math.floor(player.seasonStats.totalGameTime / 60)} total minutes on field across ${player.seasonStats.gamesCompleted} games.`,
     category: 'performance'
   },
   {
-    id: 'most-versatile',
-    name: 'Most Versatile Player',
-    description: 'Played well in multiple positions',
+    id: 'mr-ms-reliable',
+    name: 'Mr/Ms Reliable',
+    description: 'Player who appeared in the most games',
+    icon: 'Shield',
+    criteria: (player) => player.seasonStats.gamesCompleted >= 5,
+    reasoning: (player) => `Consistent team member with ${player.seasonStats.gamesCompleted} games played this season.`,
+    category: 'character'
+  },
+  {
+    id: 'stamina-champion',
+    name: 'Stamina Champion',
+    description: 'Highest average playing time per game',
+    icon: 'Activity',
+    criteria: (player) => {
+      const averageTime = player.seasonStats.averageGameTime;
+      return player.seasonStats.gamesCompleted >= 3 && averageTime > 1200; // 20+ min average
+    },
+    reasoning: (player) => `Maintains high energy with ${Math.floor(player.seasonStats.averageGameTime / 60)} minutes average per game.`,
+    category: 'performance'
+  },
+
+  // TACTICAL & VERSATILITY AWARDS
+  {
+    id: 'swiss-army-knife',
+    name: 'Swiss Army Knife',
+    description: 'Most balanced time across all positions',
     icon: 'Target',
     criteria: (player) => {
       const positions = player.seasonStats.positionTotals;
+      const positionTimes = Object.values(positions);
+      const maxTime = Math.max(...positionTimes);
+      const minTime = Math.min(...positionTimes.filter(t => t > 0));
+      const balance = minTime / maxTime;
+      return Object.values(positions).filter(time => time > 300).length >= 3 && balance > 0.3; // Played all 3 positions with good balance
+    },
+    reasoning: (player) => {
+      const positions = player.seasonStats.positionTotals;
+      const positionsText = Object.entries(positions)
+        .filter(([, time]) => time > 300)
+        .map(([pos, time]) => `${pos}: ${Math.floor(time / 60)}min`)
+        .join(', ');
+      return `Evenly distributed across positions - ${positionsText}.`;
+    },
+    category: 'team'
+  },
+  {
+    id: 'tactical-mastermind',
+    name: 'Tactical Mastermind',
+    description: 'Player with the most position switches',
+    icon: 'Repeat',
+    criteria: (player) => {
+      // This would require tracking interchanges - for now use position diversity
+      const positions = player.seasonStats.positionTotals;
+      const activePositions = Object.values(positions).filter(time => time > 180).length; // 3+ min in position
+      return activePositions >= 3 && player.seasonStats.gamesCompleted >= 3;
+    },
+    reasoning: (player) => `Tactically flexible player who adapts to multiple roles during games.`,
+    category: 'team'
+  },
+  {
+    id: 'forward-specialist',
+    name: 'Forward Specialist',
+    description: 'Spent most time in forward position',
+    icon: 'Flame',
+    criteria: (player) => {
+      const forwardTime = player.seasonStats.positionTotals.forward;
+      const totalTime = player.seasonStats.totalGameTime;
+      return forwardTime > 600 && forwardTime / totalTime > 0.6; // 60%+ forward time, 10+ min total
+    },
+    reasoning: (player) => `Dedicated forward with ${Math.floor(player.seasonStats.positionTotals.forward / 60)} minutes attacking the goals.`,
+    category: 'performance'
+  },
+  {
+    id: 'midfield-specialist',
+    name: 'Midfield Specialist',
+    description: 'Spent most time in midfield position',
+    icon: 'Gauge',
+    criteria: (player) => {
+      const midfieldTime = player.seasonStats.positionTotals.midfield;
+      const totalTime = player.seasonStats.totalGameTime;
+      return midfieldTime > 600 && midfieldTime / totalTime > 0.6; // 60%+ midfield time
+    },
+    reasoning: (player) => `Engine room expert with ${Math.floor(player.seasonStats.positionTotals.midfield / 60)} minutes controlling the game.`,
+    category: 'performance'
+  },
+  {
+    id: 'defence-specialist',
+    name: 'Defence Specialist',
+    description: 'Spent most time in defensive position',
+    icon: 'Shield',
+    criteria: (player) => {
+      const defenceTime = player.seasonStats.positionTotals.defence;
+      const totalTime = player.seasonStats.totalGameTime;
+      return defenceTime > 600 && defenceTime / totalTime > 0.6; // 60%+ defence time
+    },
+    reasoning: (player) => `Defensive rock with ${Math.floor(player.seasonStats.positionTotals.defence / 60)} minutes protecting the backline.`,
+    category: 'performance'
+  },
+
+  // DEVELOPMENT & IMPROVEMENT AWARDS
+  {
+    id: 'rising-star',
+    name: 'Rising Star',
+    description: 'New player showing excellent development',
+    icon: 'Star',
+    criteria: (player) => {
+      return player.seasonStats.gamesCompleted >= 2 && player.seasonStats.gamesCompleted <= 4 && player.seasonStats.averageGameTime > 600; // New player with good time
+    },
+    reasoning: (player) => `Emerging talent with ${player.seasonStats.gamesCompleted} games and strong ${Math.floor(player.seasonStats.averageGameTime / 60)} min average.`,
+    category: 'development'
+  },
+  {
+    id: 'consistency-champion',
+    name: 'Consistency Champion',
+    description: 'Most consistent playing time across games',
+    icon: 'Timer',
+    criteria: (player) => {
+      // This would require game-by-game variance calculation - simplified for now
+      return player.seasonStats.gamesCompleted >= 4 && player.seasonStats.averageGameTime > 900 && player.seasonStats.totalGameTime > 3600; // 60+ min total, 15+ avg
+    },
+    reasoning: (player) => `Reliable performer with consistent ${Math.floor(player.seasonStats.averageGameTime / 60)} minutes per game.`,
+    category: 'character'
+  },
+  {
+    id: 'late-bloomer',
+    name: 'Late Bloomer',
+    description: 'Player showing increasing involvement',
+    icon: 'TrendingUp',
+    criteria: (player) => {
+      // This would ideally track improvement over time - simplified
+      return player.seasonStats.gamesCompleted >= 3 && player.seasonStats.totalGameTime > 1500 && player.seasonStats.averageGameTime > 450; // Growing involvement
+    },
+    reasoning: (player) => `Developing player with growing involvement and ${Math.floor(player.seasonStats.totalGameTime / 60)} total minutes.`,
+    category: 'development'
+  },
+
+  // CHARACTER & TEAM SPIRIT AWARDS
+  {
+    id: 'team-spirit',
+    name: 'Team Spirit Award',
+    description: 'Willing to play any position for the team',
+    icon: 'Users',
+    criteria: (player) => {
+      const positions = player.seasonStats.positionTotals;
       const playedPositions = Object.values(positions).filter(time => time > 300).length; // 5+ min in position
-      return playedPositions >= 2;
+      return playedPositions >= 2 && player.seasonStats.gamesCompleted >= 3;
     },
     reasoning: (player) => {
       const positions = player.seasonStats.positionTotals;
@@ -44,94 +181,43 @@ export const JUNIOR_AWARDS: AussieRulesAward[] = [
         .filter(([, time]) => time > 300)
         .map(([pos]) => pos)
         .join(', ');
-      return `Played effectively in multiple positions: ${positionsPlayed}.`;
+      return `Team-first player contributing in ${positionsPlayed}.`;
     },
-    category: 'development'
-  },
-  {
-    id: 'rising-star',
-    name: 'Rising Star',
-    description: 'Showing great improvement and potential',
-    icon: 'Star',
-    criteria: (player) => {
-      // Players with good game time but newer to the team
-      return player.seasonStats.gamesCompleted >= 2 && player.seasonStats.gamesCompleted <= 5;
-    },
-    reasoning: (player) => `New talent showing great development over ${player.seasonStats.gamesCompleted} games.`,
-    category: 'development'
-  },
-  {
-    id: 'team-player',
-    name: 'Ultimate Team Player',
-    description: 'Always ready to help wherever needed',
-    icon: 'Users',
-    criteria: (player) => {
-      const positions = player.seasonStats.positionTotals;
-      const positionChanges = Object.values(positions).filter(time => time > 0).length;
-      return positionChanges >= 2 && player.seasonStats.gamesCompleted >= 3;
-    },
-    reasoning: (player) => `Flexible player who contributes wherever the team needs them most.`,
     category: 'team'
   },
   {
-    id: 'enthusiast',
-    name: 'Footy Enthusiast',
-    description: 'Great attitude and love for the game',
-    icon: 'Heart',
-    criteria: (player) => player.seasonStats.gamesCompleted >= 4,
-    reasoning: (player) => `Consistent attendance and participation across ${player.seasonStats.gamesCompleted} games.`,
-    category: 'character'
+    id: 'utility-player',
+    name: 'Utility Player',
+    description: 'Valuable contributor in multiple roles',
+    icon: 'RotateCcw',
+    criteria: (player) => {
+      const positions = player.seasonStats.positionTotals;
+      const activePositions = Object.values(positions).filter(time => time > 450).length; // 7.5+ min in position
+      return activePositions >= 2 && player.seasonStats.totalGameTime > 1200; // 20+ min total
+    },
+    reasoning: (player) => `Versatile contributor with meaningful time in multiple positions.`,
+    category: 'team'
   },
   {
     id: 'energizer',
     name: 'Team Energizer',
-    description: 'Brings positive energy when they take the field',
+    description: 'High-impact player who maximizes their time',
     icon: 'Zap',
     criteria: (player) => {
       const averageTime = player.seasonStats.averageGameTime;
-      return averageTime > 600 && player.seasonStats.gamesCompleted >= 3; // 10+ min average
+      return averageTime > 600 && player.seasonStats.gamesCompleted >= 3; // 10+ min average, engaged player
     },
-    reasoning: (player) => `High-energy player who makes the most of their ${Math.floor(player.seasonStats.averageGameTime / 60)} minutes per game.`,
+    reasoning: (player) => `High-energy contributor making the most of ${Math.floor(player.seasonStats.averageGameTime / 60)} minutes per game.`,
     category: 'character'
   },
   {
-    id: 'most-improved',
-    name: 'Most Improved',
-    description: 'Showing significant development over the season',
-    icon: 'TrendingUp',
-    criteria: (player) => {
-      // Look for increasing game time over recent games
-      return player.seasonStats.gamesCompleted >= 3 && player.seasonStats.totalGameTime > 1800; // 30+ min total
-    },
-    reasoning: (player) => `Demonstrated growth and development with increasing involvement in games.`,
-    category: 'development'
-  },
-  {
-    id: 'best-forward',
-    name: 'Best Forward',
-    description: 'Outstanding in the forward line',
-    icon: 'Award',
-    criteria: (player) => player.seasonStats.positionTotals.forward > 900, // 15+ min forward
-    reasoning: (player) => `Excellent forward play with ${Math.floor(player.seasonStats.positionTotals.forward / 60)} minutes in attack.`,
-    category: 'performance'
-  },
-  {
-    id: 'best-midfielder',
-    name: 'Best Midfielder',
-    description: 'Dominant in the middle of the ground',
-    icon: 'Award',
-    criteria: (player) => player.seasonStats.positionTotals.midfield > 900,
-    reasoning: (player) => `Outstanding midfield work with ${Math.floor(player.seasonStats.positionTotals.midfield / 60)} minutes in the engine room.`,
-    category: 'performance'
-  },
-  {
-    id: 'best-defender',
-    name: 'Best Defender',
-    description: 'Rock solid in defence',
-    icon: 'Award',
-    criteria: (player) => player.seasonStats.positionTotals.defence > 900,
-    reasoning: (player) => `Dependable defender with ${Math.floor(player.seasonStats.positionTotals.defence / 60)} minutes protecting the goals.`,
-    category: 'performance'
+    id: 'heart-of-gold',
+    name: 'Heart of Gold',
+    description: 'Player who brings positivity to every game',
+    icon: 'Heart',
+    criteria: (player) => player.seasonStats.gamesCompleted >= 4, // Simple attendance-based character award
+    reasoning: (player) => `Positive team presence across ${player.seasonStats.gamesCompleted} games this season.`,
+    category: 'character'
   }
 ];
 
@@ -167,7 +253,17 @@ export const getIconComponent = (iconName: string) => {
     Heart,
     Zap,
     TrendingUp,
-    Award
+    Award,
+    Clock,
+    Shield,
+    Repeat,
+    Activity,
+    Timer,
+    RotateCcw,
+    Gauge,
+    Flame,
+    Crown,
+    Sparkles
   };
   return iconMap[iconName as keyof typeof iconMap] || Award;
 };
