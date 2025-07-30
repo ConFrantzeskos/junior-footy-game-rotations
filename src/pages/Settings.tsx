@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { ArrowLeft, Plus, Trash2, Save, TrendingUp, Award, Target } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, TrendingUp, Award, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Player, Position } from '@/types/sports';
 import { toast } from '@/hooks/use-toast';
@@ -72,7 +72,10 @@ const Settings = () => {
       newPlayer.attributes.preferredPosition = newPlayerPosition;
     }
 
-    setPlayers([...players, newPlayer]);
+    const updatedPlayers = [...players, newPlayer];
+    setPlayers(updatedPlayers);
+    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    
     setNewPlayerName('');
     setNewPlayerGuernsey(undefined);
     setNewPlayerPosition(undefined);
@@ -84,7 +87,9 @@ const Settings = () => {
   };
 
   const removePlayer = (playerId: string) => {
-    setPlayers(players.filter(p => p.id !== playerId));
+    const updatedPlayers = players.filter(p => p.id !== playerId);
+    setPlayers(updatedPlayers);
+    localStorage.setItem('players', JSON.stringify(updatedPlayers));
     toast({
       title: "Player Removed",
       description: "Player has been removed from the roster",
@@ -92,42 +97,43 @@ const Settings = () => {
   };
 
   const updatePlayerName = (playerId: string, newName: string) => {
-    setPlayers(players.map(p => 
+    const updatedPlayers = players.map(p => 
       p.id === playerId ? { ...p, name: newName } : p
-    ));
+    );
+    setPlayers(updatedPlayers);
+    localStorage.setItem('players', JSON.stringify(updatedPlayers));
   };
 
   const updatePlayerGuernsey = (playerId: string, guernseyNumber?: number) => {
-    setPlayers(players.map(p => 
+    const updatedPlayers = players.map(p => 
       p.id === playerId ? { ...p, guernseyNumber } : p
-    ));
+    );
+    setPlayers(updatedPlayers);
+    localStorage.setItem('players', JSON.stringify(updatedPlayers));
   };
 
   const updatePlayerAttribute = (playerId: string, attribute: keyof Player['attributes'], value: any) => {
-    setPlayers(players.map(p => 
+    const updatedPlayers = players.map(p => 
       p.id === playerId ? { 
         ...p, 
         attributes: { ...p.attributes, [attribute]: value } 
       } : p
-    ));
+    );
+    setPlayers(updatedPlayers);
+    localStorage.setItem('players', JSON.stringify(updatedPlayers));
   };
 
   const updatePlayerPreferredPosition = (playerId: string, position: Position) => {
-    setPlayers(players.map(p => 
+    const updatedPlayers = players.map(p => 
       p.id === playerId ? { 
         ...p, 
         attributes: { ...p.attributes, preferredPosition: position } 
       } : p
-    ));
+    );
+    setPlayers(updatedPlayers);
+    localStorage.setItem('players', JSON.stringify(updatedPlayers));
   };
 
-  const saveSettings = () => {
-    localStorage.setItem('players', JSON.stringify(players));
-    toast({
-      title: "Settings Saved",
-      description: "Player roster has been saved successfully",
-    });
-  };
 
   const resetAllStats = () => {
     const resetPlayers = players.map(player => ({
@@ -266,11 +272,8 @@ const Settings = () => {
           
           <h1 className="text-3xl font-bold text-foreground">Team Management</h1>
           
-          <div className="flex gap-2">
-            <Button onClick={saveSettings} className="bg-sherrin-red hover:bg-sherrin-red/90 text-white">
-              <Save className="w-4 h-4 mr-2" />
-              Save All Changes
-            </Button>
+          <div className="text-sm text-muted-foreground">
+            Changes are saved automatically
           </div>
         </div>
 
@@ -437,17 +440,13 @@ const Settings = () => {
             <Card className="p-6 bg-white">
               <h2 className="text-xl font-semibold mb-4">Advanced Settings</h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded">
+                <div className="p-4 border rounded">
                   <div>
-                    <h3 className="font-medium">Save All Changes</h3>
+                    <h3 className="font-medium">Auto-Save</h3>
                     <p className="text-sm text-muted-foreground">
-                      Save player roster, attributes, and settings to local storage
+                      All changes to player roster and attributes are automatically saved to local storage when you make them.
                     </p>
                   </div>
-                  <Button onClick={saveSettings}>
-                    <Save className="w-4 h-4 mr-2" />
-                    Save All
-                  </Button>
                 </div>
               </div>
             </Card>
