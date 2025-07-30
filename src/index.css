@@ -18,10 +18,10 @@
     --primary: 222.2 84% 4.9%;
     --primary-foreground: 0 0% 98%;
     
-    /* AFL-inspired Position Colors */
-    --position-forward: 15 65% 48%;      /* Goal end - warm orange */
-    --position-midfield: 213 65% 48%;    /* Centre square - cool blue */
-    --position-defense: 285 65% 48%;     /* Defensive end - purple */
+    /* Position System - Minimal and elegant */
+    --position-forward: 15 65% 48%;
+    --position-midfield: 213 65% 48%;
+    --position-defense: 285 65% 48%;
     
     /* Player States */
     --player-active: 142 71% 45%;
@@ -42,15 +42,10 @@
     --input: 0 0% 97%;
     --ring: 222.2 84% 4.9%;
 
-    /* Game Time Status Colours (Australian spelling) */
-    --status-overplayed: 15 85% 55%;    /* Needs rest */
-    --status-underplayed: 213 85% 55%;  /* Needs more time */
-    --status-balanced: 142 71% 45%;     /* Good balance */
-    
-    /* AFL Design Motifs */
-    --sherrin-red: 0 65% 45%;           /* Classic Sherrin football red */
-    --goal-post-white: 0 0% 98%;        /* Goal post white */
-    --field-green: 100 35% 25%;         /* AFL field green */
+    /* Game Time Status Colors */
+    --status-overplayed: 15 85% 55%;    /* Warm orange - needs rest */
+    --status-underplayed: 213 85% 55%;  /* Cool blue - needs more time */
+    --status-balanced: 142 71% 45%;     /* Green - good balance */
 
     /* Unified Spacing System */
     --space-xs: 0.25rem;    /* 4px */
@@ -197,42 +192,8 @@
     @apply shadow-sm;
   }
   
-  /* AFL Design Elements */
-  .centre-square {
-    position: relative;
-  }
-  
-  .centre-square::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
-    border: 2px solid hsl(var(--position-midfield));
-    border-radius: 4px;
-    opacity: 0.1;
-    z-index: 0;
-  }
-  
-  .goal-posts {
-    position: relative;
-  }
-  
-  .goal-posts::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 8px;
-    width: 2px;
-    height: 100%;
-    background: linear-gradient(to bottom, hsl(var(--goal-post-white)) 0%, hsl(var(--goal-post-white)) 40%, transparent 40%, transparent 60%, hsl(var(--goal-post-white)) 60%, hsl(var(--goal-post-white)) 100%);
-    opacity: 0.2;
-    z-index: 0;
-  }
-  
-  .sherrin-accent {
-    background-color: hsl(var(--sherrin-red));
+  .time-balanced {
+    background-color: hsl(var(--status-balanced));
+    @apply shadow-sm;
   }
 }

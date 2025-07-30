@@ -42,11 +42,6 @@ export default {
 					underplayed: 'hsl(var(--status-underplayed))',
 					balanced: 'hsl(var(--status-balanced))'
 				},
-				afl: {
-					sherrin: 'hsl(var(--sherrin-red))',
-					goalpost: 'hsl(var(--goal-post-white))',
-					field: 'hsl(var(--field-green))'
-				},
 				player: {
 					active: 'hsl(var(--player-active))',
 					inactive: 'hsl(var(--player-inactive))',
