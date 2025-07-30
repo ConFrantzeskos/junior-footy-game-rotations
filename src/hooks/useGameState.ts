@@ -136,6 +136,104 @@ export const useGameState = () => {
     });
   }, []);
 
+  const movePlayer = useCallback((playerId: string, targetPosition: Position, sourcePosition?: Position) => {
+    setGameState(prev => {
+      const player = prev.players.find(p => p.id === playerId);
+      if (!player) return prev;
+
+      const targetPositionPlayers = prev.activePlayersByPosition[targetPosition];
+      
+      // If target position is full, perform hot-swap
+      if (targetPositionPlayers.length >= MAX_PLAYERS_PER_POSITION) {
+        // Find a player to swap out (prefer the one with most time in that position)
+        const playerToSwap = targetPositionPlayers
+          .map(id => prev.players.find(p => p.id === id)!)
+          .sort((a, b) => b.timeStats[targetPosition] - a.timeStats[targetPosition])[0];
+
+        if (sourcePosition && playerToSwap) {
+          // Hot-swap: move the displaced player to source position
+          const newActivePlayersByPosition = { ...prev.activePlayersByPosition };
+          
+          // Remove both players from their current positions
+          Object.keys(newActivePlayersByPosition).forEach(pos => {
+            newActivePlayersByPosition[pos as Position] = newActivePlayersByPosition[pos as Position]
+              .filter(id => id !== playerId && id !== playerToSwap.id);
+          });
+          
+          // Place players in their new positions
+          newActivePlayersByPosition[targetPosition].push(playerId);
+          newActivePlayersByPosition[sourcePosition].push(playerToSwap.id);
+
+          return {
+            ...prev,
+            players: prev.players.map(p => {
+              if (p.id === playerId) {
+                return { ...p, isActive: true, currentPosition: targetPosition };
+              }
+              if (p.id === playerToSwap.id) {
+                return { ...p, isActive: true, currentPosition: sourcePosition };
+              }
+              return p;
+            }),
+            activePlayersByPosition: newActivePlayersByPosition,
+          };
+        } else {
+          // Can't swap, target position is full
+          toast({
+            title: "Position Full",
+            description: `Cannot move player - ${targetPosition} is full`,
+            variant: "destructive",
+          });
+          return prev;
+        }
+      }
+
+      // Normal move - target position has space
+      const newActivePlayersByPosition = { ...prev.activePlayersByPosition };
+      
+      // Remove player from any current position
+      Object.keys(newActivePlayersByPosition).forEach(pos => {
+        newActivePlayersByPosition[pos as Position] = newActivePlayersByPosition[pos as Position]
+          .filter(id => id !== playerId);
+      });
+      
+      // Add to target position
+      newActivePlayersByPosition[targetPosition].push(playerId);
+
+      return {
+        ...prev,
+        players: prev.players.map(p =>
+          p.id === playerId
+            ? { ...p, isActive: true, currentPosition: targetPosition }
+            : p
+        ),
+        activePlayersByPosition: newActivePlayersByPosition,
+      };
+    });
+  }, []);
+
+  const removePlayer = useCallback((playerId: string) => {
+    setGameState(prev => {
+      const newActivePlayersByPosition = { ...prev.activePlayersByPosition };
+      
+      // Remove player from all positions
+      Object.keys(newActivePlayersByPosition).forEach(pos => {
+        newActivePlayersByPosition[pos as Position] = newActivePlayersByPosition[pos as Position]
+          .filter(id => id !== playerId);
+      });
+
+      return {
+        ...prev,
+        players: prev.players.map(p =>
+          p.id === playerId
+            ? { ...p, isActive: false, currentPosition: null }
+            : p
+        ),
+        activePlayersByPosition: newActivePlayersByPosition,
+      };
+    });
+  }, []);
+
   const startGame = useCallback(() => {
     setGameState(prev => ({ ...prev, isPlaying: true }));
     toast({
@@ -196,6 +294,8 @@ export const useGameState = () => {
   return {
     gameState,
     togglePlayer,
+    movePlayer,
+    removePlayer,
     startGame,
     pauseGame,
     nextQuarter,

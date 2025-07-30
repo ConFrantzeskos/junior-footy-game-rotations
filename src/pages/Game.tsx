@@ -1,15 +1,23 @@
 import { useGameState } from '@/hooks/useGameState';
 import { GameHeader } from '@/components/GameHeader';
 import { PositionSection } from '@/components/PositionSection';
+import { DraggablePlayer } from '@/components/DraggablePlayer';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Position } from '@/types/sports';
 
 const Game = () => {
   const navigate = useNavigate();
+  const [draggedPlayer, setDraggedPlayer] = useState<{ id: string; sourcePosition?: Position } | null>(null);
+  
   const {
     gameState,
     togglePlayer,
+    movePlayer,
+    removePlayer,
     startGame,
     pauseGame,
     nextQuarter,
@@ -17,6 +25,16 @@ const Game = () => {
   } = useGameState();
 
   const { players, activePlayersByPosition, isPlaying, currentQuarter, quarterTime, totalTime } = gameState;
+
+  const handleDragStart = (playerId: string, sourcePosition?: Position) => {
+    setDraggedPlayer({ id: playerId, sourcePosition });
+  };
+
+  const handleDragEnd = () => {
+    setDraggedPlayer(null);
+  };
+
+  const availablePlayers = players.filter(p => !p.isActive);
 
   if (players.length === 0) {
     return (
@@ -68,6 +86,9 @@ const Game = () => {
             players={players}
             activePlayers={activePlayersByPosition.forward}
             onTogglePlayer={togglePlayer}
+            onMovePlayer={movePlayer}
+            onRemovePlayer={removePlayer}
+            onDragStart={handleDragStart}
             maxPlayers={6}
           />
           
@@ -77,6 +98,9 @@ const Game = () => {
             players={players}
             activePlayers={activePlayersByPosition.midfield}
             onTogglePlayer={togglePlayer}
+            onMovePlayer={movePlayer}
+            onRemovePlayer={removePlayer}
+            onDragStart={handleDragStart}
             maxPlayers={6}
           />
           
@@ -86,17 +110,39 @@ const Game = () => {
             players={players}
             activePlayers={activePlayersByPosition.defense}
             onTogglePlayer={togglePlayer}
+            onMovePlayer={movePlayer}
+            onRemovePlayer={removePlayer}
+            onDragStart={handleDragStart}
             maxPlayers={6}
           />
         </div>
 
-        <div className="mt-6 text-center">
-          <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-            <div className="text-field-line font-semibold">
+        {/* Team Roster Section */}
+        <Card className="mt-6 p-6 bg-white/90 backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold">Team Roster</h3>
+            <div className="text-sm text-muted-foreground">
               Players on Field: {activePlayersByPosition.forward.length + activePlayersByPosition.midfield.length + activePlayersByPosition.defense.length}/18
             </div>
           </div>
-        </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {availablePlayers.map((player) => (
+              <DraggablePlayer
+                key={player.id}
+                player={player}
+                onDragStart={handleDragStart}
+                className="min-h-[60px]"
+              />
+            ))}
+          </div>
+          
+          {availablePlayers.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              All players are currently on the field
+            </div>
+          )}
+        </Card>
       </div>
     </div>
   );
