@@ -124,7 +124,7 @@ const Game = () => {
         {/* Team Roster Section */}
         <Card className="mt-6 p-6 bg-white/90 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold">Team Roster</h3>
+            <h3 className="text-lg font-bold">Interchange</h3>
             <div className="text-sm text-muted-foreground">
               Players on Field: {activePlayersByPosition.forward.length + activePlayersByPosition.midfield.length + activePlayersByPosition.defense.length}/18
             </div>
@@ -138,6 +138,7 @@ const Game = () => {
                 onDragStart={handleDragStart}
                 onPlayerSwap={swapPlayers}
                 className="min-h-[60px]"
+                showTime={true}
               />
             ))}
           </div>
