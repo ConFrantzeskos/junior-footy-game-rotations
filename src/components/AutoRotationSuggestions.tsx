@@ -10,6 +10,7 @@ interface AutoRotationSuggestionsProps {
   onExecuteSwap: (playerInId: string, playerOutId: string) => void;
   onRefresh: () => void;
   isGameActive: boolean;
+  currentGameTime: number;
 }
 
 const AutoRotationSuggestions = ({
@@ -18,6 +19,7 @@ const AutoRotationSuggestions = ({
   onExecuteSwap,
   onRefresh,
   isGameActive,
+  currentGameTime,
 }: AutoRotationSuggestionsProps) => {
   const getPlayerName = (playerId: string) => {
     return players.find(p => p.id === playerId)?.name || 'Unknown';
@@ -34,12 +36,12 @@ const AutoRotationSuggestions = ({
     if (!playerOut || !playerIn) return 'Rotation needed';
     
     if (reasoning.includes('rest') || reasoning.includes('Fresh') || reasoning.includes('Rested')) {
-      const benchTime = Math.floor((playerIn.lastInterchangeTime ? Date.now() - playerIn.lastInterchangeTime : 0) / 60000);
+      const benchTime = Math.floor((currentGameTime - playerIn.lastInterchangeTime) / 60);
       return `${benchTime}min rest`;
     }
     if (reasoning.includes('break') || reasoning.includes('Tired')) {
-      // This would need the current game time passed down to calculate properly
-      return 'Long on field';
+      const fieldTime = Math.floor((currentGameTime - playerOut.lastInterchangeTime) / 60);
+      return `${fieldTime}min on field`;
     }
     if (reasoning.includes('field') || reasoning.includes('Bench')) {
       return 'Fresh legs';

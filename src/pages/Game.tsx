@@ -250,6 +250,7 @@ const Game = () => {
             onExecuteSwap={handleExecuteRotationSwap}
             onRefresh={refreshRotationSuggestions}
             isGameActive={isPlaying}
+            currentGameTime={totalTime}
           />
         </div>
 
