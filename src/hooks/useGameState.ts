@@ -177,7 +177,7 @@ export const useGameState = () => {
           ...prev,
           players: prev.players.map(p =>
             p.id === playerId
-              ? { ...p, isActive: true, currentPosition: position, lastInterchangeTime: prev.totalTime }
+              ? { ...p, isActive: true, currentPosition: position, lastInterchangeTime: !p.isActive ? prev.totalTime : p.lastInterchangeTime }
               : p
           ),
           activePlayersByPosition: newActivePlayersByPosition,
@@ -218,10 +218,10 @@ export const useGameState = () => {
             ...prev,
             players: prev.players.map(p => {
               if (p.id === playerId) {
-                return { ...p, isActive: true, currentPosition: targetPosition, lastInterchangeTime: prev.totalTime };
+                return { ...p, isActive: true, currentPosition: targetPosition, lastInterchangeTime: !p.isActive ? prev.totalTime : p.lastInterchangeTime };
               }
               if (p.id === playerToSwap.id) {
-                return { ...p, isActive: true, currentPosition: sourcePosition, lastInterchangeTime: prev.totalTime };
+                return { ...p, isActive: true, currentPosition: sourcePosition, lastInterchangeTime: !p.isActive ? prev.totalTime : p.lastInterchangeTime };
               }
               return p;
             }),
@@ -254,7 +254,7 @@ export const useGameState = () => {
         ...prev,
         players: prev.players.map(p =>
           p.id === playerId
-            ? { ...p, isActive: true, currentPosition: targetPosition, lastInterchangeTime: prev.totalTime }
+            ? { ...p, isActive: true, currentPosition: targetPosition, lastInterchangeTime: !p.isActive ? prev.totalTime : p.lastInterchangeTime }
             : p
         ),
         activePlayersByPosition: newActivePlayersByPosition,
@@ -311,7 +311,8 @@ export const useGameState = () => {
               ...p, 
               isActive: !!player1NewPosition, 
               currentPosition: player1NewPosition,
-              lastInterchangeTime: player1NewPosition ? prev.totalTime : p.lastInterchangeTime
+              // Only update lastInterchangeTime if player was previously inactive (coming from bench)
+              lastInterchangeTime: (player1NewPosition && !player1.isActive) ? prev.totalTime : p.lastInterchangeTime
             };
           }
           if (p.id === player2Id) {
@@ -319,7 +320,8 @@ export const useGameState = () => {
               ...p, 
               isActive: !!player2NewPosition, 
               currentPosition: player2NewPosition,
-              lastInterchangeTime: player2NewPosition ? prev.totalTime : p.lastInterchangeTime
+              // Only update lastInterchangeTime if player was previously inactive (coming from bench)
+              lastInterchangeTime: (player2NewPosition && !player2.isActive) ? prev.totalTime : p.lastInterchangeTime
             };
           }
           return p;
