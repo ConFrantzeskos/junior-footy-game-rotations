@@ -63,6 +63,23 @@ export const useGameState = () => {
     localStorage.setItem('gameState', JSON.stringify(gameState));
   }, [gameState]);
 
+  const addLateArrival = useCallback((playerData: Omit<Player, 'id'>) => {
+    const newPlayer: Player = {
+      ...playerData,
+      id: `late-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    };
+
+    setGameState(prev => ({
+      ...prev,
+      players: [...prev.players, newPlayer]
+    }));
+
+    toast({
+      title: "Late Arrival Added",
+      description: `${newPlayer.name} is now available for rotation`,
+    });
+  }, [toast]);
+
   // Load players from localStorage and sync updates
   useEffect(() => {
     const syncPlayers = () => {
@@ -457,7 +474,6 @@ export const useGameState = () => {
     }
   }, [gameState.plannedInterchanges, movePlayer, removePlannedInterchange]);
 
-
   const completeGame = useCallback((result?: 'win' | 'loss' | 'draw', opponent?: string) => {
     setGameState(prev => {
       // Complete the game for all players and save to season history
@@ -533,7 +549,7 @@ export const useGameState = () => {
     startGame,
     pauseGame,
     nextQuarter,
-    
+    addLateArrival,
     addPlannedInterchange,
     removePlannedInterchange,
     executePlannedInterchange,

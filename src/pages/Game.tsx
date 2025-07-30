@@ -4,6 +4,7 @@ import { PositionSection } from '@/components/PositionSection';
 import { DraggablePlayer } from '@/components/DraggablePlayer';
 import PlannedInterchanges from '@/components/PlannedInterchanges';
 import PlayerContextMenu from '@/components/PlayerContextMenu';
+import AddLateArrival from '@/components/AddLateArrival';
 import AutoRotationSuggestions from '@/components/AutoRotationSuggestions';
 import SeasonStats from '@/components/SeasonStats';
 import { AppHeader } from '@/components/AppHeader';
@@ -35,7 +36,7 @@ const Game = () => {
     startGame,
     pauseGame,
     nextQuarter,
-    
+    addLateArrival,
     addPlannedInterchange,
     removePlannedInterchange,
     executePlannedInterchange,
@@ -184,8 +185,16 @@ const Game = () => {
         <Card className="mt-2xl p-lg card-elevated">
           <div className="flex items-center justify-between mb-lg">
             <h3 className="text-xl font-bold font-system tracking-tight">Interchange</h3>
-            <div className="text-sm text-muted-foreground font-semibold">
-              On Ground: {activePlayersByPosition.forward.length + activePlayersByPosition.midfield.length + activePlayersByPosition.defence.length}/18
+            <div className="flex items-center gap-2">
+              <AddLateArrival 
+                onAddPlayer={addLateArrival}
+                isGameActive={isPlaying}
+                currentGameTime={totalTime}
+                existingPlayers={players}
+              />
+              <div className="text-sm text-muted-foreground font-semibold">
+                On Ground: {activePlayersByPosition.forward.length + activePlayersByPosition.midfield.length + activePlayersByPosition.defence.length}/18
+              </div>
             </div>
           </div>
           

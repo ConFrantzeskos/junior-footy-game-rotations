@@ -30,12 +30,13 @@ export class EnhancedRotationEngine {
     const allSuggestions: RotationSuggestion[] = [];
 
     // Unified intelligent scoring system
+    const lateArrivalSuggestions = this.analyzeLateArrivals(context);
     const equitySuggestions = this.analyzeTimeEquity(context);
     const fatigueSuggestions = this.analyzeFatigue(context);
     const inclusionSuggestions = this.analyzeInclusion(context);
     const positionSuggestions = this.analyzePositionExperience(context);
 
-    allSuggestions.push(...equitySuggestions, ...fatigueSuggestions, ...inclusionSuggestions, ...positionSuggestions);
+    allSuggestions.push(...lateArrivalSuggestions, ...equitySuggestions, ...fatigueSuggestions, ...inclusionSuggestions, ...positionSuggestions);
 
     // Smart filtering to prevent flip-flopping
     const filteredSuggestions = this.applySmartFiltering(allSuggestions, context);
@@ -59,6 +60,45 @@ export class EnhancedRotationEngine {
       quarterProgress,
       gamePhase
     };
+  }
+
+  private analyzeLateArrivals(context: RotationContext): RotationSuggestion[] {
+    const suggestions: RotationSuggestion[] = [];
+    const positions = ['forward', 'midfield', 'defence'] as const;
+    
+    // Find players who haven't played at all (late arrivals)
+    const lateArrivals = this.gameState.players.filter(p => 
+      !this.isPlayerActive(p.id) && this.getTotalPlayTime(p) === 0
+    );
+
+    for (const lateArrival of lateArrivals) {
+      // Find best position to substitute them into
+      for (const position of positions) {
+        const activePlayerIds = this.gameState.activePlayersByPosition[position] || [];
+        
+        // Find the player who has played the most in this position
+        const mostPlayedPlayer = activePlayerIds
+          .map(playerId => this.gameState.players.find(p => p.id === playerId))
+          .filter(Boolean)
+          .sort((a, b) => this.getCurrentStint(b!) - this.getCurrentStint(a!))[0];
+
+        if (mostPlayedPlayer && this.getCurrentStint(mostPlayedPlayer) > 5 * 60) { // 5+ minutes
+          suggestions.push({
+            id: `late-arrival-${position}-${Date.now()}`,
+            type: 'swap',
+            priority: 'urgent',
+            reasoning: `🔥 PRIORITY: ${lateArrival.name} just arrived and hasn't played yet - get them on field!`,
+            playerIn: lateArrival.id,
+            playerOut: mostPlayedPlayer.id,
+            position,
+            urgencyScore: 15, // Highest priority
+            factors: ['late_arrival', 'inclusion', 'fairness']
+          });
+        }
+      }
+    }
+
+    return suggestions;
   }
 
   private analyzeTimeEquity(context: RotationContext): RotationSuggestion[] {
@@ -273,6 +313,11 @@ export class EnhancedRotationEngine {
     return suggestions
       .map(suggestion => {
         let score = suggestion.urgencyScore;
+
+        // HIGHEST PRIORITY: Late arrivals who haven't played
+        if (suggestion.factors.includes('late_arrival')) {
+          score += 10; // Massive boost
+        }
 
         // Boost equity-based suggestions
         if (suggestion.factors.includes('time_equity')) {
