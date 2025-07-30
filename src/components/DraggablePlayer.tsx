@@ -128,47 +128,48 @@ export const DraggablePlayer = ({
       )}
       
       <div className="space-y-xs relative z-10">
-        <div className="flex items-center justify-between">
-          <div className="font-semibold text-sm font-system leading-tight">{player.name}</div>
-          
-          {/* Time since last interchange - for active players only */}
-          {isActive && player.lastInterchangeTime !== undefined && (
-            <div className="text-xs text-muted-foreground font-mono opacity-70">
-              {formatTime(currentGameTime - player.lastInterchangeTime)}
-            </div>
-          )}
-        </div>
+        <div className="font-semibold text-sm font-system leading-tight">{player.name}</div>
         
-        {showTime && totalTime > 0 && (
+        {showTime && (
           <div className="space-y-xs">
-            <div className="text-xs text-muted-foreground font-medium">
-              Total: {formatTime(totalTime)}
+            <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+              <span>Total: {formatTime(totalTime)}</span>
+              
+              {/* Time since last interchange - for all players */}
+              <span className="font-mono opacity-70">
+                {player.lastInterchangeTime !== undefined 
+                  ? formatTime(currentGameTime - player.lastInterchangeTime)
+                  : formatTime(currentGameTime)
+                }
+              </span>
             </div>
             
             {/* Position Time Breakdown - Mini Progress Bars */}
-            <div className="flex gap-xs">
-              {player.timeStats.forward > 0 && (
-                <div 
-                  className="h-1 bg-position-forward rounded-full opacity-60"
-                  style={{ width: `${(player.timeStats.forward / totalTime) * 100}%`, minWidth: '4px' }}
-                  title={`Forward: ${formatTime(player.timeStats.forward)}`}
-                />
-              )}
-              {player.timeStats.midfield > 0 && (
-                <div 
-                  className="h-1 bg-position-midfield rounded-full opacity-60"
-                  style={{ width: `${(player.timeStats.midfield / totalTime) * 100}%`, minWidth: '4px' }}
-                  title={`Midfield: ${formatTime(player.timeStats.midfield)}`}
-                />
-              )}
-              {player.timeStats.defense > 0 && (
-                <div 
-                  className="h-1 bg-position-defense rounded-full opacity-60"
-                  style={{ width: `${(player.timeStats.defense / totalTime) * 100}%`, minWidth: '4px' }}
-                  title={`Defence: ${formatTime(player.timeStats.defense)}`}
-                />
-              )}
-            </div>
+            {totalTime > 0 && (
+              <div className="flex gap-xs">
+                {player.timeStats.forward > 0 && (
+                  <div 
+                    className="h-1 bg-position-forward rounded-full opacity-60"
+                    style={{ width: `${(player.timeStats.forward / totalTime) * 100}%`, minWidth: '4px' }}
+                    title={`Forward: ${formatTime(player.timeStats.forward)}`}
+                  />
+                )}
+                {player.timeStats.midfield > 0 && (
+                  <div 
+                    className="h-1 bg-position-midfield rounded-full opacity-60"
+                    style={{ width: `${(player.timeStats.midfield / totalTime) * 100}%`, minWidth: '4px' }}
+                    title={`Midfield: ${formatTime(player.timeStats.midfield)}`}
+                  />
+                )}
+                {player.timeStats.defense > 0 && (
+                  <div 
+                    className="h-1 bg-position-defense rounded-full opacity-60"
+                    style={{ width: `${(player.timeStats.defense / totalTime) * 100}%`, minWidth: '4px' }}
+                    title={`Defence: ${formatTime(player.timeStats.defense)}`}
+                  />
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
