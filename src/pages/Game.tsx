@@ -4,13 +4,16 @@ import { PositionSection } from '@/components/PositionSection';
 import { DraggablePlayer } from '@/components/DraggablePlayer';
 import PlannedSubstitutions from '@/components/PlannedSubstitutions';
 import PlayerContextMenu from '@/components/PlayerContextMenu';
+import AutoRotationSuggestions from '@/components/AutoRotationSuggestions';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Position, Player } from '@/types/sports';
 import { calculatePlayerRankings } from '@/utils/playerRanking';
+import { generateRotationSuggestions } from '@/utils/autoRotationEngine';
+import { RotationAnalysis } from '@/types/autoRotation';
 
 const Game = () => {
   const navigate = useNavigate();
@@ -19,6 +22,7 @@ const Game = () => {
     player: Player;
     position: { x: number; y: number };
   } | null>(null);
+  const [rotationAnalysis, setRotationAnalysis] = useState<RotationAnalysis | null>(null);
   
   const {
     gameState,
@@ -40,6 +44,23 @@ const Game = () => {
   // Calculate player rankings based on total game time
   const playerRankings = calculatePlayerRankings(players);
 
+  // Generate rotation suggestions when game state changes
+  useEffect(() => {
+    if (isPlaying && players.length > 0) {
+      const analysis = generateRotationSuggestions(gameState);
+      setRotationAnalysis(analysis);
+    } else {
+      setRotationAnalysis(null);
+    }
+  }, [gameState, isPlaying, players.length]);
+
+  const refreshRotationSuggestions = () => {
+    if (isPlaying && players.length > 0) {
+      const analysis = generateRotationSuggestions(gameState);
+      setRotationAnalysis(analysis);
+    }
+  };
+
   const handleDragStart = (playerId: string, sourcePosition?: Position) => {
     setDraggedPlayer({ id: playerId, sourcePosition });
   };
@@ -54,6 +75,12 @@ const Game = () => {
 
   const handleCloseContextMenu = () => {
     setContextMenu(null);
+  };
+
+  const handleExecuteRotationSwap = (playerInId: string, playerOutId: string) => {
+    swapPlayers(playerInId, playerOutId);
+    // Refresh suggestions after execution
+    setTimeout(refreshRotationSuggestions, 100);
   };
 
   const availablePlayers = players.filter(p => !p.isActive);
@@ -100,6 +127,17 @@ const Game = () => {
           onNextQuarter={nextQuarter}
           onReset={resetGame}
         />
+
+        {/* Auto-Rotation Suggestions */}
+        <div className="mb-6">
+          <AutoRotationSuggestions
+            rotationAnalysis={rotationAnalysis}
+            players={players}
+            onExecuteSwap={handleExecuteRotationSwap}
+            onRefresh={refreshRotationSuggestions}
+            isGameActive={isPlaying}
+          />
+        </div>
 
         {/* Planned Substitutions Queue */}
         <div className="mb-6">
