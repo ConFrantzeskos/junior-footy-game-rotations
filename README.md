@@ -16,7 +16,7 @@ Smart rotation management for junior Australian Rules Football (18 on the field)
 - Roadmap
 
 ## Overview
-This app helps coaches manage on-field rotations for junior Australian Rules Football. It keeps accurate game time even if the app is backgrounded or the device is restarted, suggests interchanges, tracks season statistics, and supports planning and on-the-fly changes.
+This app helps coaches manage on-field rotations for junior Australian Rules Football. It helps you ensure every kid has a go, helps coaches track rotations and player time in various positions, and provides reporting to coahces and parents. It suggests interchanges, tracks season statistics, and supports planning and on-the-fly changes.
 
 ## In-game features
 
