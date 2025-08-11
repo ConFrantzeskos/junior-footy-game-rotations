@@ -36,6 +36,10 @@ export const useGameState = () => {
       if (parsedState.gameCompleted === undefined) {
         parsedState.gameCompleted = false;
       }
+      // Initialize timing fields if missing
+      if (parsedState.lastTickAt === undefined) {
+        parsedState.lastTickAt = null;
+      }
       
       return parsedState;
     }
@@ -47,6 +51,7 @@ export const useGameState = () => {
       currentQuarter: 1,
       quarterTime: 0,
       totalTime: 0,
+      lastTickAt: null,
       gameCompleted: false,
       players: [],
       activePlayersByPosition: {
@@ -203,65 +208,99 @@ export const useGameState = () => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []); // Remove dependency on gameState.players.length to always sync
 
+  // Delta-based timer with catch-up
+  const catchUp = useCallback(() => {
+    setGameState(prev => {
+      if (!prev.isPlaying) return prev;
+      const nowSec = Math.floor(Date.now() / 1000);
+      const last = prev.lastTickAt ?? nowSec;
+      let delta = nowSec - last;
+      if (delta <= 0) {
+        return { ...prev, lastTickAt: nowSec };
+      }
+
+      const maxDelta = QUARTER_DURATION - prev.quarterTime;
+      const deltaUsed = Math.min(delta, maxDelta);
+
+      // Update player time stats in bulk by deltaUsed
+      const updatedPlayers = prev.players.map(player => {
+        if (player.isActive && player.currentPosition) {
+          const newTimeStats = { ...player.timeStats };
+          newTimeStats[player.currentPosition] += deltaUsed;
+          const newQuarterStats = { ...player.quarterStats };
+          if (!newQuarterStats[prev.currentQuarter]) {
+            newQuarterStats[prev.currentQuarter] = { forward: 0, midfield: 0, defence: 0 };
+          }
+          newQuarterStats[prev.currentQuarter][player.currentPosition] += deltaUsed;
+          return { ...player, timeStats: newTimeStats, quarterStats: newQuarterStats };
+        }
+        return player;
+      });
+
+      const newQuarterTime = prev.quarterTime + deltaUsed;
+      const newTotalTime = prev.totalTime + deltaUsed;
+
+      if (newQuarterTime >= QUARTER_DURATION) {
+        // Auto-pause at end of quarter
+        toast({
+          title: "Quarter Complete",
+          description: `Quarter ${prev.currentQuarter} finished (15 minutes)`,
+        });
+        return {
+          ...prev,
+          isPlaying: false,
+          quarterTime: QUARTER_DURATION,
+          totalTime: newTotalTime,
+          lastTickAt: null,
+          players: updatedPlayers,
+        };
+      }
+
+      return {
+        ...prev,
+        quarterTime: newQuarterTime,
+        totalTime: newTotalTime,
+        lastTickAt: nowSec,
+        players: updatedPlayers,
+      };
+    });
+  }, []);
+
   // Timer effect
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
+    let interval: NodeJS.Timeout | undefined;
     if (gameState.isPlaying) {
       interval = setInterval(() => {
-        setGameState(prev => {
-          const newQuarterTime = prev.quarterTime + 1;
-          const newTotalTime = prev.totalTime + 1;
-          
-          // Check if quarter time has reached 15 minutes (900 seconds)
-          if (newQuarterTime >= QUARTER_DURATION) {
-            // Auto-pause at end of quarter
-            toast({
-              title: "Quarter Complete",
-              description: `Quarter ${prev.currentQuarter} finished (15 minutes)`,
-            });
-            
-            return {
-              ...prev,
-              isPlaying: false,
-              quarterTime: QUARTER_DURATION,
-              totalTime: newTotalTime,
-            };
-          }
-          
-          // Update player time stats
-          const updatedPlayers = prev.players.map(player => {
-            if (player.isActive && player.currentPosition) {
-              const newTimeStats = { ...player.timeStats };
-              newTimeStats[player.currentPosition] += 1;
-              
-              const newQuarterStats = { ...player.quarterStats };
-              if (!newQuarterStats[prev.currentQuarter]) {
-                newQuarterStats[prev.currentQuarter] = { forward: 0, midfield: 0, defence: 0 };
-              }
-              newQuarterStats[prev.currentQuarter][player.currentPosition] += 1;
-              
-              return {
-                ...player,
-                timeStats: newTimeStats,
-                quarterStats: newQuarterStats,
-              };
-            }
-            return player;
-          });
-
-          return {
-            ...prev,
-            quarterTime: newQuarterTime,
-            totalTime: newTotalTime,
-            players: updatedPlayers,
-          };
-        });
+        catchUp();
       }, 1000);
     }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [gameState.isPlaying, catchUp]);
 
-    return () => clearInterval(interval);
-  }, [gameState.isPlaying]);
+  // Catch up on mount and when tab gains focus/visibility
+  useEffect(() => {
+    if (gameState.isPlaying) {
+      catchUp();
+    }
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible' && gameState.isPlaying) {
+        catchUp();
+      }
+    };
+    const onFocus = () => {
+      if (gameState.isPlaying) {
+        catchUp();
+      }
+    };
+    window.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [gameState.isPlaying, catchUp]);
 
   const togglePlayer = useCallback((playerId: string, position: Position) => {
     setGameState(prev => {
@@ -494,7 +533,8 @@ export const useGameState = () => {
   }, []);
 
   const startGame = useCallback(() => {
-    setGameState(prev => ({ ...prev, isPlaying: true }));
+    const nowSec = Math.floor(Date.now() / 1000);
+    setGameState(prev => ({ ...prev, isPlaying: true, lastTickAt: nowSec }));
     toast({
       title: "Game Started",
       description: `Quarter ${gameState.currentQuarter} is now in progress`,
@@ -502,27 +542,30 @@ export const useGameState = () => {
   }, [gameState.currentQuarter]);
 
   const pauseGame = useCallback(() => {
-    setGameState(prev => ({ ...prev, isPlaying: false }));
+    catchUp();
+    setGameState(prev => ({ ...prev, isPlaying: false, lastTickAt: null }));
     toast({
       title: "Game Paused",
       description: "Timer stopped",
     });
-  }, []);
+  }, [catchUp]);
 
   const nextQuarter = useCallback(() => {
+    catchUp();
     if (gameState.currentQuarter < 4) {
       setGameState(prev => ({
         ...prev,
         currentQuarter: prev.currentQuarter + 1,
         quarterTime: 0,
         isPlaying: false,
+        lastTickAt: null,
       }));
       toast({
         title: "Next Quarter",
         description: `Starting Quarter ${gameState.currentQuarter + 1}`,
       });
     }
-  }, [gameState.currentQuarter]);
+  }, [gameState.currentQuarter, catchUp]);
 
   const addPlannedInterchange = useCallback((playerId: string, targetPosition: Position, priority: 'high' | 'medium' | 'low' = 'medium') => {
     setGameState(prev => ({
@@ -597,6 +640,7 @@ export const useGameState = () => {
       currentQuarter: 1,
       quarterTime: 0,
       totalTime: 0,
+      lastTickAt: null,
       gameCompleted: false,
       // Reset all current game stats but keep season data
       players: prev.players.map(player => ({

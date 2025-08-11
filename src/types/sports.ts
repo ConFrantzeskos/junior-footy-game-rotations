@@ -158,6 +158,7 @@ export interface GameState {
   currentQuarter: number;
   quarterTime: number;
   totalTime: number;
+  lastTickAt?: number | null;
   gameCompleted: boolean;
   
   // Players and positions
