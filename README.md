@@ -1,6 +1,6 @@
 # Junior Footy Game Rotations
 
-Smart rotation management for Australian Rules Football. Plan, run, and analyse junior footy rotations with live timing, AI-enhanced suggestions, season tracking, and a simple drag-and-drop interface.
+Smart rotation management for junior Australian Rules Football (18 on the field). Plan, run, and analyse junior footy rotations with live timing, AI-enhanced suggestions, season tracking, and a simple drag-and-drop interface.
 
 ## Table of contents
 - Overview
