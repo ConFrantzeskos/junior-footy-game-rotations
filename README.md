@@ -1,73 +1,128 @@
-# Welcome to your Lovable project
+# junior-footy-game-rotations
 
-## Project info
+Smart rotation management for Australian Rules Football. Plan, run, and analyze junior footy rotations with live timing, AI-enhanced suggestions, season tracking, and a simple drag-and-drop interface.
 
-**URL**: https://lovable.dev/projects/ca32521c-c5cf-478b-a257-fb23be4b8bf0
+## Table of contents
+- Overview
+- Key features (coach-friendly)
+- Technical features & architecture
+- Project structure
+- Getting started
+- Configuration
+- Data & persistence
+- Supabase Edge Functions (AI)
+- Development tips
+- Roadmap
 
-## How can I edit this code?
+## Overview
+This app helps coaches manage on-field rotations for junior Australian Rules Football. It keeps accurate game time even if the app is backgrounded or the device is restarted, suggests interchanges, tracks season statistics, and supports planning and on-the-fly changes.
 
-There are several ways of editing your application.
+## Key features (coach-friendly)
+- Live game clock with automatic catch-up
+  - Time keeps running based on when the quarter started, even if you close the app or switch devices. The quarter auto-pauses at 15:00.
+- Drag-and-drop player management
+  - Move players between Forwards, Midfielders, Defenders, and the Interchange bench. Hot-swap when a line is full.
+- Auto rotation suggestions
+  - Data-driven suggestions considering fatigue, fairness, position fit, rest time, and inclusion. Bench/late-arrival prompts appear quickly when relevant.
+- AI-enhanced tactical insight (optional)
+  - Uses Supabase Edge Functions to add brief tactical insights to the top suggestion.
+- Planned interchanges
+  - Queue up interchanges with priorities and execute them in one tap.
+- Late arrivals
+  - Add players who turn up after the bounce; they’ll be considered in auto-suggestions.
+- Season statistics
+  - Complete a game to record per-player and per-position time, longest stints, rotation frequency, trends, and more.
+- Awards & insights
+  - AI award nominations and player insights available via Edge Functions.
+- Works offline
+  - Everything you do during a game persists locally and continues if the tab reloads.
 
-**Use Lovable**
+## Technical features & architecture
+- React + TypeScript + Vite + Tailwind (with shadcn-ui components)
+- Resilient, delta-based game timer
+  - The useGameState hook stores lastTickAt and updates time by real elapsed seconds (catch-up on mount, focus, and visibility changes).
+- Local-first persistence
+  - Game state and roster stored in localStorage with live sync across tabs via Storage events.
+- Rotation engines
+  - Enhanced client engine (src/utils/enhancedRotationEngine.ts) generates suggestions locally.
+  - Optional AI layer (src/services/aiRotationService.ts) enriches the top suggestion via Supabase Edge Functions.
+- Strong typing
+  - Central domain types in src/types/sports.ts and src/types/autoRotation.ts.
+- Modular UI
+  - Key components include GameHeader, PositionSection, DraggablePlayer, AutoRotationSuggestions, PlannedInterchanges, SeasonStats, Settings, and Welcome.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ca32521c-c5cf-478b-a257-fb23be4b8bf0) and start prompting.
+### High-level data flow
+- useGameState manages:
+  - Players, active positions, timers, interchanges, and game lifecycle
+  - Persisted to localStorage under gameState; roster under sport-rotation-players
+- Game page renders layout, handles DnD, and wires suggestion execution
+- AutoRotationSuggestions shows local suggestions and optionally calls AI for insights
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## Project structure
+```
+src/
+  components/
+    AutoRotationSuggestions.tsx
+    DraggablePlayer.tsx
+    PositionSection.tsx
+    PlannedInterchanges.tsx
+    SeasonStats.tsx
+    AddLateArrival.tsx
+    AppHeader.tsx
+    GameHeader.tsx
+    ui/… (shadcn components)
+  hooks/
+    useGameState.ts  // game logic, timers, persistence, interchanges
+  pages/
+    Game.tsx, Settings.tsx, Welcome.tsx, NotFound.tsx
+  services/
+    aiRotationService.ts, aiPlayerInsightsService.ts, aiCoachingAssistantService.ts,
+    aiAwardService.ts, aiSeasonAnalysisService.ts, feedbackService.ts
+  utils/
+    enhancedRotationEngine.ts, autoRotationEngine.ts, playerAnalytics.ts, seasonManager.ts, …
+  types/
+    sports.ts, autoRotation.ts
+supabase/
+  functions/
+    ai-rotation-suggestions/, ai-player-insights/, ai-coaching-assistant/,
+    ai-award-nominations/, ai-season-analysis/
 ```
 
-**Edit a file directly in GitHub**
+## Getting started
+Prerequisites: Node.js 18+ and npm
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Install: npm install
+- Start dev server: npm run dev
+- Build: npm run build
+- Preview production build: npm run preview
 
-**Use GitHub Codespaces**
+Open the dev URL shown in your terminal. On first run, go to Welcome to set up your roster.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Configuration
+- Supabase (optional AI features)
+  - A public URL and anon key are pre-configured in src/integrations/supabase/client.ts.
+  - If you fork this project, update those values to your own Supabase project.
 
-## What technologies are used for this project?
+## Data & persistence
+- LocalStorage keys
+  - sport-rotation-players: persistent roster across games
+  - gameState: current game-only state (timers, active players, planned interchanges, etc.)
+- Timer behavior
+  - lastTickAt is stored to compute real elapsed seconds on resume, focus, or visibility changes.
+  - Quarter auto-pauses at 15 minutes.
 
-This project is built with:
+## Supabase Edge Functions (AI)
+- ai-rotation-suggestions: Enhances the top local suggestion with short tactical context.
+- ai-player-insights, ai-coaching-assistant, ai-award-nominations, ai-season-analysis: Additional insights and season analysis endpoints.
+- The UI gracefully falls back to standard logic if AI calls fail or are disabled.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Development tips
+- Source of truth is useGameState; keep UI components presentational where possible.
+- Rotation suggestion logic lives in src/utils/enhancedRotationEngine.ts; adjust thresholds there.
+- Multiple tabs stay in sync via the Storage event; device-to-device sync would require a backend.
 
-## How can I deploy this project?
+## Roadmap
+- Optional cloud sync for rosters and game state via authenticated profiles
+- Export game reports (CSV/PDF)
+- More configurable quarter length and coaching styles
 
-Simply open [Lovable](https://lovable.dev/projects/ca32521c-c5cf-478b-a257-fb23be4b8bf0) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
