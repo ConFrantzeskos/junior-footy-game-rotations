@@ -1,6 +1,6 @@
-# junior-footy-game-rotations
+# Junior Footy Game Rotations
 
-Smart rotation management for Australian Rules Football. Plan, run, and analyze junior footy rotations with live timing, AI-enhanced suggestions, season tracking, and a simple drag-and-drop interface.
+Smart rotation management for Australian Rules Football. Plan, run, and analyse junior footy rotations with live timing, AI-enhanced suggestions, season tracking, and a simple drag-and-drop interface.
 
 ## Table of contents
 - Overview
@@ -18,7 +18,7 @@ Smart rotation management for Australian Rules Football. Plan, run, and analyze 
 ## Overview
 This app helps coaches manage on-field rotations for junior Australian Rules Football. It keeps accurate game time even if the app is backgrounded or the device is restarted, suggests interchanges, tracks season statistics, and supports planning and on-the-fly changes.
 
-## Coach value-first: In-game features (ranked by impact)
+## In-game features
 
 1) Per-player Time on Ground (TOG) and Bench Time
 - Live TOG per player and "time since last interchange" so you know who needs a rest or a run immediately.
