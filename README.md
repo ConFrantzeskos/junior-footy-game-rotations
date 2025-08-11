@@ -1,4 +1,4 @@
-# junior-footy-game-rotations
+# Junior Footy Game Rotations
 
 Smart rotation management for Australian Rules Football. Plan, run, and analyze junior footy rotations with live timing, AI-enhanced suggestions, season tracking, and a simple drag-and-drop interface.
 
