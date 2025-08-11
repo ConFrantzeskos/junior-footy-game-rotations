@@ -1,10 +1,11 @@
-# Junior Footy Game Rotations
+# junior-footy-game-rotations
 
 Smart rotation management for Australian Rules Football. Plan, run, and analyze junior footy rotations with live timing, AI-enhanced suggestions, season tracking, and a simple drag-and-drop interface.
 
 ## Table of contents
 - Overview
-- Key features (coach-friendly)
+- Coach value-first: In-game features
+- Other features
 - Technical features & architecture
 - Project structure
 - Getting started
@@ -17,25 +18,43 @@ Smart rotation management for Australian Rules Football. Plan, run, and analyze 
 ## Overview
 This app helps coaches manage on-field rotations for junior Australian Rules Football. It keeps accurate game time even if the app is backgrounded or the device is restarted, suggests interchanges, tracks season statistics, and supports planning and on-the-fly changes.
 
-## Key features (coach-friendly)
-- Live game clock with automatic catch-up
-  - Time keeps running based on when the quarter started, even if you close the app or switch devices. The quarter auto-pauses at 15:00.
-- Drag-and-drop player management
-  - Move players between Forwards, Midfielders, Defenders, and the Interchange bench. Hot-swap when a line is full.
-- Auto rotation suggestions
-  - Data-driven suggestions considering fatigue, fairness, position fit, rest time, and inclusion. Bench/late-arrival prompts appear quickly when relevant.
-- AI-enhanced tactical insight (optional)
-  - Uses Supabase Edge Functions to add brief tactical insights to the top suggestion.
-- Planned interchanges
-  - Queue up interchanges with priorities and execute them in one tap.
-- Late arrivals
-  - Add players who turn up after the bounce; they’ll be considered in auto-suggestions.
-- Season statistics
-  - Complete a game to record per-player and per-position time, longest stints, rotation frequency, trends, and more.
-- Awards & insights
-  - AI award nominations and player insights available via Edge Functions.
-- Works offline
-  - Everything you do during a game persists locally and continues if the tab reloads.
+## Coach value-first: In-game features (ranked by impact)
+
+1) Per-player Time on Ground (TOG) and Bench Time
+- Live TOG per player and "time since last interchange" so you know who needs a rest or a run immediately.
+- Clear indicators for current stint length to avoid overplaying.
+
+2) Position Management with Drag-and-Drop
+- Place players into field positions and move them between lines/zones quickly.
+- Prevent conflicts and see who is currently on vs off at a glance.
+
+3) Quick Interchange Execution
+- One-tap execute flows from suggested or planned swaps.
+- Smart hot-swap handling when a position is full.
+
+4) Smart Auto-Rotation Suggestions (Client + Optional AI)
+- Local Enhanced Rotation Engine balances equity, fatigue, and development.
+- Optional Supabase AI layer adds rationale and context-sensitive recommendations.
+
+5) Planned Interchanges (Ahead-of-time)
+- Queue interchanges by priority and execute when the moment is right.
+- Visual list with remove/execute controls.
+
+6) Late Arrivals Handling
+- Bring late players straight into the game with clean stat resets.
+- Suggestions prioritize fair minutes for latecomers without disrupting structure.
+
+7) Accurate, Resilient Game Clock
+- Start/Pause/Next-Quarter controls with reliable timekeeping.
+- Recovers from tab switches and minor interruptions, using a delta-based timer.
+
+## Other features
+- Season statistics and post-game summaries: per-player and per-position time, longest stints, rotation frequency, trends.
+- AI coaching assistant (optional): context-aware tips for inclusivity, engagement, and fairness.
+- Player insights (optional): concise per-player observations from time/usage.
+- Award nominations (optional): end-of-game nomination prompts.
+- Settings and customization: simple preferences across sessions.
+- Works offline: state persists locally and continues after reloads.
 
 ## Technical features & architecture
 - React + TypeScript + Vite + Tailwind (with shadcn-ui components)
