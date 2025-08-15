@@ -35,13 +35,20 @@ export class FeedbackService {
         }
       };
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User must be authenticated to submit feedback');
+      }
+
       const { error } = await supabase
         .from('rotation_feedback')
         .insert({
           suggestion_id: feedbackData.suggestionId,
           feedback_type: feedbackData.feedbackType,
           suggestion_data: feedbackData.suggestionData as any,
-          game_context: feedbackData.gameContext as any
+          game_context: feedbackData.gameContext as any,
+          user_id: user.id
         });
 
       if (error) {
@@ -63,9 +70,16 @@ export class FeedbackService {
     recentTrends: Array<{ date: string; positive: number; negative: number }>;
   }> {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User must be authenticated to get feedback analytics');
+      }
+
       const { data, error } = await supabase
         .from('rotation_feedback')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1000);
 
@@ -114,9 +128,16 @@ export class FeedbackService {
 
   static async getCoachPreferences(): Promise<Record<string, any>> {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User must be authenticated to get preferences');
+      }
+
       const { data, error } = await supabase
         .from('coach_preferences')
-        .select('*');
+        .select('*')
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -134,13 +155,20 @@ export class FeedbackService {
 
   static async updateCoachPreference(key: string, value: any): Promise<void> {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User must be authenticated to update preferences');
+      }
+
       const { error } = await supabase
         .from('coach_preferences')
         .upsert({
           preference_key: key,
-          preference_value: value
+          preference_value: value,
+          user_id: user.id
         }, { 
-          onConflict: 'preference_key' 
+          onConflict: 'preference_key,user_id' 
         });
 
       if (error) throw error;

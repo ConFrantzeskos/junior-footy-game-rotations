@@ -1,10 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { Users, Target, Clock, Zap, ArrowRight, Settings } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Users, Target, Clock, Zap, ArrowRight, Settings, LogOut } from 'lucide-react';
 
 const Welcome = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -12,13 +14,28 @@ const Welcome = () => {
       <div className="bg-gradient-to-br from-card via-card to-accent/30 border-b">
         <div className="h-2 bg-gradient-to-r from-sherrin-red via-position-forward to-position-midfield" />
         <div className="container mx-auto max-w-4xl px-6 py-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-sherrin-red via-position-forward to-position-midfield bg-clip-text text-transparent mb-4">
-              Junior Footy Manager
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Smart rotation management for Australian Rules Football
-            </p>
+          <div className="flex justify-between items-center">
+            <div className="text-center flex-1">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-sherrin-red via-position-forward to-position-midfield bg-clip-text text-transparent mb-4">
+                Junior Footy Manager
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                Smart rotation management for Australian Rules Football
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {user?.email}
+              </span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => signOut()}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </div>
