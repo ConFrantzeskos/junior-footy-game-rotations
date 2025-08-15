@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -48,6 +48,30 @@ export const PositionSection = ({
   currentGameTime,
 }: PositionSectionProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleTouchDrop = (e: CustomEvent) => {
+      const { playerId } = e.detail;
+      if (playerId) {
+        const dragEvent = new DragEvent('drop', { bubbles: true });
+        Object.defineProperty(dragEvent, 'dataTransfer', {
+          value: {
+            getData: () => playerId
+          }
+        });
+        handleDrop(dragEvent as any);
+      }
+    };
+
+    const element = sectionRef.current;
+    if (element) {
+      element.addEventListener('touchDrop', handleTouchDrop as EventListener);
+      return () => {
+        element.removeEventListener('touchDrop', handleTouchDrop as EventListener);
+      };
+    }
+  }, []);
   
   // Sort active players by time on field since last interchange (highest first)
   const activePlayersData = players
@@ -96,6 +120,8 @@ export const PositionSection = ({
 
   return (
     <Card 
+      ref={sectionRef}
+      data-position-target={position}
       className={`
         p-lg card-elevated min-h-[600px] transition-all duration-300 ease-out
         ${isDragOver ? 'drop-zone-active ring-2 ring-primary/50 bg-primary/5' : ''}

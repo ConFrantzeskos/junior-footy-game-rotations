@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Player, Position } from '@/types/sports';
 import { Badge } from '@/components/ui/badge';
 import { PlayerRank } from '@/utils/playerRanking';
@@ -33,6 +33,9 @@ export const DraggablePlayer = ({
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isTouchDragging, setIsTouchDragging] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState<{ x: number; y: number } | null>(null);
+  const dragElementRef = useRef<HTMLDivElement>(null);
   
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
@@ -80,21 +83,107 @@ export const DraggablePlayer = ({
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    // Only trigger long press if not dragging and onLongPress is available
-    if (!isDragging && onLongPress) {
+    const touch = e.touches[0];
+    setDragStartPos({ x: touch.clientX, y: touch.clientY });
+    
+    // Set up long press for context menu
+    if (onLongPress) {
       const timer = setTimeout(() => {
-        const touch = e.touches[0];
-        onLongPress(player, { x: touch.clientX, y: touch.clientY });
-      }, 800); // Longer delay to avoid conflict with drag
+        if (!isTouchDragging) {
+          onLongPress(player, { x: touch.clientX, y: touch.clientY });
+        }
+      }, 600);
       setLongPressTimer(timer);
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!dragStartPos) return;
+    
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - dragStartPos.x);
+    const deltaY = Math.abs(touch.clientY - dragStartPos.y);
+    
+    // Start drag if moved more than threshold
+    if ((deltaX > 10 || deltaY > 10) && !isTouchDragging) {
+      setIsTouchDragging(true);
+      setIsDragging(true);
+      onDragStart(player.id, player.currentPosition || undefined);
+      
+      // Clear long press timer
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        setLongPressTimer(null);
+      }
+      
+      // Add visual feedback
+      if (dragElementRef.current) {
+        dragElementRef.current.classList.add('drag-lift');
+      }
+    }
+    
+    if (isTouchDragging) {
+      e.preventDefault(); // Prevent scrolling while dragging
+      
+      // Create a visual drag ghost
+      const elementUnderPoint = document.elementFromPoint(touch.clientX, touch.clientY);
+      const dropTarget = elementUnderPoint?.closest('[data-drop-target]');
+      
+      // Remove previous drag over states
+      document.querySelectorAll('.touch-drag-over').forEach(el => {
+        el.classList.remove('touch-drag-over');
+      });
+      
+      // Add drag over state to valid drop target
+      if (dropTarget && dropTarget.getAttribute('data-drop-target') !== player.id) {
+        dropTarget.classList.add('touch-drag-over');
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
     if (longPressTimer) {
       clearTimeout(longPressTimer);
       setLongPressTimer(null);
     }
+    
+    if (isTouchDragging) {
+      e.preventDefault();
+      
+      const touch = e.changedTouches[0];
+      const elementUnderPoint = document.elementFromPoint(touch.clientX, touch.clientY);
+      const dropTarget = elementUnderPoint?.closest('[data-drop-target]');
+      
+      // Clean up drag over states
+      document.querySelectorAll('.touch-drag-over').forEach(el => {
+        el.classList.remove('touch-drag-over');
+      });
+      
+      // Handle drop
+      if (dropTarget) {
+        const targetPlayerId = dropTarget.getAttribute('data-drop-target');
+        const targetPositionSection = dropTarget.getAttribute('data-position-target');
+        
+        if (targetPlayerId && targetPlayerId !== player.id) {
+          onPlayerSwap(player.id, targetPlayerId);
+        } else if (targetPositionSection) {
+          // Handle drop on position section
+          const dropEvent = new CustomEvent('touchDrop', {
+            detail: { playerId: player.id, position: targetPositionSection }
+          });
+          dropTarget.dispatchEvent(dropEvent);
+        }
+      }
+      
+      // Clean up
+      if (dragElementRef.current) {
+        dragElementRef.current.classList.remove('drag-lift');
+      }
+    }
+    
+    setIsTouchDragging(false);
+    setIsDragging(false);
+    setDragStartPos(null);
   };
 
 
@@ -124,19 +213,22 @@ export const DraggablePlayer = ({
 
   return (
     <div
+      ref={dragElementRef}
       draggable
+      data-drop-target={player.id}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       className={`
         player-card cursor-grab active:cursor-grabbing relative overflow-hidden
         min-h-[64px] min-w-[120px] touch-manipulation transition-all duration-200
         ${isDragOver ? 'ring-2 ring-primary/60 bg-primary/10 scale-105' : ''}
-        ${isDragging ? 'opacity-50 rotate-2' : ''}
+        ${isDragging || isTouchDragging ? 'opacity-50 rotate-2' : ''}
         ${
           // Interchange indicators take priority - apply to all players regardless of field status
           ranking?.rank === 'most-1' || ranking?.rank === 'most-2' || ranking?.rank === 'most-3'

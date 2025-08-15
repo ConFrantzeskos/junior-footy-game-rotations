@@ -225,4 +225,10 @@
   .usage-balanced {
     background-color: hsl(var(--usage-balanced));
   }
+  
+  /* Touch drag feedback */
+  .touch-drag-over {
+    @apply ring-2 ring-primary/60 bg-primary/10 scale-105 !important;
+    transition: all 0.2s ease !important;
+  }
 }
