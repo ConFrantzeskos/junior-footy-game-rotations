@@ -162,16 +162,19 @@ export const completeGameForPlayer = (
 };
 
 // Helper functions for advanced calculations
-const calculateConsistencyScore = (gameHistory: GameRecord[]): number => {
+export const calculateConsistencyScore = (gameHistory: GameRecord[]): number => {
   if (gameHistory.length < 2) return 5;
-  
+
   const times = gameHistory.map(game => game.totalGameTime);
   const mean = times.reduce((a, b) => a + b, 0) / times.length;
   const variance = times.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) / times.length;
   const standardDeviation = Math.sqrt(variance);
-  
+
   // Lower standard deviation = higher consistency (scale 1-10)
   const maxStdDev = mean * 0.5; // Assume 50% variation is maximum inconsistency
+  // No variation possible (mean is 0 → all game times 0) = perfectly consistent.
+  // Guards against 0/0 = NaN.
+  if (maxStdDev === 0) return 10;
   return Math.max(1, Math.min(10, 10 - (standardDeviation / maxStdDev) * 9));
 };
 

@@ -77,28 +77,37 @@ const getWeakestPosition = (positionPerformance: Player['seasonStats']['position
   return positions.length > 0 ? positions[0][0] as Position : null;
 };
 
-const analyzeFormTrend = (gameHistory: Player['seasonStats']['gameHistory']): 'improving' | 'declining' | 'stable' => {
+export const analyzeFormTrend = (gameHistory: Player['seasonStats']['gameHistory']): 'improving' | 'declining' | 'stable' => {
   if (gameHistory.length < 3) return 'stable';
-  
+
   const recentGames = gameHistory.slice(-5);
   const earlierGames = gameHistory.slice(-10, -5);
-  
+
   if (recentGames.length === 0 || earlierGames.length === 0) return 'stable';
-  
+
   const recentAvg = recentGames.reduce((sum, game) => sum + game.totalGameTime, 0) / recentGames.length;
   const earlierAvg = earlierGames.reduce((sum, game) => sum + game.totalGameTime, 0) / earlierGames.length;
-  
+
+  // Guard div-by-zero: no earlier baseline to compare against → no trend.
+  if (earlierAvg === 0) return 'stable';
+
   const improvement = (recentAvg - earlierAvg) / earlierAvg;
-  
+
   if (improvement > 0.1) return 'improving';
   if (improvement < -0.1) return 'declining';
   return 'stable';
 };
 
-const categorizePlayingTime = (player: Player, teamPlayers: Player[]): 'high' | 'medium' | 'low' => {
+export const categorizePlayingTime = (player: Player, teamPlayers: Player[]): 'high' | 'medium' | 'low' => {
+  // Guard div-by-zero: no team to compare against → default to medium.
+  if (teamPlayers.length === 0) return 'medium';
+
   const playerAvgTime = player.seasonStats.averageGameTime;
   const teamAvgTime = teamPlayers.reduce((sum, p) => sum + p.seasonStats.averageGameTime, 0) / teamPlayers.length;
-  
+
+  // No meaningful team average (all times 0) → avoid NaN/misclassification.
+  if (teamAvgTime <= 0) return 'medium';
+
   if (playerAvgTime > teamAvgTime * 1.2) return 'high';
   if (playerAvgTime > teamAvgTime * 0.8) return 'medium';
   return 'low';
