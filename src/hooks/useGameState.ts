@@ -2,17 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { Player, Position, GameState, PlannedInterchange } from '@/types/sports';
 import { toast } from '@/hooks/use-toast';
 import { migratePlayerToSeasonFormat, completeGameForPlayer } from '@/utils/seasonManager';
+import { computeElapsedCredit } from '@/utils/gameTime';
+import { safeParse } from '@/lib/safeStorage';
 
 const QUARTER_DURATION = 15 * 60; // 15 minutes in seconds
 const MAX_PLAYERS_PER_POSITION = 6;
 
 export const useGameState = () => {
   const [gameState, setGameState] = useState<GameState>(() => {
-    const saved = localStorage.getItem('gameState');
-    if (saved) {
-      const parsedState = JSON.parse(saved);
-      
-      // Data migration: handle old "defense" to new "defence" 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const parsedState = safeParse<any>(localStorage.getItem('gameState'), null);
+    if (parsedState) {
+      // Data migration: handle old "defense" to new "defence"
       if (parsedState.activePlayersByPosition && parsedState.activePlayersByPosition.defense) {
         parsedState.activePlayersByPosition.defence = parsedState.activePlayersByPosition.defense;
         delete parsedState.activePlayersByPosition.defense;
@@ -80,7 +81,7 @@ export const useGameState = () => {
       return;
     }
 
-    const fullRoster: Player[] = JSON.parse(storedPlayers);
+    const fullRoster: Player[] = safeParse<Player[]>(storedPlayers, []);
     const playerToAdd = fullRoster.find(p => p.id === playerId);
     
     if (!playerToAdd) {
@@ -130,7 +131,7 @@ export const useGameState = () => {
       const savedPlayers = localStorage.getItem('sport-rotation-players');
       
       if (savedPlayers) {
-        const rosterPlayers = JSON.parse(savedPlayers);
+        const rosterPlayers = safeParse<Player[]>(savedPlayers, []);
         const migratedRosterPlayers = rosterPlayers.map(migratePlayerToSeasonFormat);
         console.log('📋 Roster players loaded:', migratedRosterPlayers.length);
         
@@ -213,14 +214,26 @@ export const useGameState = () => {
     setGameState(prev => {
       if (!prev.isPlaying) return prev;
       const nowSec = Math.floor(Date.now() / 1000);
-      const last = prev.lastTickAt ?? nowSec;
-      let delta = nowSec - last;
-      if (delta <= 0) {
-        return { ...prev, lastTickAt: nowSec };
+      const { deltaUsed, gapTooLong } = computeElapsedCredit({
+        lastTickAt: prev.lastTickAt,
+        nowSec,
+        quarterTime: prev.quarterTime,
+        quarterDuration: QUARTER_DURATION,
+      });
+
+      // A gap longer than MAX_CATCHUP_SECONDS means the app was closed/asleep —
+      // don't credit unattended time; pause and let the coach reconcile the clock.
+      if (gapTooLong) {
+        toast({
+          title: "Large time gap",
+          description: "The app was away for a while — game paused. Check the clock and adjust if needed.",
+        });
+        return { ...prev, isPlaying: false, lastTickAt: null };
       }
 
-      const maxDelta = QUARTER_DURATION - prev.quarterTime;
-      const deltaUsed = Math.min(delta, maxDelta);
+      if (deltaUsed <= 0) {
+        return { ...prev, lastTickAt: nowSec };
+      }
 
       // Update player time stats in bulk by deltaUsed
       const updatedPlayers = prev.players.map(player => {
